@@ -1,0 +1,9 @@
+from flask import Blueprint
+
+administrator_bp = Blueprint('administrator', __name__, url_prefix='/administrator')
+
+from src.controllers.auth.administrator_auth_controllers import AdministratorAuthControllers
+
+administratorAuthControllers = AdministratorAuthControllers()
+
+administrator_bp.post('/register-account')(administratorAuthControllers.create_administrator)

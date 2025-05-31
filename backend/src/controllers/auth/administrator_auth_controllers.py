@@ -1,0 +1,3 @@
+class AdministratorAuthControllers:
+    async def create_administrator(self):
+        ...
