@@ -8,7 +8,7 @@ from src.utils.db_utils import CreatedAt, UpdatedAt
 class AccountTypeEnum(Enum):
     PLAYER = "Player"
     TEAM_ACCOUNT = "Team_Account"
-    ADMINISTRATOR = "Administrator"
+    LEAGUE_ADMINISTRATOR = "League_Administrator"
     CITY_ADMINISTRATOR = "City_Administrator"
 
 class UserModel(db.Model):
