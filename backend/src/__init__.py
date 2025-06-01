@@ -41,7 +41,7 @@ class FlaskServer:
             return "Programmer: Josuan Leonardo Hulom BSIT 3B"
     
         self.server.register_blueprint(administrator_bp)
-        # self.server.register_blueprint(test_bp)
+        self.server.register_blueprint(test_bp)
         self.server.register_blueprint(place_route)
         file_routes = FileRoutes(self.server)
         self.server.register_blueprint(file_routes.get_blueprint())
