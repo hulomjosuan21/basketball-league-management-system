@@ -1,4 +1,6 @@
 from flask import Blueprint, jsonify, request
+from src.errors.test_error import TestException, TestExceptionOne
+from src.errors.errors import ValueException
 from src.models.test_model import TestModel
 from src.extensions import db
 test_bp = Blueprint('test', __name__, url_prefix='/test')
@@ -13,9 +15,9 @@ def add_test():
 
         content = data.get('content')
         if not content: 
-            return ApiResponse.error("Content cannot be empty", 400)
+            raise ValueException("Content cannot be empty")
         if content == "Hulom":
-            return ApiResponse.error("Content cannot be Hulom", 401)
+            raise TestExceptionOne("Content cannot be Hulom")
         
         new_test = TestModel(content=content)
         db.session.add(new_test)
@@ -24,7 +26,7 @@ def add_test():
         tests = TestModel.query.all()
         test_list = [{"id": test.id, "content": test.content} for test in tests]
 
-        return ApiResponse.success(message="Test added successfully", payload=test_list, status_code=201)
+        return ApiResponse.success(message=f"{new_test.content} successfully added!", payload=test_list, status_code=201)
 
     except Exception as e:
         db.session.rollback()
