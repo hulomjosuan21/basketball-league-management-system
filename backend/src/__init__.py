@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from src.config import Config
-from src.extensions import db, migrate, jwt, limiter
+from src.extensions import db, migrate, jwt, limiter, socketio
 import os
 
 from src.routes.administrator.administrator_route import administrator_bp
@@ -33,6 +33,7 @@ class FlaskServer:
         limiter.init_app(self.server)
         self.server.config['UPLOAD_FOLDER'] = os.path.join(BASE_DIR, 'uploads')
         CORS(self.server, origins=self.server.config['CORS_ORIGINS'], supports_credentials=self.server.config['CORS_SUPPORTS_CREDENTIALS'])
+        socketio.init_app(self.server, cors_allowed_origins=self.server.config['CORS_ORIGINS'])
 
     def init_blueprints(self):
         @self.server.get("/")

@@ -7,6 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 from argon2 import PasswordHasher
 import json
 import os
+from flask_socketio import SocketIO
 
 limiter = Limiter(
     key_func=get_remote_address,
@@ -16,6 +17,7 @@ limiter = Limiter(
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
+socketio = SocketIO(cors_allowed_origins="*")
 
 ph = PasswordHasher()
 
