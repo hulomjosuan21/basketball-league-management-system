@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from src.errors.test_error import TestException, TestExceptionOne
-from src.errors.errors import ValueException
+from src.errors.errors import AuthException
 from src.models.test_model import TestModel
 from src.extensions import db
 test_bp = Blueprint('test', __name__, url_prefix='/test')
@@ -15,7 +15,7 @@ def add_test():
 
         content = data.get('content')
         if not content: 
-            raise ValueException("Content cannot be empty")
+            raise AuthException("Error login")
         if content == "Hulom":
             raise TestExceptionOne("Content cannot be Hulom")
         

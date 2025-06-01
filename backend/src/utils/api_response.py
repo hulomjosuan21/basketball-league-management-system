@@ -2,7 +2,7 @@ from flask import jsonify, make_response
 from sqlalchemy.exc import IntegrityError, DataError, OperationalError
 
 from src.errors.test_error import TestException
-from src.errors.errors import ValueException
+from src.errors.errors import AuthException
 
 class ApiResponse:
     @staticmethod
@@ -27,9 +27,12 @@ class ApiResponse:
             elif isinstance(error, DataError):
                 message = "Invalid data format or length"
                 code = 400
-            elif isinstance(error, ValueException):
+            elif isinstance(error, AuthException):
                 message = error.message if hasattr(error, 'message') else str(error)
-                code = 400
+                code = 401
+            elif isinstance(error, ValueError):
+                message = error.message if hasattr(error, 'message') else str(error)
+                code = 401
             elif isinstance(error, OperationalError):
                 message = "Database operational error"
                 code = 503
