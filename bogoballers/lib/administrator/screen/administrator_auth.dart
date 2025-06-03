@@ -1,13 +1,81 @@
 import 'package:bogoballers/components/app_button.dart';
+import 'package:bogoballers/components/snackbars.dart';
+import 'package:bogoballers/core/enums/user_enum.dart';
+import 'package:bogoballers/core/models/user.dart';
+import 'package:bogoballers/core/services/league_administrator_service.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
+import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-class AdministratorRegisterScreen extends StatelessWidget {
+class AdministratorRegisterScreen extends StatefulWidget {
   const AdministratorRegisterScreen({super.key});
 
   @override
+  State<AdministratorRegisterScreen> createState() =>
+      _AdministratorRegisterScreenState();
+}
+
+class _AdministratorRegisterScreenState
+    extends State<AdministratorRegisterScreen> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  bool isLoading = false;
+
+  @override
   Widget build(BuildContext context) {
+    Future<void> handleRegister() async {
+      setState(() {
+        isLoading = true;
+      });
+      try {
+        final leagueAdministratorService = LeagueAdministratorService();
+
+        final newAdministrator = UserModel.create(
+          email: emailController.text,
+          password_str: passwordController.text,
+          account_type: AccountTypeEnum.League_Administrator,
+        );
+
+        await leagueAdministratorService.registerAccount(
+          newAdministrator: newAdministrator,
+        );
+      } catch (e) {
+        if (context.mounted) {
+          handleDioError(context, e, (message) {
+            showErrorSnackbar(context, message);
+          });
+        }
+      } finally {
+        if (context.mounted) {
+          setState(() {
+            isLoading = false;
+          });
+        }
+      }
+    }
+
+    final registerControllers = GridView.count(
+      shrinkWrap: true,
+      crossAxisCount: 2,
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 0,
+      childAspectRatio: 3 / 1,
+      children: [
+        TextField(
+          decoration: InputDecoration(labelText: "Email"),
+          controller: emailController,
+        ),
+        TextField(
+          decoration: InputDecoration(labelText: "Password"),
+          obscureText: true,
+          obscuringCharacter: '*',
+          controller: passwordController,
+        ),
+      ],
+    );
+
     return Scaffold(
       body: Center(
         child: Container(
@@ -27,21 +95,7 @@ class AdministratorRegisterScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              GridView.count(
-                shrinkWrap: true,
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 0,
-                childAspectRatio: 3 / 1,
-                children: const [
-                  TextField(decoration: InputDecoration(labelText: "Email")),
-                  TextField(
-                    decoration: InputDecoration(labelText: "Password"),
-                    obscureText: true,
-                    obscuringCharacter: '*',
-                  ),
-                ],
-              ),
+              registerControllers,
 
               const SizedBox(height: 12),
               Row(
@@ -77,11 +131,10 @@ class AdministratorRegisterScreen extends StatelessWidget {
                   ),
                   AppButton(
                     label: "Register",
-                    onPressed: () {
-                      // Handle registration logic
-                    },
+                    onPressed: handleRegister,
                     variant: ButtonVariant.primary,
                     size: ButtonSize.lg,
+                    isDisabled: isLoading,
                   ),
                 ],
               ),

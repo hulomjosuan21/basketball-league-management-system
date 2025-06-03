@@ -13,6 +13,7 @@ class AppButton extends MaterialButton {
   final bool isDisabled;
   final bool iconOnRight;
   final double? width;
+  @override
   final double? height;
 
   const AppButton({

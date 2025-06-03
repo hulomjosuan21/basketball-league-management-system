@@ -4,6 +4,8 @@ from enum import Enum
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from src.utils.db_utils import CreatedAt, UpdatedAt
+from argon2.exceptions import HashingError
+import re
 
 class AccountTypeEnum(Enum):
     PLAYER = "Player"
@@ -21,7 +23,7 @@ class UserModel(db.Model):
     )
 
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
+    password_hash = db.Column(db.String, nullable=False)
 
     account_type = db.Column(
         SqlEnum(
@@ -33,13 +35,27 @@ class UserModel(db.Model):
 
     def set_account_type(self, account_type_str: str) -> None:
         for account_type in AccountTypeEnum:
-            if account_type.value.lower() == account_type_str.lower():
+            if account_type.value == account_type_str:
                 self.account_type = account_type
                 return
         raise ValueError(f"Invalid account type string: {account_type_str}")
 
+
     def set_password(self, password_str: str) -> None:
-        self.password_hash = ph.hash(password_str)
+        # if len(password_str) < 8:
+        #     raise ValueError("Password must be at least 8 characters long.")
+        # if not re.search(r"[A-Z]", password_str):
+        #     raise ValueError("Password must include at least one uppercase letter.")
+        # if not re.search(r"[a-z]", password_str):
+        #     raise ValueError("Password must include at least one lowercase letter.")
+        # if not re.search(r"[0-9]", password_str):
+        #     raise ValueError("Password must include at least one digit.")
+        # if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password_str):
+        #     raise ValueError("Password must include at least one special character (!@#$%^&*(),.?\":{}|<>).")
+        try:
+            self.password_hash = ph.hash(password_str)
+        except HashingError as e:
+            raise ValueError(f"Password hashing failed: {str(e)}")
 
     def verify_password(self, password_str: str) -> bool:
         try:
