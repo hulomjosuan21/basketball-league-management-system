@@ -3,26 +3,40 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from os import getenv
 from dotenv import load_dotenv
-import datetime
+import asyncio
+load_dotenv()
 
-def html_template(secret_code):
-    return ""
+async def send_verification_email(recipient_email, verify_link, req):
+    def send_email():
+        sender_email = "hulomjosuanleonardo@gmail.com"
+        app_password = "zwrs qwyz idvr uvco"
 
-def send_secret_via_email(recipient_email, secret_code):
-    sender_email = getenv('GMAIL_EMAIL')
-    app_password = getenv('GMAIL_APP_PASSWORD')
-    
-    message = MIMEMultipart()
-    message['From'] = 'no-reply@email.com'
-    message['To'] = recipient_email
-    message['Subject'] = "Your Cerification Code"
+        host_url = req.host_url.rstrip('/')
+        verification_link = f"{host_url}{verify_link}"
 
-    message.attach(MIMEText(html_template(secret_code), 'html'))
-    
-    try:
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-            server.login(sender_email, app_password)
-            server.sendmail(sender_email, recipient_email, message.as_string())
-        return True
-    except:
-        return False
+        html_content = f"""
+        <html>
+        <body>
+            <h2>Welcome!</h2>
+            <p>Click the button below to verify your email:</p>
+            <a href="{verification_link}" style="padding:10px 20px; background-color:#4CAF50; color:white; text-decoration:none;">Verify Email</a>
+        </body>
+        </html>
+        """
+
+        message = MIMEText(html_content, "html")
+        message["Subject"] = "Verify Your Account"
+        message["From"] = sender_email
+        message["To"] = recipient_email
+
+        try:
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+                server.login(sender_email, app_password)
+                server.sendmail(sender_email, recipient_email, message.as_string())
+            print("Email sent successfully.")
+            return True
+        except Exception as e:
+            print(f"Failed to send email: {e}")
+            return False
+
+    return await asyncio.to_thread(send_email)

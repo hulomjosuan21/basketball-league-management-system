@@ -1,6 +1,6 @@
 from flask import jsonify, make_response
 from sqlalchemy.exc import IntegrityError, DataError, OperationalError
-
+from werkzeug.exceptions import NotFound, Forbidden
 from src.errors.test_error import TestException
 from src.errors.errors import AuthException
 
@@ -27,9 +27,12 @@ class ApiResponse:
             elif isinstance(error, DataError):
                 message = "Invalid data format or length"
                 code = 400
+            elif isinstance(error, NotFound):
+                message = "Resource not found"
+                code = 404
             elif isinstance(error, AuthException):
-                message = error.message if hasattr(error, 'message') else str(error)
-                code = 401
+                message = getattr(error, 'message', str(error))
+                code = getattr(error, 'status_code', 401)
             elif isinstance(error, ValueError):
                 message = error.message if hasattr(error, 'message') else str(error)
                 code = 401

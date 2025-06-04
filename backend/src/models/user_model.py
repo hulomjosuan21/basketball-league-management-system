@@ -3,7 +3,7 @@ from sqlalchemy import Enum as SqlEnum
 from enum import Enum
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
-from src.utils.db_utils import CreatedAt, UpdatedAt
+from src.utils.db_utils import CreatedAt, UUIDGenerator, UpdatedAt
 from argon2.exceptions import HashingError
 import re
 
@@ -16,14 +16,11 @@ class AccountTypeEnum(Enum):
 class UserModel(db.Model):
     __tablename__ = 'users_table'
     
-    user_id = db.Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4
-    )
+    user_id = UUIDGenerator(db,'user')
 
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String, nullable=False)
+    is_verified = db.Column(db.Boolean, default=False)
 
     account_type = db.Column(
         SqlEnum(
@@ -63,5 +60,18 @@ class UserModel(db.Model):
         except Exception:
             return False
         
+    def to_json(self) -> dict:
+        return {
+            "user_id": self.user_id,
+            "email": self.email,
+            "is_verified": self.is_verified,
+            "account_type": self.account_type.value,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+    
+    league_administrator = db.relationship('LeagueAdministratorModel', back_populates='user', uselist=False)
+    player = db.relationship('PlayerModel', back_populates='user', uselist=False)
+
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)

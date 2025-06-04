@@ -1,4 +1,5 @@
 class AuthException(Exception):
-    def __init__(self, message: str = None):
+    def __init__(self, message="Authentication failed", status_code=401):
         self.message = message
-        super().__init__(self.message if message is not None else "Auth Error")
+        self.status_code = status_code
+        super().__init__(message)

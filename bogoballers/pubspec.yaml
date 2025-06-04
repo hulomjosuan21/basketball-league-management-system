@@ -30,6 +30,8 @@ environment:
 dependencies:
   dio: ^5.8.0+1
   awesome_snackbar_content: ^0.1.6
+  flutter_native_splash: ^2.4.6
+  dropdown_search: ^6.0.2
   flutter:
     sdk: flutter
   flutter_dotenv: ^5.2.1
@@ -63,6 +65,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
       - .env
+      - assets/images/app_logo.png
+      - assets/data/terms_and_conditions.json
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
@@ -146,3 +150,15 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+flutter_native_splash:
+  color: "#FCFCFD"
+  image: assets/images/app_logo.png
+  android: true
+  android_gravity: center
+  windows_gravity: center
+  fullscreen: true
+  preserve: true
+
+  dark:
+    color: "#1E1F24"
+    image: assets/images/app_logo.png

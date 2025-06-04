@@ -1,19 +1,13 @@
 from src.extensions import db, ph
-import uuid
-from sqlalchemy.dialects.postgresql import UUID
-from src.utils.db_utils import CreatedAt, UpdatedAt
+from src.utils.db_utils import CreatedAt, UUIDGenerator, UpdatedAt
 
 class PlayerModel(db.Model):
     __tablename__ = 'players_table'
 
-    player_id = db.Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4
-    )
+    player_id = UUIDGenerator(db,'player')
 
     user_id = db.Column(
-        UUID(as_uuid=True),
+        db.String,
         db.ForeignKey('users_table.user_id'),
         unique=True,
         nullable=False
