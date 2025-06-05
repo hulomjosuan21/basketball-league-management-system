@@ -13,7 +13,7 @@ class PlayerModel(db.Model):
         nullable=False
     )
 
-    user = db.relationship('UserModel', backref=db.backref('player', uselist=False))
+    user = db.relationship('UserModel', back_populates='player')
 
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)

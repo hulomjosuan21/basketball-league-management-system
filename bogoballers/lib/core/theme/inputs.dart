@@ -30,6 +30,7 @@ InputDecorationTheme appInputDecorationTheme(BuildContext context) {
     prefixIconColor: context.appColors.gray600,
     focusColor: context.appColors.accent900,
     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+    hintStyle: TextStyle(color: context.appColors.gray1000, fontSize: 13),
     isDense: true,
   );
 }

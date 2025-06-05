@@ -8,7 +8,7 @@ class LeagueAdministratorModel(db.Model):
 
     user_id = db.Column(
         db.String,
-        db.ForeignKey('users_table.user_id'),
+        db.ForeignKey('users_table.user_id', ondelete='CASCADE'),
         unique=True,
         nullable=False
     )
@@ -33,7 +33,7 @@ class LeagueAdministratorModel(db.Model):
         nullable=False
     )
 
-    province_name = db.Column(
+    municipality_name = db.Column(
         db.String(100),
         nullable=False
     )
@@ -48,19 +48,23 @@ class LeagueAdministratorModel(db.Model):
         nullable=True
     )
 
-    user = db.relationship('UserModel', backref=db.backref('league_administrator', uselist=False))
-
+    user = db.relationship(
+        'UserModel',
+        back_populates='league_administrator',
+        cascade='all, delete-orphan',
+        single_parent=True
+    )
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)
 
-    def toJson(self) -> dict:
+    def to_json(self) -> dict:
         return {
             "league_administrator_id": self.league_administrator_id,
             "user_id": self.user_id,
             "organization_type": self.organization_type,
             "organization_name": self.organization_name,
             "barangay_name": self.barangay_name,
-            "province_name": self.province_name,
+            "municipality_name": self.municipality_name,
             "organization_photo_url": self.organization_photo_url,
             "organization_logo_url": self.organization_logo_url,
             "user": self.user.to_json() if self.user else None,

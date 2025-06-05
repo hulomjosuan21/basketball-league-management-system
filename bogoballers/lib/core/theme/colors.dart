@@ -51,6 +51,12 @@ final lightAppColors = AppColors(
   gray900: Color(0xFF80828D),
   gray1000: Color(0xFF62636C),
   gray1100: Color(0xFF1E1F24), // often used in text & icons
+  primaryGradient: LinearGradient(
+    colors: [Color(0xffffe9de), Color(0xfff9f9fb)],
+    stops: [0.25, 0.75],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  ),
 );
 
 final darkAppColors = AppColors(
@@ -78,6 +84,12 @@ final darkAppColors = AppColors(
   gray900: Color(0xFF797B86),
   gray1000: Color(0xFFB2B3BD),
   gray1100: Color(0xFFEEEEF0),
+  primaryGradient: LinearGradient(
+    colors: [Color(0xfffc466b), Color(0xff3f5efb)],
+    stops: [0.25, 0.75],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  ),
 );
 
 @immutable
@@ -107,6 +119,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color gray900;
   final Color gray1000;
   final Color gray1100;
+  final LinearGradient primaryGradient;
 
   const AppColors({
     required this.accent100,
@@ -133,6 +146,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.gray900,
     required this.gray1000,
     required this.gray1100,
+    required this.primaryGradient,
   });
 
   @override
@@ -161,6 +175,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? gray900,
     Color? gray1000,
     Color? gray1100,
+    LinearGradient? primaryGradient,
   }) {
     return AppColors(
       accent100: accent100 ?? this.accent100,
@@ -187,6 +202,7 @@ class AppColors extends ThemeExtension<AppColors> {
       gray900: gray900 ?? this.gray900,
       gray1000: gray1000 ?? this.gray1000,
       gray1100: gray1100 ?? this.gray1100,
+      primaryGradient: primaryGradient ?? this.primaryGradient,
     );
   }
 
@@ -218,6 +234,11 @@ class AppColors extends ThemeExtension<AppColors> {
       gray900: Color.lerp(gray900, other.gray900, t)!,
       gray1000: Color.lerp(gray1000, other.gray1000, t)!,
       gray1100: Color.lerp(gray1100, other.gray1100, t)!,
+      primaryGradient: LinearGradient.lerp(
+        primaryGradient,
+        other.primaryGradient,
+        t,
+      )!,
     );
   }
 }

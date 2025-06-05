@@ -2,7 +2,6 @@ import 'package:bogoballers/administrator/league_administrator.dart';
 import 'package:bogoballers/administrator/screen/administrator_auth.dart';
 import 'package:bogoballers/core/components/loading.dart';
 import 'package:bogoballers/core/theme/theme.dart';
-import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
 class AdministratorMaterialScreen extends StatelessWidget {
@@ -29,7 +28,7 @@ class AdministratorMaterialScreen extends StatelessWidget {
           theme: lightTheme(context),
           home: isAuthenticated
               ? const LeagueAdministratorMainScreen()
-              : const AdministratorRegisterScreen(),
+              : const AdministratorLoginScreen(),
           debugShowCheckedModeBanner: false,
         );
       },

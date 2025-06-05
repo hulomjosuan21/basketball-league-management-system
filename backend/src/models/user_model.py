@@ -70,7 +70,13 @@ class UserModel(db.Model):
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
     
-    league_administrator = db.relationship('LeagueAdministratorModel', back_populates='user', uselist=False)
+    league_administrator = db.relationship(
+        'LeagueAdministratorModel',
+        back_populates='user',
+        cascade='all, delete-orphan',
+        uselist=False,
+        single_parent=True
+    )
     player = db.relationship('PlayerModel', back_populates='user', uselist=False)
 
     created_at = CreatedAt(db)

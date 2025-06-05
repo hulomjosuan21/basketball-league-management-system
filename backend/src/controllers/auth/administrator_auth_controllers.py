@@ -14,19 +14,20 @@ class AdministratorAuthControllers:
         try:
             data = request.get_json()
             
-            email = data.get('email')
-            password_str = data.get('password_str')
-            account_type = data.get('account_type')
+            user_data = data.get('user')
+            email = user_data.get('email')
+            password_str = user_data.get('password_str')
+            account_type = user_data.get('account_type')
 
-            organization_type = data.get('account_type')
+            organization_type = data.get('organization_type')
             organization_name = data.get('organization_name')
             contact_number = data.get('contact_number')
             barangay_name = data.get('barangay_name')
-            province_name = data.get('province_name')
+            municipality_name = data.get('municipality_name')
 
-            if not all([email, password_str, account_type, organization_name, contact_number, barangay_name, province_name]):
+            if not all([email, password_str, account_type, organization_name, contact_number, barangay_name, municipality_name]):
                 raise ValueError("All fields must be provided and not empty.")
-
+            
             user = UserModel(email=email)
             user.set_account_type(account_type)
             user.set_password(password_str)
@@ -37,7 +38,7 @@ class AdministratorAuthControllers:
                 organization_name=organization_name,
                 contact_number=contact_number,
                 barangay_name=barangay_name,
-                province_name=province_name
+                municipality_name=municipality_name
             )
             
             db.session.add(user)
@@ -93,12 +94,14 @@ class AdministratorAuthControllers:
 
             user = UserModel.query.filter(UserModel.email == email).first()
 
+            league_administrator = user.league_administrator;
+
             if not user.is_verified:
                 raise AuthException("Your account is not verified.",403)
 
             user.verify_password(password_str)
 
-            payload = user.to_json()
+            payload = league_administrator.to_json()
 
             return ApiResponse.success(message="Login successful.",payload=payload)
         except Exception as e:

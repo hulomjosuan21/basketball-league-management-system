@@ -2,8 +2,12 @@
 
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:bogoballers/core/components/app_button.dart';
+import 'package:bogoballers/core/components/error_screen.dart';
 import 'package:bogoballers/core/components/loading.dart';
+import 'package:bogoballers/core/components/password_field.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
+import 'package:bogoballers/core/models/league_administrator.dart';
+import 'package:bogoballers/core/utils/validators.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:bogoballers/core/models/user.dart';
@@ -17,44 +21,91 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:bogoballers/core/models/location_data.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+
+RichText authNavigator(
+  BuildContext context,
+  String text,
+  String textTo,
+  void Function() callback,
+) {
+  return RichText(
+    text: TextSpan(
+      text: text,
+      style: TextStyle(color: context.appColors.gray1100, fontSize: 12),
+      children: [
+        TextSpan(
+          text: textTo,
+          style: TextStyle(
+            color: context.appColors.accent900,
+            fontWeight: FontWeight.w600,
+          ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              callback();
+            },
+        ),
+      ],
+    ),
+  );
+}
 
 Future<List<String>> getOrganizationTypes() async {
   final dioClient = DioClient();
+  Response response = await dioClient.client.get('/organization-types');
 
-  try {
-    Response response = await dioClient.client.get('/organization-types');
-
-    final apiResponse = ApiResponse<List<String>>.fromJson(
-      response.data,
-      (json) => List<String>.from(json),
-    );
-    return apiResponse.payload ?? [];
-  } catch (e) {
-    debugPrint('Error fetching organization types: $e');
-    return [];
-  }
+  final apiResponse = ApiResponse<List<String>>.fromJson(
+    response.data,
+    (json) => List<String>.from(json),
+  );
+  return apiResponse.payload ?? [];
 }
 
-Future<ApiResponse<LocationData>> getLocationData() async {
+Future<LocationData?> getLocationData() async {
   final dioClient = DioClient();
+  final response = await dioClient.client.get('/places');
 
-  try {
-    final response = await dioClient.client.get('/places');
+  final apiResponse = ApiResponse<LocationData>.fromJson(
+    response.data,
+    (json) => LocationData.fromJson(json),
+  );
 
-    final apiResponse = ApiResponse<LocationData>.fromJson(
-      response.data,
-      (json) => LocationData.fromJson(json),
-    );
+  debugPrint(apiResponse.payload!.municipalities.toString());
+  return apiResponse.payload!;
+}
 
-    debugPrint(apiResponse.payload!.municipalities.toString());
-    return apiResponse;
-  } catch (e) {
-    debugPrint('Error fetching location data: $e');
-    return ApiResponse<LocationData>(
-      status: false,
-      message: 'Failed to fetch location data',
-      payload: null,
-    );
+void validateOrganizationFields({
+  required TextEditingController orgNameController,
+  required String? selectedOrgType,
+  required String? selectedMunicipality,
+  required String? selectedBarangay,
+  required TextEditingController emailController,
+  required TextEditingController passwordController,
+  required String? fullPhoneNumber,
+}) {
+  if (orgNameController.text.trim().isEmpty) {
+    throw ValidationException("Organization name cannot be empty");
+  }
+  if (selectedOrgType == null || selectedOrgType.trim().isEmpty) {
+    throw ValidationException("Organization type must be selected");
+  }
+  if (selectedMunicipality == null || selectedMunicipality.trim().isEmpty) {
+    throw ValidationException("Municipality must be selected");
+  }
+  if (selectedBarangay == null || selectedBarangay.trim().isEmpty) {
+    throw ValidationException("Barangay must be selected");
+  }
+  if (emailController.text.trim().isEmpty) {
+    throw ValidationException("Email cannot be empty");
+  }
+  if (passwordController.text.trim().isEmpty) {
+    throw ValidationException("Password cannot be empty");
+  }
+  if (fullPhoneNumber == null || fullPhoneNumber.trim().isEmpty) {
+    throw ValidationException("Phone number cannot be empty");
+  }
+  if (!isValidateContactNumber(fullPhoneNumber)) {
+    throw ValidationException("Invalid Phone number");
   }
 }
 
@@ -70,6 +121,8 @@ class _AdministratorRegisterScreenState
     extends State<AdministratorRegisterScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmPassController = TextEditingController();
+  final orgNameController = TextEditingController();
   bool isLoading = false;
   bool _isFetchingData = false;
   bool hasAcceptedTerms = false;
@@ -79,14 +132,48 @@ class _AdministratorRegisterScreenState
   Map<String, List<String>> _barangaysMap = {};
   List<String> _filteredBarangays = [];
 
+  String? _selectedOrgType;
   String? _selectedMunicipality;
   String? _selectedBarangay;
+
+  String? fullPhoneNumber;
+  bool isValidPhoneNumber = false;
+  String initialCountry = 'PH';
+  PhoneNumber number = PhoneNumber(isoCode: 'PH');
+
+  bool _hasError = false;
+  Object? _initError;
 
   @override
   void initState() {
     super.initState();
     loadNetworkData();
-    _termsFuture = _loadTermsAndConditions();
+  }
+
+  Future<void> loadNetworkData() async {
+    setState(() {
+      _isFetchingData = true;
+    });
+
+    try {
+      _organization_types = await getOrganizationTypes();
+      final locations = await getLocationData();
+      _termsFuture = _loadTermsAndConditions();
+
+      if (locations != null) {
+        _municipalities = locations.municipalities;
+        _barangaysMap = locations.barangays;
+      }
+    } catch (e) {
+      setState(() {
+        _hasError = true;
+        _initError = e;
+      });
+    } finally {
+      setState(() {
+        _isFetchingData = false;
+      });
+    }
   }
 
   Future<String> _loadTermsAndConditions() async {
@@ -107,12 +194,12 @@ class _AdministratorRegisterScreenState
       context: context,
       builder: (context) {
         return FutureBuilder<String>(
-          future: _termsFuture, // Use the future we created
+          future: _termsFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return AlertDialog(
                 title: Text("Terms and Conditions"),
-                content: CircularProgressIndicator(), // Show loading indicator
+                content: CircularProgressIndicator(),
               );
             } else if (snapshot.hasError) {
               return AlertDialog(
@@ -126,18 +213,12 @@ class _AdministratorRegisterScreenState
                 ],
               );
             } else {
-              // Data is loaded, display the dialog with the content
               return AlertDialog(
                 title: Text(
                   "Terms and Conditions",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
-                content: SingleChildScrollView(
-                  // Add SingleChildScrollView for long text
-                  child: Text(
-                    snapshot.data!, // Use the loaded data
-                  ),
-                ),
+                content: SingleChildScrollView(child: Text(snapshot.data!)),
                 actions: [
                   MaterialButton(
                     onPressed: () => Navigator.of(context).pop(),
@@ -152,26 +233,10 @@ class _AdministratorRegisterScreenState
     );
   }
 
-  Future<void> loadNetworkData() async {
+  void _onOrgTypeChanged(String? orgtype) {
     setState(() {
-      _isFetchingData = true;
+      _selectedOrgType = orgtype;
     });
-
-    try {
-      _organization_types = await getOrganizationTypes();
-      final locations = await getLocationData();
-
-      if (locations.status && locations.payload != null) {
-        _municipalities = locations.payload!.municipalities;
-        _barangaysMap = locations.payload!.barangays;
-      }
-    } catch (e) {
-      debugPrint('Error loading data: $e');
-    } finally {
-      setState(() {
-        _isFetchingData = false;
-      });
-    }
   }
 
   void _onMunicipalityChanged(String? muni) {
@@ -194,15 +259,65 @@ class _AdministratorRegisterScreenState
       return appFullScreenLoading(context);
     }
 
+    if (_hasError && _initError != null) {
+      return appFullScreenError(context, _initError, () {
+        loadNetworkData();
+        setState(() {
+          _hasError = false;
+          _initError = null;
+        });
+      });
+    }
+
     Future<void> handleRegister() async {
       setState(() {
         isLoading = true;
       });
       try {
         final leagueAdministratorService = LeagueAdministratorService();
+
+        validateOrganizationFields(
+          orgNameController: orgNameController,
+          selectedOrgType: _selectedOrgType,
+          selectedMunicipality: _selectedMunicipality,
+          selectedBarangay: _selectedBarangay,
+          emailController: emailController,
+          passwordController: passwordController,
+          fullPhoneNumber: fullPhoneNumber,
+        );
+        if (passwordController.text != confirmPassController.text) {
+          throw ValidationException("Password don't match!");
+        }
+
+        final user = UserModel.create(
+          email: emailController.text,
+          password_str: passwordController.text,
+        );
+
+        final leagueAdministrator = LeagueAdministratorModel.create(
+          organization_name: orgNameController.text,
+          organization_type: _selectedOrgType as String,
+          municipality_name: _selectedMunicipality as String,
+          barangay_name: _selectedBarangay as String,
+          contact_number: fullPhoneNumber as String,
+          user: user,
+        );
+
+        final response = await leagueAdministratorService.registerAccount(
+          newAdministrator: leagueAdministrator,
+        );
+
+        if (context.mounted) {
+          showAppSnackbar(
+            context,
+            message: response,
+            title: "Success",
+            contentType: ContentType.success,
+          );
+        }
       } catch (e) {
         if (context.mounted) {
-          handleDioError(context, e, (message) {
+          handleErrorCallBack(e, (message) {
             showAppSnackbar(
               context,
               message: message,
@@ -225,6 +340,7 @@ class _AdministratorRegisterScreenState
         Expanded(
           child: TextField(
             decoration: const InputDecoration(labelText: "Organization Name"),
+            controller: orgNameController,
           ),
         ),
         const SizedBox(width: 16),
@@ -232,6 +348,8 @@ class _AdministratorRegisterScreenState
           child: DropdownSearch<String>(
             key: ValueKey('org_dropdown'),
             items: (_, _) => _organization_types,
+            selectedItem: _selectedOrgType,
+            onChanged: _onOrgTypeChanged,
             decoratorProps: DropDownDecoratorProps(
               decoration: InputDecoration(labelText: 'Organization Type'),
             ),
@@ -293,146 +411,166 @@ class _AdministratorRegisterScreenState
     final contactControlls = <Widget>[
       Row(
         children: [
+          const SizedBox(width: 16),
           Expanded(
-            child: TextField(
-              decoration: const InputDecoration(labelText: "Email"),
+            child: PasswordField(
+              controller: passwordController,
+              hintText: 'Password',
             ),
           ),
           const SizedBox(width: 16),
           Expanded(
-            child: TextField(
-              decoration: const InputDecoration(labelText: "Password"),
+            child: PasswordField(
+              controller: confirmPassController,
+              hintText: 'Confirm Password',
             ),
           ),
         ],
       ),
       const SizedBox(height: 16),
-      Row(
-        children: [
-          Expanded(
-            child: TextField(
-              decoration: const InputDecoration(labelText: "Contact Number"),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: TextField(
-              decoration: const InputDecoration(labelText: "Confirm Password"),
-            ),
-          ),
-        ],
+      InternationalPhoneNumberInput(
+        countries: ['PH', 'US'],
+        onInputChanged: (PhoneNumber number) {
+          setState(() {
+            fullPhoneNumber = number.phoneNumber ?? '';
+          });
+        },
+        onInputValidated: (_) {
+          setState(() {
+            isValidPhoneNumber = true;
+          });
+        },
+        ignoreBlank: false,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Phone number is required';
+          }
+
+          final digitsOnly = value.replaceAll(RegExp(r'\D'), '');
+
+          if (digitsOnly.length != 10) {
+            return 'Phone number must be exactly 10 digits';
+          }
+          if (!digitsOnly.startsWith('9')) {
+            return 'Phone number must start with 9';
+          }
+          return null;
+        },
+        autoValidateMode: AutovalidateMode.onUserInteraction,
+        initialValue: number,
       ),
       const SizedBox(width: 24),
     ];
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 550),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: context.appColors.gray100,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    width: 0.5,
-                    color: context.appColors.gray600,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: context.appColors.primaryGradient,
+          ),
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 550),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: context.appColors.gray100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      width: 0.5,
+                      color: context.appColors.gray600,
+                    ),
                   ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Center(
-                      child: Text(
-                        "Register Organization",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: Text(
+                          "Register Organization",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    infoControlls,
-                    const SizedBox(height: 16),
-                    placeControllers,
-                    const SizedBox(height: 16),
-                    ...contactControlls,
-                    const SizedBox(height: 16),
+                      const SizedBox(height: 16),
+                      infoControlls,
+                      const SizedBox(height: 16),
+                      placeControllers,
+                      const SizedBox(height: 16),
+                      TextField(
+                        decoration: const InputDecoration(labelText: "Email"),
+                        controller: emailController,
+                      ),
+                      const SizedBox(height: 16),
+                      ...contactControlls,
+                      const SizedBox(height: 16),
 
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: hasAcceptedTerms,
-                          onChanged: (value) {
-                            setState(() {
-                              hasAcceptedTerms = value ?? false;
-                            });
-                          },
-                        ),
-                        Expanded(
-                          child: Text.rich(
-                            TextSpan(
-                              text: 'I agree to the ',
-                              style: TextStyle(
-                                color: context.appColors.gray1100,
-                                fontSize: 11,
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: 'Terms and Conditions',
-                                  style: TextStyle(
-                                    color: context.appColors.accent900,
-                                    decoration: TextDecoration.underline,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () => _showTermsDialog(context),
-                                ),
-                              ],
-                            ),
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: hasAcceptedTerms,
+                            onChanged: (value) {
+                              setState(() {
+                                hasAcceptedTerms = value ?? false;
+                              });
+                            },
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            text: "Already have an account? ",
-                            style: TextStyle(
-                              color: context.appColors.gray1100,
-                              fontSize: 14,
-                            ),
-                            children: [
+                          Expanded(
+                            child: Text.rich(
                               TextSpan(
-                                text: "Login",
+                                text: 'I agree to the ',
                                 style: TextStyle(
-                                  color: context.appColors.accent900,
-                                  fontWeight: FontWeight.w600,
+                                  color: context.appColors.gray1100,
+                                  fontSize: 11,
                                 ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const AdministratorLoginScreen(),
-                                      ),
-                                    );
-                                  },
+                                children: [
+                                  TextSpan(
+                                    text: 'Terms and Conditions',
+                                    style: TextStyle(
+                                      color: context.appColors.accent900,
+                                      decoration: TextDecoration.underline,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () => _showTermsDialog(context),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
-                        ),
-                        AppButton(label: "Test", onPressed: getLocationData),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          authNavigator(
+                            context,
+                            "Already have an account?",
+                            " Login",
+                            () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const AdministratorLoginScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                          AppButton(
+                            label: isLoading ? "Registering..." : "Register",
+                            onPressed: handleRegister,
+                            isDisabled: !hasAcceptedTerms || isLoading,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -440,6 +578,26 @@ class _AdministratorRegisterScreenState
         ),
       ),
     );
+  }
+}
+
+void validateLoginFields({
+  required TextEditingController emailController,
+  required TextEditingController passwordController,
+}) {
+  final email = emailController.text.trim();
+  final password = passwordController.text.trim();
+
+  if (email.isEmpty) {
+    throw ValidationException("Email cannot be empty");
+  }
+
+  if (!isValidEmail(email)) {
+    throw ValidationException("Invalid email format");
+  }
+
+  if (password.isEmpty) {
+    throw ValidationException("Password cannot be empty");
   }
 }
 
@@ -466,26 +624,20 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
       try {
         final leagueAdministratorService = LeagueAdministratorService();
 
+        validateLoginFields(
+          emailController: emailController,
+          passwordController: passwordController,
+        );
+
         final user = UserModel.login(
           email: emailController.text,
           password_str: passwordController.text,
         );
 
-        final response = await leagueAdministratorService.loginAccount(
-          user: user,
-        );
-
-        if (context.mounted) {
-          showAppSnackbar(
-            context,
-            message: response.message,
-            title: "Welcome",
-            contentType: ContentType.success,
-          );
-        }
+        await leagueAdministratorService.loginAccount(user: user);
       } catch (e) {
         if (context.mounted) {
-          handleDioError(context, e, (message) {
+          handleErrorCallBack(e, (message) {
             showAppSnackbar(
               context,
               message: message,
@@ -503,22 +655,84 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
       }
     }
 
-    final loginControllers = Column(
-      children: [
-        TextField(
-          decoration: InputDecoration(labelText: "Email"),
-          controller: emailController,
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          decoration: InputDecoration(labelText: "Password"),
-          controller: passwordController,
-          obscureText: true,
-          obscuringCharacter: '*',
-        ),
-      ],
-    );
+    final loginControll = <Widget>[
+      const SizedBox(height: 16),
+      TextField(
+        decoration: const InputDecoration(label: Text("Email")),
+        controller: emailController,
+      ),
+      const SizedBox(height: 16),
+      PasswordField(controller: passwordController, hintText: "Password"),
+    ];
 
-    return Scaffold(body: Text("adsdds"));
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: SafeArea(
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: context.appColors.primaryGradient,
+          ),
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: context.appColors.gray100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      width: 0.5,
+                      color: context.appColors.gray600,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: Text(
+                          "Welcome",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      ...loginControll,
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          authNavigator(
+                            context,
+                            "Don't have an account yet?",
+                            " Register",
+                            () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const AdministratorRegisterScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                          AppButton(
+                            label: isLoading ? "Logging in..." : "Login",
+                            onPressed: handleLogin,
+                            isDisabled: isLoading,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
