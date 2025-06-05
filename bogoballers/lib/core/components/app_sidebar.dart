@@ -29,7 +29,10 @@ class SidebarItem extends StatelessWidget {
           onTap: onTap,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            color: selected ? appColors.gray300 : Colors.transparent,
+            decoration: BoxDecoration(
+              color: selected ? appColors.gray300 : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
+            ),
             child: Row(
               children: [
                 if (icon != null)
@@ -43,7 +46,7 @@ class SidebarItem extends StatelessWidget {
                   child: Text(
                     label,
                     style: TextStyle(
-                      color: selected ? appColors.accent900 : appColors.gray700,
+                      color: selected ? appColors.gray1000 : appColors.gray700,
                       fontWeight: selected
                           ? FontWeight.bold
                           : FontWeight.normal,
@@ -113,77 +116,54 @@ class SubMenuItem extends StatelessWidget {
 }
 
 class AppSidebar extends StatelessWidget {
-  final int selectedIndex;
-  final Function(int) onSelectIndex;
+  final List<SidebarItem> sidebarItems;
 
-  const AppSidebar({
-    super.key,
-    required this.selectedIndex,
-    required this.onSelectIndex,
-  });
+  const AppSidebar({super.key, required this.sidebarItems});
 
   @override
   Widget build(BuildContext context) {
     final appColors = context.appColors;
 
     return Container(
-      width: 250,
-      color: appColors.gray100,
+      width: 220,
+      decoration: BoxDecoration(
+        color: appColors.gray100,
+        border: Border(right: BorderSide(width: 0.5, color: appColors.gray600)),
+      ),
       child: Column(
         children: [
           Container(
             padding: const EdgeInsets.all(16),
             width: double.infinity,
-            color: appColors.accent900,
-            child: Text(
-              'League Admin',
-              style: TextStyle(
-                color: appColors.accent100,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+            height: 80,
+            decoration: BoxDecoration(
+              color: appColors.gray100,
+              border: Border(
+                bottom: BorderSide(width: 0.5, color: appColors.gray600),
               ),
             ),
           ),
           Expanded(
             child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  SidebarItem(
-                    label: 'Dashboard',
-                    icon: Icons.dashboard,
-                    selected: selectedIndex == 0,
-                    onTap: () => onSelectIndex(0),
-                  ),
-                  SidebarItem(
-                    label: 'Settings',
-                    icon: Icons.settings,
-                    selected: selectedIndex == 1,
-                    onTap: () => onSelectIndex(1),
-                    subMenu: [
-                      SubMenuItem(
-                        label: 'Account',
-                        selected: false,
-                        onTap: () => debugPrint('Account tapped'),
-                      ),
-                      SubMenuItem(
-                        label: 'Privacy',
-                        selected: false,
-                        onTap: () => debugPrint('Privacy tapped'),
-                      ),
-                    ],
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Column(children: sidebarItems),
               ),
             ),
           ),
+
+          // Sidebar footer
           Container(
+            width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              border: Border(top: BorderSide(color: appColors.gray400)),
+              border: Border(
+                top: BorderSide(color: appColors.gray600, width: 0.5),
+              ),
             ),
             child: Text(
               'v1.0.0',
-              style: TextStyle(fontSize: 12, color: appColors.gray600),
+              style: TextStyle(fontSize: 12, color: appColors.gray1100),
             ),
           ),
         ],

@@ -19,20 +19,35 @@ class AppHeader extends StatelessWidget {
       height: 34,
       width: double.infinity,
       color: appColors.accent900,
+      padding: EdgeInsets.all(4),
       child: Row(
         children: [
           IconButton(
             icon: Icon(Icons.menu, color: appColors.accent100, size: 14),
             onPressed: onToggleSidebar,
           ),
-          const SizedBox(width: 8),
-          Text(
-            "League Admin",
-            style: TextStyle(
-              color: appColors.accent100,
-              fontWeight: FontWeight.bold,
+          const Spacer(),
+          Expanded(
+            child: Center(
+              child: Container(
+                alignment: Alignment.center,
+                constraints: BoxConstraints(minWidth: 200),
+                padding: EdgeInsets.symmetric(vertical: 2, horizontal: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(width: 0.5, color: appColors.gray100),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  "Sangguniang Kabataan-Barangay Ilihan",
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: TextStyle(fontSize: 11, color: appColors.accent100),
+                ),
+              ),
             ),
           ),
+          const Spacer(),
+          const SizedBox(width: 38),
         ],
       ),
     );

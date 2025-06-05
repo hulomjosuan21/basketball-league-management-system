@@ -19,6 +19,7 @@ class _LeagueAdministratorMainScreenState
   final List<Widget> pages = const [
     Center(child: Text('Dashboard Page')),
     Center(child: Text('Settings Page')),
+    Center(child: Text('Account Page')),
   ];
 
   void toggleSidebar() {
@@ -43,15 +44,38 @@ class _LeagueAdministratorMainScreenState
       });
     }
 
+    final List<SidebarItem> sidebarItems = [
+      SidebarItem(
+        label: 'Dashboard',
+        icon: Icons.dashboard,
+        selected: selectedIndex == 0,
+        onTap: () => onSelectIndex(0),
+      ),
+      SidebarItem(
+        label: 'Settings',
+        icon: Icons.settings,
+        selected: selectedIndex == 1,
+        onTap: () => onSelectIndex(1),
+        subMenu: [
+          SubMenuItem(
+            label: 'Account',
+            selected: selectedIndex == 2,
+            onTap: () => onSelectIndex(2),
+          ),
+          SubMenuItem(
+            label: 'Privacy',
+            selected: false,
+            onTap: () => debugPrint('Privacy tapped'),
+          ),
+        ],
+      ),
+    ];
+
     return Scaffold(
       body: SafeArea(
         child: Row(
           children: [
-            if (showSidebar)
-              AppSidebar(
-                selectedIndex: selectedIndex,
-                onSelectIndex: onSelectIndex,
-              ),
+            if (showSidebar) AppSidebar(sidebarItems: sidebarItems),
             Expanded(
               child: Column(
                 children: [
