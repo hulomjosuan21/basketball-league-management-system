@@ -6,6 +6,7 @@ import 'package:bogoballers/core/components/error_screen.dart';
 import 'package:bogoballers/core/components/loading.dart';
 import 'package:bogoballers/core/components/password_field.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
+import 'package:bogoballers/core/hive/app_box.dart';
 import 'package:bogoballers/core/models/league_administrator.dart';
 import 'package:bogoballers/core/utils/validators.dart';
 import 'dart:convert';
@@ -634,7 +635,18 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
           password_str: passwordController.text,
         );
 
-        await leagueAdministratorService.loginAccount(user: user);
+        final response = await leagueAdministratorService.loginAccount(
+          user: user,
+        );
+
+        if (context.mounted) {
+          showAppSnackbar(
+            context,
+            message: response.message,
+            title: "Success",
+            contentType: ContentType.success,
+          );
+        }
       } catch (e) {
         if (context.mounted) {
           handleErrorCallBack(e, (message) {
