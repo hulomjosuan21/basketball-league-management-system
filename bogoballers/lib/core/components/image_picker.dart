@@ -154,11 +154,13 @@ class AppImagePickerController {
 class AppImagePicker extends StatefulWidget {
   final AppImagePickerController controller;
   final double aspectRatio;
+  final double width;
 
   const AppImagePicker({
     super.key,
     required this.controller,
     this.aspectRatio = 1.0,
+    this.width = 180,
   });
 
   @override
@@ -222,13 +224,13 @@ class _AvatarCropperState extends State<AppImagePicker> {
       child: _avatarBytes != null
           ? Image.memory(
               _avatarBytes!,
-              width: 180,
-              height: 180 / widget.aspectRatio,
+              width: widget.width,
+              height: widget.width / widget.aspectRatio,
               fit: BoxFit.cover,
             )
           : Container(
-              width: 180,
-              height: 180 / widget.aspectRatio,
+              width: widget.width,
+              height: widget.width / widget.aspectRatio,
               color: appColors.gray400,
               child: Icon(Icons.image, size: 48, color: appColors.gray100),
             ),
