@@ -39,7 +39,7 @@ class _AdministratorMaterialScreenState
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Administrator App',
+      title: 'BogoBallers',
       theme: lightTheme(context),
       home: FutureBuilder<bool>(
         future: _loginFuture,

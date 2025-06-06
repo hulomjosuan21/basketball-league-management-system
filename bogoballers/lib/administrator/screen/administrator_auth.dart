@@ -282,6 +282,13 @@ class _AdministratorRegisterScreenState
             title: "Success",
             contentType: ContentType.success,
           );
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AdministratorLoginScreen(),
+            ),
+          );
         }
       } catch (e) {
         if (context.mounted) {
@@ -455,112 +462,117 @@ class _AdministratorRegisterScreenState
 
                 return SingleChildScrollView(
                   padding: const EdgeInsets.all(24),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 550),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: context.appColors.gray100,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          width: 0.5,
-                          color: context.appColors.gray600,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Center(
-                            child: Text(
-                              "Register Organization",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
+                  child: isLoading
+                      ? CircularProgressIndicator(
+                          color: context.appColors.accent900,
+                        )
+                      : ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 550),
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: context.appColors.gray100,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                width: 0.5,
+                                color: context.appColors.gray600,
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 16),
-                          infoControlls,
-                          const SizedBox(height: 16),
-                          placeControllers,
-                          const SizedBox(height: 16),
-                          TextField(
-                            decoration: const InputDecoration(
-                              labelText: "Email",
-                            ),
-                            controller: emailController,
-                          ),
-                          const SizedBox(height: 16),
-                          ...contactControlls,
-                          const SizedBox(height: 16),
-
-                          Row(
-                            children: [
-                              Checkbox(
-                                value: hasAcceptedTerms,
-                                onChanged: (value) {
-                                  setState(() {
-                                    hasAcceptedTerms = value ?? false;
-                                  });
-                                },
-                              ),
-                              Expanded(
-                                child: Text.rich(
-                                  TextSpan(
-                                    text: 'I agree to the ',
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Center(
+                                  child: Text(
+                                    "Register Organization",
                                     style: TextStyle(
-                                      color: context.appColors.gray1100,
-                                      fontSize: 11,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
                                     ),
-                                    children: [
-                                      TextSpan(
-                                        text: 'Terms and Conditions',
-                                        style: TextStyle(
-                                          color: context.appColors.accent900,
-                                          decoration: TextDecoration.underline,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () =>
-                                              _showTermsDialog(context),
-                                      ),
-                                    ],
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              authNavigator(
-                                context,
-                                "Already have an account?",
-                                " Login",
-                                () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const AdministratorLoginScreen(),
+                                const SizedBox(height: 16),
+                                infoControlls,
+                                const SizedBox(height: 16),
+                                placeControllers,
+                                const SizedBox(height: 16),
+                                TextField(
+                                  decoration: const InputDecoration(
+                                    labelText: "Email",
+                                  ),
+                                  controller: emailController,
+                                ),
+                                const SizedBox(height: 16),
+                                ...contactControlls,
+                                const SizedBox(height: 16),
+
+                                Row(
+                                  children: [
+                                    Checkbox(
+                                      value: hasAcceptedTerms,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          hasAcceptedTerms = value ?? false;
+                                        });
+                                      },
                                     ),
-                                  );
-                                },
-                              ),
-                              AppButton(
-                                label: isLoading
-                                    ? "Registering..."
-                                    : "Register",
-                                onPressed: handleRegister,
-                                isDisabled: !hasAcceptedTerms || isLoading,
-                              ),
-                            ],
+                                    Expanded(
+                                      child: Text.rich(
+                                        TextSpan(
+                                          text: 'I agree to the ',
+                                          style: TextStyle(
+                                            color: context.appColors.gray1100,
+                                            fontSize: 11,
+                                          ),
+                                          children: [
+                                            TextSpan(
+                                              text: 'Terms and Conditions',
+                                              style: TextStyle(
+                                                color:
+                                                    context.appColors.accent900,
+                                                decoration:
+                                                    TextDecoration.underline,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              recognizer: TapGestureRecognizer()
+                                                ..onTap = () =>
+                                                    _showTermsDialog(context),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    authNavigator(
+                                      context,
+                                      "Already have an account?",
+                                      " Login",
+                                      () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const AdministratorLoginScreen(),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    AppButton(
+                                      label: "Register",
+                                      onPressed: handleRegister,
+                                      isDisabled: !hasAcceptedTerms,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
+                        ),
                 );
               },
             ),
