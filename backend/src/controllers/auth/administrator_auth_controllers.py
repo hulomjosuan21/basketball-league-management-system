@@ -56,6 +56,19 @@ class AdministratorAuthControllers:
             db.session.rollback()
             return ApiResponse.error(e)
         
+    async def fetch_administrator(self, user_id):
+        try:
+            user = UserModel.query.filter(UserModel.user_id == user_id).first()
+            if not user:
+                raise AuthException("No User found.", 401)
+            
+            league_administrator = user.league_administrator
+
+            print(league_administrator)
+            return ApiResponse.success()
+        except Exception as e:
+            return ApiResponse.error(e)
+        
     async def login_administrator(self):
         try:
             data = request.get_json()

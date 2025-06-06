@@ -4,11 +4,20 @@ import 'package:flutter/material.dart';
 
 MaterialApp appFullScreenLoading(BuildContext context) {
   return MaterialApp(
-    title: 'Administrator App',
     theme: lightTheme(context),
     home: Scaffold(
-      body: Center(
-        child: CircularProgressIndicator(color: context.appColors.accent900),
+      body: SafeArea(
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: context.appColors.primaryGradient,
+          ),
+
+          child: Center(
+            child: CircularProgressIndicator(
+              color: context.appColors.accent900,
+            ),
+          ),
+        ),
       ),
     ),
     debugShowCheckedModeBanner: false,

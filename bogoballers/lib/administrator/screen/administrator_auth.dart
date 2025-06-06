@@ -4,10 +4,8 @@ import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:bogoballers/administrator/league_administrator.dart';
 import 'package:bogoballers/core/components/app_button.dart';
 import 'package:bogoballers/core/components/error.dart';
-import 'package:bogoballers/core/components/loading.dart';
 import 'package:bogoballers/core/components/password_field.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
-import 'package:bogoballers/core/hive/app_box.dart';
 import 'package:bogoballers/core/models/league_administrator.dart';
 import 'package:bogoballers/core/utils/validators.dart';
 import 'dart:convert';
@@ -449,7 +447,9 @@ class _AdministratorRegisterScreenState
                   );
                 } else if (asyncSnapshot.hasError) {
                   return retryError(context, asyncSnapshot.error, () {
-                    _networkDataFuture = loadNetworkData();
+                    setState(() {
+                      _networkDataFuture = loadNetworkData();
+                    });
                   });
                 }
 
