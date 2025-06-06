@@ -1,7 +1,7 @@
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
-enum ButtonVariant { primary, secondary, destructive }
+enum ButtonVariant { primary, secondary, destructive, outline, ghost }
 
 enum ButtonSize { sm, md, lg }
 
@@ -13,8 +13,6 @@ class AppButton extends MaterialButton {
   final bool isDisabled;
   final bool iconOnRight;
   final double? width;
-  @override
-  final double? height;
 
   const AppButton({
     super.key,
@@ -26,7 +24,6 @@ class AppButton extends MaterialButton {
     this.isDisabled = false,
     this.iconOnRight = false,
     this.width,
-    this.height,
   }) : super(onPressed: isDisabled ? null : onPressed);
 
   @override
@@ -41,14 +38,27 @@ class AppButton extends MaterialButton {
       case ButtonVariant.primary:
         backgroundColor = colors.accent900;
         textColor = colors.gray100;
+        borderSide = BorderSide.none;
         break;
       case ButtonVariant.secondary:
         backgroundColor = colors.accent100;
         textColor = colors.gray1100;
+        borderSide = BorderSide.none;
         break;
       case ButtonVariant.destructive:
-        backgroundColor = colors.accent1200;
+        backgroundColor = Colors.redAccent;
         textColor = colors.accent100;
+        borderSide = BorderSide.none;
+        break;
+      case ButtonVariant.outline:
+        backgroundColor = Colors.transparent;
+        textColor = colors.gray1100;
+        borderSide = BorderSide(color: colors.gray600, width: 0.5);
+        break;
+      case ButtonVariant.ghost:
+        backgroundColor = Colors.transparent;
+        textColor = colors.gray1100;
+        borderSide = BorderSide.none;
         break;
     }
 
@@ -73,7 +83,11 @@ class AppButton extends MaterialButton {
     final iconWidget = icon;
     final textWidget = Text(
       label,
-      style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w500),
+      style: TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.w500,
+        color: isDisabled ? colors.gray500 : textColor,
+      ),
     );
 
     return SizedBox(
@@ -82,14 +96,18 @@ class AppButton extends MaterialButton {
       child: MaterialButton(
         onPressed: onPressed,
         color: backgroundColor,
-        textColor: textColor,
+        textColor: isDisabled ? colors.gray500 : textColor,
         disabledColor: colors.gray400,
         disabledTextColor: colors.gray500,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),
-          side: borderSide ?? BorderSide.none,
+          side: borderSide,
         ),
         padding: padding,
+        elevation: 0,
+        focusElevation: 0,
+        hoverElevation: 0,
+        highlightElevation: 0,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,

@@ -14,6 +14,10 @@ class ApiResponse:
         if payload is not None:
             response["payload"] = payload
         return make_response(jsonify(response), status_code)
+    
+    @staticmethod
+    def html(template=None, status_code=200):
+        return make_response(template, status_code)
 
     @staticmethod
     def error(error="An error occurred", status_code=None):

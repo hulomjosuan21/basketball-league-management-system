@@ -1,6 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
 
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:bogoballers/administrator/league_administrator.dart';
 import 'package:bogoballers/core/components/app_button.dart';
 import 'package:bogoballers/core/components/error_screen.dart';
 import 'package:bogoballers/core/components/loading.dart';
@@ -645,6 +646,13 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
             message: response.message,
             title: "Success",
             contentType: ContentType.success,
+          );
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const LeagueAdministratorMainScreen(),
+            ),
           );
         }
       } catch (e) {

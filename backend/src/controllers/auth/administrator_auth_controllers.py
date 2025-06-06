@@ -11,8 +11,6 @@ from flask_jwt_extended import (
 )
 from datetime import timedelta
 
-from src.utils.html_template import email_html_template
-
 class AdministratorAuthControllers:
     async def create_administrator(self):
         try:
@@ -49,7 +47,7 @@ class AdministratorAuthControllers:
             db.session.add(league_administrator)
             db.session.commit()
 
-            verify_link = f"/administrator/{user.user_id}"
+            verify_link = f"/user/{user.user_id}"
 
             await send_verification_email(email, verify_link, request)
 
@@ -57,35 +55,6 @@ class AdministratorAuthControllers:
         except Exception as e:
             db.session.rollback()
             return ApiResponse.error(e)
-        
-    def verify_administrator_account(self, user_id):
-        try:
-            if not user_id:
-                raise ValueError("Missing user credentials")
-
-            user = UserModel.query.filter_by(user_id=user_id).first()
-
-            if not user:
-                return make_response(
-                    email_html_template("Verification Failed", "User not found.",'error'), 404
-                )
-
-            if user.is_verified:
-                return make_response(
-                    email_html_template("Already Verified", "Your account is already verified.",'info'), 200
-                )
-
-            user.is_verified = True
-            db.session.commit()
-
-            return make_response(
-                email_html_template("Account Verified", "Your account has been verified successfully!"), 200
-            )
-
-        except Exception as e:
-            return make_response(
-                email_html_template("Error Occurred","✕ Something went wrong!",'error'),500
-            )
         
     async def login_administrator(self):
         try:

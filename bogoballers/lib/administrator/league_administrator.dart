@@ -1,5 +1,6 @@
 import 'package:bogoballers/core/components/app_header.dart';
 import 'package:bogoballers/core/components/app_sidebar.dart';
+import 'package:bogoballers/core/hive/app_box.dart';
 import 'package:flutter/material.dart';
 
 class LeagueAdministratorMainScreen extends StatefulWidget {
@@ -65,7 +66,12 @@ class _LeagueAdministratorMainScreenState
           SubMenuItem(
             label: 'Privacy',
             selected: false,
-            onTap: () => debugPrint('Privacy tapped'),
+            onTap: () {
+              final token = AppBox.accessTokenBox.get('access_token');
+              if (token != null && !token.isExpired) {
+                debugPrint('User ID: ${token.user_id}');
+              }
+            },
           ),
         ],
       ),

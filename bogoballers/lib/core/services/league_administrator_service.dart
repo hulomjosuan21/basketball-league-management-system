@@ -13,8 +13,8 @@ class LeagueAdministratorService {
   Future<String> registerAccount({
     required LeagueAdministratorModel newAdministrator,
   }) async {
-    final dioClient = DioClient();
-    Response response = await dioClient.client.post(
+    final api = DioClient().client;
+    Response response = await api.post(
       '/administrator/register-account',
       data: newAdministrator.toJsonForCreation(),
     );
@@ -23,9 +23,9 @@ class LeagueAdministratorService {
   }
 
   Future<ApiResponse> loginAccount({required UserModel user}) async {
-    final dioClient = DioClient();
+    final api = DioClient().client;
 
-    Response response = await dioClient.client.post(
+    Response response = await api.post(
       '/administrator/login-account',
       data: user.toJsonForLogin(),
     );
