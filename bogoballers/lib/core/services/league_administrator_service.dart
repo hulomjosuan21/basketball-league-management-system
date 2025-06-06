@@ -1,3 +1,7 @@
+// ignore_for_file: non_constant_identifier_names
+
+import 'package:bogoballers/core/hive/app_box.dart';
+import 'package:bogoballers/core/models/access_token.dart';
 import 'package:bogoballers/core/models/league_administrator.dart';
 import 'package:bogoballers/core/models/user.dart';
 import 'package:bogoballers/core/network/api_response.dart';
@@ -18,7 +22,7 @@ class LeagueAdministratorService {
     return apiResponse.message;
   }
 
-  Future<void> loginAccount({required UserModel user}) async {
+  Future<ApiResponse> loginAccount({required UserModel user}) async {
     final dioClient = DioClient();
 
     Response response = await dioClient.client.post(
@@ -26,13 +30,18 @@ class LeagueAdministratorService {
       data: user.toJsonForLogin(),
     );
 
-    final apiResponse = ApiResponse<LeagueAdministratorModel>.fromJson(
+    final apiResponse = ApiResponse<AccessToken>.fromJson(
       response.data,
-      (json) => LeagueAdministratorModel.fromJson(json),
+      (json) => AccessToken.fromJson(json),
     );
 
-    debugPrint(apiResponse.payload!.toJson().toString());
+    final access_token = apiResponse.payload;
 
-    // return apiResponse;
+    if (access_token != null) {
+      AppBox.accessTokenBox.put('access_token', access_token);
+      debugPrint("Token Stored");
+    }
+
+    return apiResponse;
   }
 }

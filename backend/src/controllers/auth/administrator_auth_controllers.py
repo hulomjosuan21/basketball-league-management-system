@@ -5,7 +5,11 @@ from src.models.league_administrator_model import LeagueAdministratorModel
 from src.models.user_model import UserModel
 from src.services.email_services import send_verification_email
 from src.utils.api_response import ApiResponse
-from werkzeug.exceptions import NotFound, Forbidden
+from flask_jwt_extended import (
+    create_access_token,
+    set_access_cookies,
+)
+from datetime import timedelta
 
 from src.utils.html_template import email_html_template
 
@@ -94,14 +98,22 @@ class AdministratorAuthControllers:
 
             user = UserModel.query.filter(UserModel.email == email).first()
 
-            league_administrator = user.league_administrator;
+            if not user:
+                raise AuthException("Invalid email or password.", 401)
 
             if not user.is_verified:
-                raise AuthException("Your account is not verified.",403)
+                raise AuthException("Your account is not verified.", 403)
+
+            if not user.verify_password(password_str):
+                raise AuthException("Invalid email or password.", 401)
 
             user.verify_password(password_str)
 
-            payload = league_administrator.to_json()
+            access_token = create_access_token(identity=user.user_id,expires_delta=timedelta(seconds=60))
+
+            payload = {
+                'access_token': access_token
+            }
 
             return ApiResponse.success(message="Login successful.",payload=payload)
         except Exception as e:

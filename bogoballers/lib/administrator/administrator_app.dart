@@ -26,7 +26,7 @@ class AdministratorMaterialScreen extends StatelessWidget {
         return MaterialApp(
           title: 'Administrator App',
           theme: lightTheme(context),
-          home: const LeagueAdministratorMainScreen(),
+          home: const AdministratorLoginScreen(),
           debugShowCheckedModeBanner: false,
         );
       },
