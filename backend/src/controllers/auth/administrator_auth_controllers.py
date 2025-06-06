@@ -78,7 +78,7 @@ class AdministratorAuthControllers:
 
             user.verify_password(password_str)
 
-            access_token = create_access_token(identity=user.user_id,expires_delta=timedelta(seconds=60))
+            access_token = create_access_token(identity=user.user_id,expires_delta=timedelta(weeks=1))
 
             payload = {
                 'access_token': access_token
