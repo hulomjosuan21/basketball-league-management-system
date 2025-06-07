@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -8,8 +7,8 @@ import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart' as dio;
 
-/// This function crops the image using Dart canvas APIs.
 Future<Uint8List?> cropImageDataWithDartLibrary({
   required ExtendedImageEditorState state,
 }) async {
@@ -86,7 +85,23 @@ class _CropPopupState extends State<CropPopup> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Crop Image"),
+      title: SingleChildScrollView(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "Crop Image",
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: Icon(Icons.close, size: 18),
+            ),
+          ],
+        ),
+      ),
       content: SingleChildScrollView(
         child: SizedBox(
           width: 400,
@@ -118,39 +133,28 @@ class _CropPopupState extends State<CropPopup> {
       ),
       actions: [
         AppButton(
-          onPressed: () => Navigator.pop(context),
-          label: 'Cancel',
-          variant: ButtonVariant.ghost,
-        ),
-        AppButton(
           onPressed: _resetCrop,
           label: 'Reset',
           variant: ButtonVariant.ghost,
         ),
-        AppButton(onPressed: _cropImage, label: 'Crop & Use'),
+        AppButton(onPressed: _cropImage, label: 'Crop'),
       ],
     );
   }
 }
 
 class AppImagePickerController {
-  _AvatarCropperState? _state;
+  _AppImagePickerState? _state;
+
+  /// Get the MultipartFile containing the selected and cropped image data
+  dio.MultipartFile? get multipartFile => _state?._multipartFile;
 
   /// Call this to open the picker + cropper
   Future<void> pickImage() async {
     await _state?._selectAndCropImage();
   }
-
-  /// Get the final image bytes
-  Uint8List? get selectedImage => _state?._avatarBytes;
-
-  /// Get base64 string of image
-  String get base64Image =>
-      _state?._avatarBytes != null ? base64Encode(_state!._avatarBytes!) : '';
-  String? get fileName => _state?.fileName;
 }
 
-/// The actual image cropper widget that only displays the selected image
 class AppImagePicker extends StatefulWidget {
   final AppImagePickerController controller;
   final double aspectRatio;
@@ -164,14 +168,14 @@ class AppImagePicker extends StatefulWidget {
   });
 
   @override
-  State<AppImagePicker> createState() => _AvatarCropperState();
+  State<AppImagePicker> createState() => _AppImagePickerState();
 }
 
-class _AvatarCropperState extends State<AppImagePicker> {
+class _AppImagePickerState extends State<AppImagePicker> {
   Uint8List? _avatarBytes;
+  dio.MultipartFile? _multipartFile;
   String? _fileName;
 
-  String? get fileName => _fileName;
   @override
   void initState() {
     super.initState();
@@ -186,15 +190,33 @@ class _AvatarCropperState extends State<AppImagePicker> {
 
   Future<void> _selectAndCropImage() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
+      type: FileType.custom,
+      allowedExtensions: [
+        'jpg',
+        'jpeg',
+        'png',
+      ], // Match backend ALLOWED_EXTENSIONS
     );
 
     if (result?.files.single.path == null) return;
 
-    // Save the original file name
-    _fileName = result!.files.single.name;
+    final filePath = result!.files.single.path!;
+    final fileName = result.files.single.name;
+    final fileExtension = fileName.split('.').last.toLowerCase();
 
-    final file = File(result.files.single.path!);
+    // Validate file extension
+    if (!['jpg', 'jpeg', 'png'].contains(fileExtension)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Unsupported file type! Please select a JPG, JPEG, or PNG image.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    final file = File(filePath);
     final decoded = await decodeImageFromList(await file.readAsBytes());
 
     Uint8List? finalBytes;
@@ -212,6 +234,14 @@ class _AvatarCropperState extends State<AppImagePicker> {
     if (finalBytes != null) {
       setState(() {
         _avatarBytes = finalBytes;
+        _fileName = fileName;
+        _multipartFile = dio.MultipartFile.fromBytes(
+          finalBytes as List<int>,
+          filename: fileName,
+          contentType: dio.DioMediaType.parse(
+            fileExtension == 'png' ? 'image/png' : 'image/jpeg',
+          ), // Correct MIME type as DioMediaType
+        );
       });
     }
   }
@@ -219,21 +249,37 @@ class _AvatarCropperState extends State<AppImagePicker> {
   @override
   Widget build(BuildContext context) {
     final appColors = context.appColors;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
-      child: _avatarBytes != null
-          ? Image.memory(
-              _avatarBytes!,
-              width: widget.width,
-              height: widget.width / widget.aspectRatio,
-              fit: BoxFit.cover,
-            )
-          : Container(
-              width: widget.width,
-              height: widget.width / widget.aspectRatio,
-              color: appColors.gray400,
-              child: Icon(Icons.image, size: 48, color: appColors.gray100),
+    return Column(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: _avatarBytes != null
+              ? Image.memory(
+                  _avatarBytes!,
+                  width: widget.width,
+                  height: widget.width / widget.aspectRatio,
+                  fit: BoxFit.cover,
+                )
+              : Container(
+                  width: widget.width,
+                  height: widget.width / widget.aspectRatio,
+                  color: appColors.gray400,
+                  child: Icon(Icons.image, size: 48, color: appColors.gray100),
+                ),
+        ),
+        if (_fileName != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            _fileName!,
+            style: TextStyle(
+              color: appColors.gray1100,
+              fontSize: 12,
+              overflow: TextOverflow.ellipsis,
             ),
+            maxLines: 1,
+          ),
+        ],
+      ],
     );
   }
 }

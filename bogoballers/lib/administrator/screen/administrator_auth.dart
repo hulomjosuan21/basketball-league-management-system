@@ -1,9 +1,9 @@
 // ignore_for_file: non_constant_identifier_names
-
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:bogoballers/administrator/league_administrator.dart';
 import 'package:bogoballers/core/components/app_button.dart';
 import 'package:bogoballers/core/components/error.dart';
+import 'package:bogoballers/core/components/image_picker.dart';
 import 'package:bogoballers/core/components/password_field.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
 import 'package:bogoballers/core/models/league_administrator.dart';
@@ -61,7 +61,7 @@ Future<List<String>> getOrganizationTypes() async {
   return apiResponse.payload ?? [];
 }
 
-Future<LocationData?> getLocationData() async {
+Future<LocationData> getLocationData() async {
   final dioClient = DioClient();
   final response = await dioClient.client.get('/places');
 
@@ -141,6 +141,8 @@ class _AdministratorRegisterScreenState
   PhoneNumber number = PhoneNumber(isoCode: 'PH');
   late Future<void> _networkDataFuture;
 
+  AppImagePickerController logoController = AppImagePickerController();
+
   @override
   void initState() {
     super.initState();
@@ -148,13 +150,25 @@ class _AdministratorRegisterScreenState
   }
 
   Future<void> loadNetworkData() async {
-    _organization_types = await getOrganizationTypes();
-    final locations = await getLocationData();
-    _termsFuture = _loadTermsAndConditions();
+    try {
+      final results = await Future.wait([
+        getOrganizationTypes(),
+        getLocationData(),
+        _loadTermsAndConditions(),
+      ]);
 
-    if (locations != null) {
-      _municipalities = locations.municipalities;
-      _barangaysMap = locations.barangays;
+      _organization_types = results[0] as List<String>;
+      LocationData? locations = results[1] as LocationData?;
+      _termsFuture = Future.value(results[2] as String);
+
+      if (locations != null) {
+        _municipalities = locations.municipalities;
+        _barangaysMap = locations.barangays;
+      }
+    } on DioException catch (_) {
+      throw AppException("Network error!");
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -235,81 +249,88 @@ class _AdministratorRegisterScreenState
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    Future<void> handleRegister() async {
-      setState(() {
-        isLoading = true;
-      });
-      try {
-        final leagueAdministratorService = LeagueAdministratorService();
+  Future<void> handleRegister() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      final leagueAdministratorService = LeagueAdministratorService();
 
-        validateOrganizationFields(
-          orgNameController: orgNameController,
-          selectedOrgType: _selectedOrgType,
-          selectedMunicipality: _selectedMunicipality,
-          selectedBarangay: _selectedBarangay,
-          emailController: emailController,
-          passwordController: passwordController,
-          fullPhoneNumber: fullPhoneNumber,
+      validateOrganizationFields(
+        orgNameController: orgNameController,
+        selectedOrgType: _selectedOrgType,
+        selectedMunicipality: _selectedMunicipality,
+        selectedBarangay: _selectedBarangay,
+        emailController: emailController,
+        passwordController: passwordController,
+        fullPhoneNumber: fullPhoneNumber,
+      );
+
+      if (passwordController.text != confirmPassController.text) {
+        throw ValidationException("Passwords don't match!");
+      }
+
+      final user = UserModel.create(
+        email: emailController.text,
+        password_str: passwordController.text,
+      );
+
+      final multipartFile = logoController.multipartFile;
+      if (multipartFile == null) {
+        throw ValidationException("Please select an organization logo!");
+      }
+
+      final leagueAdministrator = LeagueAdministratorModel.create(
+        organization_name: orgNameController.text,
+        organization_type: _selectedOrgType!,
+        municipality_name: _selectedMunicipality!,
+        barangay_name: _selectedBarangay!,
+        contact_number: fullPhoneNumber!,
+        user: user,
+        organization_logo_file: multipartFile,
+      );
+
+      final response = await leagueAdministratorService.registerAccount(
+        leagueAdministrator: leagueAdministrator,
+      );
+
+      if (mounted) {
+        showAppSnackbar(
+          context,
+          message: response,
+          title: "Success",
+          contentType: ContentType.success,
         );
-        if (passwordController.text != confirmPassController.text) {
-          throw ValidationException("Password don't match!");
-        }
 
-        final user = UserModel.create(
-          email: emailController.text,
-          password_str: passwordController.text,
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AdministratorLoginScreen(),
+          ),
         );
-
-        final leagueAdministrator = LeagueAdministratorModel.create(
-          organization_name: orgNameController.text,
-          organization_type: _selectedOrgType as String,
-          municipality_name: _selectedMunicipality as String,
-          barangay_name: _selectedBarangay as String,
-          contact_number: fullPhoneNumber as String,
-          user: user,
-        );
-
-        final response = await leagueAdministratorService.registerAccount(
-          newAdministrator: leagueAdministrator,
-        );
-
-        if (context.mounted) {
+      }
+    } catch (e) {
+      if (context.mounted) {
+        handleErrorCallBack(e, (message) {
           showAppSnackbar(
             context,
-            message: response,
-            title: "Success",
-            contentType: ContentType.success,
+            message: message,
+            title: "Error",
+            contentType: ContentType.failure,
           );
-
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AdministratorLoginScreen(),
-            ),
-          );
-        }
-      } catch (e) {
-        if (context.mounted) {
-          handleErrorCallBack(e, (message) {
-            showAppSnackbar(
-              context,
-              message: message,
-              title: "Error",
-              contentType: ContentType.failure,
-            );
-          });
-        }
-      } finally {
-        if (context.mounted) {
-          setState(() {
-            isLoading = false;
-          });
-        }
+        });
+      }
+    } finally {
+      if (context.mounted) {
+        setState(() {
+          isLoading = false;
+        });
       }
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     final infoControlls = Row(
       children: [
         Expanded(
@@ -379,6 +400,20 @@ class _AdministratorRegisterScreenState
               ),
             ),
           ),
+        ),
+      ],
+    );
+
+    final logoWidget = Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        AppImagePicker(controller: logoController, aspectRatio: 1),
+        const SizedBox(height: 8),
+        AppButton(
+          label: 'Select Organization Logo/Image',
+          onPressed: logoController.pickImage,
+          variant: ButtonVariant.outline,
+          size: ButtonSize.sm,
         ),
       ],
     );
@@ -493,6 +528,8 @@ class _AdministratorRegisterScreenState
                                 const SizedBox(height: 16),
                                 infoControlls,
                                 const SizedBox(height: 16),
+                                logoWidget,
+                                const SizedBox(height: 16),
                                 placeControllers,
                                 const SizedBox(height: 16),
                                 TextField(
@@ -504,7 +541,6 @@ class _AdministratorRegisterScreenState
                                 const SizedBox(height: 16),
                                 ...contactControlls,
                                 const SizedBox(height: 16),
-
                                 Row(
                                   children: [
                                     Checkbox(
