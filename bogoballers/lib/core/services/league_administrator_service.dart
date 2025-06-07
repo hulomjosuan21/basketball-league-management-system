@@ -10,11 +10,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class LeagueAdministratorService {
-  Future<String> registerAccount({required FormData formData}) async {
+  Future<String> registerAccount({
+    required LeagueAdministratorModel leagueAdministrator,
+  }) async {
     final api = DioClient().client;
     Response response = await api.post(
       '/administrator/register-account',
-      data: formData,
+      data: leagueAdministrator.toFormDataForCreation(),
     );
     final apiResponse = ApiResponse<UserModel>.fromJsonNoPayload(response.data);
     return apiResponse.message;

@@ -19,6 +19,7 @@ import 'package:dio/dio.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:bogoballers/core/models/access_token.dart';
+import 'package:provider/provider.dart';
 
 class AdministratorMaterialScreen extends StatefulWidget {
   const AdministratorMaterialScreen({super.key});
@@ -54,8 +55,15 @@ class _AdministratorMaterialScreenState
       if (response.payload != null) {
         debugPrint(response.message);
 
-        final leagueAdministratorProvider = LeagueAdministratorProvider();
-        leagueAdministratorProvider.setCurrentAdministrator(response.payload!);
+        Future.microtask(() {
+          if (!mounted) return;
+          final leagueAdministratorProvider =
+              Provider.of<LeagueAdministratorProvider>(context, listen: false);
+          leagueAdministratorProvider.setCurrentAdministrator(
+            response.payload!,
+          );
+        });
+
         return true;
       }
       return false;

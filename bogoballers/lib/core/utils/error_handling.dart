@@ -12,6 +12,14 @@ class ValidationException implements Exception {
   String toString() => message.toString();
 }
 
+class AppException implements Exception {
+  final String message;
+  AppException(this.message);
+
+  @override
+  String toString() => message.toString();
+}
+
 String getErrorMessage(Object error) {
   if (error is DioException) {
     final responseData = error.response?.data;

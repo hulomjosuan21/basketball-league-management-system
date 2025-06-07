@@ -48,6 +48,7 @@ dependencies:
   file_picker: ^10.1.9
   extended_image: ^10.0.1
   path: ^1.9.1
+  http: ^1.4.0
 
 dev_dependencies:
   flutter_test:

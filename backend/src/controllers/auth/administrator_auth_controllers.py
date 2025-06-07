@@ -1,4 +1,5 @@
 from flask import make_response, request, jsonify, render_template_string
+from src.utils.file_utils import save_file
 from src.errors.errors import AuthException
 from src.extensions import db
 from src.models.league_administrator_model import LeagueAdministratorModel
@@ -14,19 +15,17 @@ from datetime import timedelta
 class AdministratorAuthControllers:
     async def create_administrator(self):
         try:
-            data = request.get_json()
-            
-            user_data = data.get('user')
-            email = user_data.get('email')
-            password_str = user_data.get('password_str')
-            account_type = user_data.get('account_type')
+            email = request.form.get('user[email]')
+            password_str = request.form.get('user[password_str]')
+            account_type = request.form.get('user[account_type]')
 
-            organization_type = data.get('organization_type')
-            organization_name = data.get('organization_name')
-            contact_number = data.get('contact_number')
-            barangay_name = data.get('barangay_name')
-            municipality_name = data.get('municipality_name')
+            organization_type = request.form.get('organization_type')
+            organization_name = request.form.get('organization_name')
+            contact_number = request.form.get('contact_number')
+            barangay_name = request.form.get('barangay_name')
+            municipality_name = request.form.get('municipality_name')
 
+            organization_logo_file = request.files.get('organization_logo_file')
             if not all([email, password_str, account_type, organization_name, contact_number, barangay_name, municipality_name]):
                 raise ValueError("All fields must be provided and not empty.")
             
@@ -43,6 +42,9 @@ class AdministratorAuthControllers:
                 municipality_name=municipality_name
             )
             
+            full_url = save_file(organization_logo_file, 'images', request)
+            league_administrator.organization_logo_url = full_url
+
             db.session.add(user)
             db.session.add(league_administrator)
             db.session.commit()

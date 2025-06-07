@@ -16,8 +16,10 @@ Future<void> main() async {
     runApp(ClientMaterialScreen());
   } else if (Platform.isWindows || Platform.isMacOS) {
     runApp(
-      ChangeNotifierProvider(
-        create: (_) => LeagueAdministratorProvider(),
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => LeagueAdministratorProvider()),
+        ],
         child: AdministratorMaterialScreen(),
       ),
     );
