@@ -4,6 +4,7 @@ import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:bogoballers/administrator/league_administrator.dart';
 import 'package:bogoballers/core/components/app_button.dart';
 import 'package:bogoballers/core/components/error.dart';
+import 'package:bogoballers/core/components/image_picker.dart';
 import 'package:bogoballers/core/components/password_field.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
 import 'package:bogoballers/core/models/league_administrator.dart';
@@ -61,7 +62,7 @@ Future<List<String>> getOrganizationTypes() async {
   return apiResponse.payload ?? [];
 }
 
-Future<LocationData?> getLocationData() async {
+Future<LocationData> getLocationData() async {
   final dioClient = DioClient();
   final response = await dioClient.client.get('/places');
 
@@ -141,6 +142,8 @@ class _AdministratorRegisterScreenState
   PhoneNumber number = PhoneNumber(isoCode: 'PH');
   late Future<void> _networkDataFuture;
 
+  AppImagePickerController controller = AppImagePickerController();
+
   @override
   void initState() {
     super.initState();
@@ -148,9 +151,15 @@ class _AdministratorRegisterScreenState
   }
 
   Future<void> loadNetworkData() async {
-    _organization_types = await getOrganizationTypes();
-    final locations = await getLocationData();
-    _termsFuture = _loadTermsAndConditions();
+    final results = await Future.wait([
+      getOrganizationTypes(),
+      getLocationData(),
+      _loadTermsAndConditions(),
+    ]);
+
+    _organization_types = results[0] as List<String>;
+    LocationData? locations = results[1] as LocationData?;
+    _termsFuture = Future.value(results[2] as String);
 
     if (locations != null) {
       _municipalities = locations.municipalities;
@@ -383,6 +392,20 @@ class _AdministratorRegisterScreenState
       ],
     );
 
+    final logoController = Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        AppImagePicker(controller: controller, aspectRatio: 1),
+        const SizedBox(height: 8),
+        AppButton(
+          label: 'Select Organization Logo/Image',
+          onPressed: controller.pickImage,
+          variant: ButtonVariant.outline,
+          size: ButtonSize.sm,
+        ),
+      ],
+    );
+
     final contactControlls = <Widget>[
       Row(
         children: [
@@ -492,6 +515,8 @@ class _AdministratorRegisterScreenState
                                 ),
                                 const SizedBox(height: 16),
                                 infoControlls,
+                                const SizedBox(height: 16),
+                                logoController,
                                 const SizedBox(height: 16),
                                 placeControllers,
                                 const SizedBox(height: 16),

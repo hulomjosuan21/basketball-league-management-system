@@ -86,7 +86,23 @@ class _CropPopupState extends State<CropPopup> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Crop Image"),
+      title: SingleChildScrollView(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "Crop Image",
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: Icon(Icons.close, size: 18),
+            ),
+          ],
+        ),
+      ),
       content: SingleChildScrollView(
         child: SizedBox(
           width: 400,
@@ -118,23 +134,18 @@ class _CropPopupState extends State<CropPopup> {
       ),
       actions: [
         AppButton(
-          onPressed: () => Navigator.pop(context),
-          label: 'Cancel',
-          variant: ButtonVariant.ghost,
-        ),
-        AppButton(
           onPressed: _resetCrop,
           label: 'Reset',
           variant: ButtonVariant.ghost,
         ),
-        AppButton(onPressed: _cropImage, label: 'Crop & Use'),
+        AppButton(onPressed: _cropImage, label: 'Crop'),
       ],
     );
   }
 }
 
 class AppImagePickerController {
-  _AvatarCropperState? _state;
+  _AppImagePickerState? _state;
 
   /// Call this to open the picker + cropper
   Future<void> pickImage() async {
@@ -164,10 +175,10 @@ class AppImagePicker extends StatefulWidget {
   });
 
   @override
-  State<AppImagePicker> createState() => _AvatarCropperState();
+  State<AppImagePicker> createState() => _AppImagePickerState();
 }
 
-class _AvatarCropperState extends State<AppImagePicker> {
+class _AppImagePickerState extends State<AppImagePicker> {
   Uint8List? _avatarBytes;
   String? _fileName;
 

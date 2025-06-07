@@ -1,6 +1,9 @@
 // ignore_for_file: non_constant_identifier_names
 
+import 'dart:io';
+
 import 'package:bogoballers/core/models/user.dart';
+import 'package:dio/dio.dart';
 
 class LeagueAdministratorModel {
   late String league_administrator_id;
@@ -14,6 +17,7 @@ class LeagueAdministratorModel {
   UserModel user;
   late DateTime created_at;
   late DateTime updated_at;
+  late Future<MultipartFile> organization_logo_file;
 
   LeagueAdministratorModel({
     required this.league_administrator_id,
@@ -63,6 +67,24 @@ class LeagueAdministratorModel {
       'municipality_name': municipality_name,
       'user': user.toJsonForCreation(),
     };
+  }
+
+  Future<FormData> toFormDataForCreation() async {
+    final userMap = user.toJsonForCreation();
+    final formMap = {
+      'organization_type': organization_type,
+      'organization_name': organization_name,
+      'contact_number': contact_number,
+      'barangay_name': barangay_name,
+      'municipality_name': municipality_name,
+      'organization_logo_file': await organization_logo_file,
+    };
+
+    userMap.forEach((key, value) {
+      formMap['user[$key]'] = value;
+    });
+
+    return FormData.fromMap(formMap);
   }
 
   Map<String, dynamic> toJson() {
