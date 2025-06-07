@@ -10,16 +10,29 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class LeagueAdministratorService {
-  Future<String> registerAccount({
-    required LeagueAdministratorModel newAdministrator,
-  }) async {
+  Future<String> registerAccount({required FormData formData}) async {
     final api = DioClient().client;
     Response response = await api.post(
       '/administrator/register-account',
-      data: newAdministrator.toJsonForCreation(),
+      data: formData,
     );
     final apiResponse = ApiResponse<UserModel>.fromJsonNoPayload(response.data);
     return apiResponse.message;
+  }
+
+  Future<ApiResponse<LeagueAdministratorModel>> fetchLeagueAdministrator({
+    required String user_id,
+  }) async {
+    final api = DioClient().client;
+
+    Response response = await api.get("/administrator/fetch/$user_id");
+
+    final apiResponse = ApiResponse<LeagueAdministratorModel>.fromJson(
+      response.data,
+      (json) => LeagueAdministratorModel.fromJson(json),
+    );
+
+    return apiResponse;
   }
 
   Future<ApiResponse> loginAccount({required UserModel user}) async {

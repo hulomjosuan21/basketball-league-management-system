@@ -64,8 +64,8 @@ class AdministratorAuthControllers:
             
             league_administrator = user.league_administrator
 
-            print(league_administrator)
-            return ApiResponse.success()
+            payload = league_administrator.to_json();
+            return ApiResponse.success(payload=payload)
         except Exception as e:
             return ApiResponse.error(e)
         

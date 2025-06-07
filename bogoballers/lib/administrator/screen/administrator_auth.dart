@@ -280,25 +280,25 @@ class _AdministratorRegisterScreenState
           user: user,
         );
 
-        final response = await leagueAdministratorService.registerAccount(
-          newAdministrator: leagueAdministrator,
-        );
+        // final response = await leagueAdministratorService.registerAccount(
+        //   newAdministrator: leagueAdministrator,
+        // );
 
-        if (context.mounted) {
-          showAppSnackbar(
-            context,
-            message: response,
-            title: "Success",
-            contentType: ContentType.success,
-          );
+        // if (context.mounted) {
+        //   showAppSnackbar(
+        //     context,
+        //     message: response,
+        //     title: "Success",
+        //     contentType: ContentType.success,
+        //   );
 
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AdministratorLoginScreen(),
-            ),
-          );
-        }
+        //   Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //       builder: (context) => const AdministratorLoginScreen(),
+        //     ),
+        //   );
+        // }
       } catch (e) {
         if (context.mounted) {
           handleErrorCallBack(e, (message) {
