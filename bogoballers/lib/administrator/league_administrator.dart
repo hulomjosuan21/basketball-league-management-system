@@ -1,7 +1,11 @@
+import 'package:bogoballers/administrator/contents/dashboard_content.dart';
+import 'package:bogoballers/administrator/screen/administrator_auth.dart';
 import 'package:bogoballers/core/components/app_header.dart';
 import 'package:bogoballers/core/components/app_sidebar.dart';
 import 'package:bogoballers/core/hive/app_box.dart';
+import 'package:bogoballers/core/providers/league_adminstrator_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class LeagueAdministratorMainScreen extends StatefulWidget {
   const LeagueAdministratorMainScreen({super.key});
@@ -18,7 +22,7 @@ class _LeagueAdministratorMainScreenState
   double previousScreenWidth = 0;
 
   final List<Widget> pages = const [
-    Center(child: Text('Dashboard Page')),
+    DashboardContent(),
     Center(child: Text('Settings Page')),
     Center(child: Text('Account Page')),
   ];
@@ -53,18 +57,22 @@ class _LeagueAdministratorMainScreenState
         onTap: () => onSelectIndex(0),
       ),
       SidebarItem(
-        label: 'Settings',
-        icon: Icons.settings,
+        label: 'League',
+        icon: Icons.analytics,
         selected: selectedIndex == 1,
         onTap: () => onSelectIndex(1),
         subMenu: [
           SubMenuItem(
-            label: 'Account',
+            label: 'Bracket Structure',
             selected: selectedIndex == 2,
-            onTap: () => onSelectIndex(2),
+            onTap: () {
+              final leagueAdministratorProvider =
+              Provider.of<LeagueAdministratorProvider>(context, listen: false);
+              leagueAdministratorProvider.clearCurrentAdministrator();
+            },
           ),
           SubMenuItem(
-            label: 'Privacy',
+            label: 'More',
             selected: false,
             onTap: () {
               final token = AppBox.accessTokenBox.get('access_token');
@@ -77,17 +85,68 @@ class _LeagueAdministratorMainScreenState
       ),
     ];
 
+    final List<SidebarItem> sidebarFooterItems = [
+      SidebarItem(
+        label: 'Settings',
+        icon: Icons.dashboard,
+        selected: selectedIndex == 2,
+        onTap: () => onSelectIndex(2),
+        subMenu: [
+          SubMenuItem(
+            label: 'About Us',
+            onTap: () {  },
+          ),
+          SubMenuItem(
+            label: 'App Settings',
+            onTap: () {  },
+          ),
+        ],
+      ),
+    ];
+
     return Scaffold(
       body: SafeArea(
         child: Row(
           children: [
-            if (showSidebar) AppSidebar(sidebarItems: sidebarItems),
+            if (showSidebar) AppSidebar(sidebarItems: sidebarItems,sidebarFooterItems: sidebarFooterItems,),
             Expanded(
               child: Column(
                 children: [
-                  AppHeader(
-                    showSidebar: showSidebar,
-                    onToggleSidebar: toggleSidebar,
+                  Consumer<LeagueAdministratorProvider>(
+                    builder: (context, provider, _) {
+                      if (provider.getCurrentLeagueAdministrator == null) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) async {
+                          await showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Session Expired'),
+                              content: const Text('Please log in again to continue.'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const AdministratorLoginScreen(),
+                                      ),
+                                    );
+                                  },
+                                  child: const Text('OK'),
+                                ),
+                              ],
+                            ),
+                          );
+                        });
+                        return const SizedBox.shrink();
+                      }
+
+                      return AppHeader(
+                        showSidebar: showSidebar,
+                        onToggleSidebar: toggleSidebar,
+                        leagueAdministrator: provider.getCurrentLeagueAdministrator!,
+                      );
+                    },
                   ),
                   Expanded(
                     child: SingleChildScrollView(child: pages[selectedIndex]),

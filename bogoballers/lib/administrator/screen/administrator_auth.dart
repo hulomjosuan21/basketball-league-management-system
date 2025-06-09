@@ -1,4 +1,6 @@
 // ignore_for_file: non_constant_identifier_names
+import 'dart:async';
+
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:bogoballers/administrator/league_administrator.dart';
 import 'package:bogoballers/core/components/app_button.dart';
@@ -7,6 +9,7 @@ import 'package:bogoballers/core/components/image_picker.dart';
 import 'package:bogoballers/core/components/password_field.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
 import 'package:bogoballers/core/models/league_administrator.dart';
+import 'package:bogoballers/core/providers/league_adminstrator_provider.dart';
 import 'package:bogoballers/core/utils/validators.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
@@ -19,9 +22,9 @@ import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:bogoballers/core/models/location_data.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:provider/provider.dart';
 
 RichText authNavigator(
   BuildContext context,
@@ -165,6 +168,7 @@ class _AdministratorRegisterScreenState
         _municipalities = locations.municipalities;
         _barangaysMap = locations.barangays;
       }
+      setState(() {});
     } on DioException catch (_) {
       throw AppException("Network error!");
     } catch (e) {
@@ -239,7 +243,7 @@ class _AdministratorRegisterScreenState
     setState(() {
       _selectedMunicipality = muni;
       _filteredBarangays = muni != null ? (_barangaysMap[muni] ?? []) : [];
-      _selectedBarangay = null;
+      _selectedBarangay = null; 
     });
   }
 
@@ -299,7 +303,7 @@ class _AdministratorRegisterScreenState
           context,
           message: response,
           title: "Success",
-          contentType: ContentType.success,
+          variant: SnackbarVariant.success
         );
 
         Navigator.push(
@@ -316,7 +320,7 @@ class _AdministratorRegisterScreenState
             context,
             message: message,
             title: "Error",
-            contentType: ContentType.failure,
+            variant: SnackbarVariant.error,
           );
         });
       }
@@ -331,45 +335,44 @@ class _AdministratorRegisterScreenState
 
   @override
   Widget build(BuildContext context) {
-    final infoControlls = Row(
+// ---------- Row 1: org name + org type ----------
+    final infoControls = Row(
       children: [
         Expanded(
           child: TextField(
-            decoration: const InputDecoration(labelText: "Organization Name"),
             controller: orgNameController,
+            decoration: const InputDecoration(labelText: 'Organization Name'),
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: DropdownSearch<String>(
-            key: ValueKey('org_dropdown'),
-            items: (_, _) => _organization_types,
-            selectedItem: _selectedOrgType,
-            onChanged: _onOrgTypeChanged,
-            decoratorProps: DropDownDecoratorProps(
-              decoration: InputDecoration(labelText: 'Organization Type'),
-            ),
-            popupProps: PopupProps.menu(fit: FlexFit.loose),
+          child: DropdownMenu<String>(
+            key: const ValueKey('org_dropdown'),
+            initialSelection: _selectedOrgType,
+            onSelected: _onOrgTypeChanged,
+            enableFilter: true,
+            dropdownMenuEntries: _organization_types
+                .map((o) => DropdownMenuEntry(value: o, label: o))
+                .toList(),
+            label: const Text('Organization Type'),
           ),
         ),
       ],
     );
 
-    final placeControllers = Row(
+    final placeControls = Row(
       children: [
         Expanded(
-          child: DropdownSearch<String>(
-            key: ValueKey('muni_dropdown'),
-            items: (_, _) => _municipalities,
-            selectedItem: _selectedMunicipality,
-            onChanged: _onMunicipalityChanged,
-            decoratorProps: DropDownDecoratorProps(
-              decoration: InputDecoration(labelText: 'Select Municipality'),
-            ),
-            popupProps: PopupProps.menu(
-              fit: FlexFit.loose,
-              showSearchBox: true,
-            ),
+          child: DropdownMenu<String>(
+            key: const ValueKey('muni_dropdown'),
+            initialSelection: _selectedMunicipality,
+            onSelected: _onMunicipalityChanged,
+            enableFilter: true,
+            enableSearch: true,
+            dropdownMenuEntries: _municipalities
+                .map((m) => DropdownMenuEntry(value: m, label: m))
+                .toList(),
+            label: const Text('Select Municipality'),
           ),
         ),
         const SizedBox(width: 16),
@@ -378,25 +381,23 @@ class _AdministratorRegisterScreenState
             onTap: () {
               if (_selectedMunicipality == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Please select municipality first')),
+                  const SnackBar(content: Text('Please select municipality first')),
                 );
               }
             },
             child: AbsorbPointer(
               absorbing: _selectedMunicipality == null,
-              child: DropdownSearch<String>(
-                key: ValueKey('brgy_dropdown'),
-                items: (_, _) => _filteredBarangays,
-                selectedItem: _selectedBarangay,
-                onChanged: _onBarangayChanged,
+              child: DropdownMenu<String>(
+                key: const ValueKey('brgy_dropdown'),
                 enabled: _selectedMunicipality != null,
-                decoratorProps: DropDownDecoratorProps(
-                  decoration: InputDecoration(labelText: 'Select Barangay'),
-                ),
-                popupProps: PopupProps.menu(
-                  fit: FlexFit.loose,
-                  showSearchBox: true,
-                ),
+                initialSelection: _selectedBarangay,
+                onSelected: _onBarangayChanged,
+                enableFilter: true,
+                enableSearch: true,
+                dropdownMenuEntries: _filteredBarangays
+                    .map((b) => DropdownMenuEntry(value: b, label: b))
+                    .toList(),
+                label: const Text('Select Barangay'),
               ),
             ),
           ),
@@ -526,11 +527,11 @@ class _AdministratorRegisterScreenState
                                   ),
                                 ),
                                 const SizedBox(height: 16),
-                                infoControlls,
+                                infoControls,
                                 const SizedBox(height: 16),
                                 logoWidget,
                                 const SizedBox(height: 16),
-                                placeControllers,
+                                placeControls,
                                 const SizedBox(height: 16),
                                 TextField(
                                   decoration: const InputDecoration(
@@ -656,9 +657,10 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
   @override
   Widget build(BuildContext context) {
     Future<void> handleLogin() async {
-      setState(() {
-        isLoading = true;
-      });
+      if (!context.mounted) return;
+
+      setState(() => isLoading = true);
+
       try {
         final leagueAdministratorService = LeagueAdministratorService();
 
@@ -667,46 +669,70 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
           passwordController: passwordController,
         );
 
+        final email = emailController.text.trim();
+        final password = passwordController.text;
+        if (email.isEmpty || password.isEmpty) {
+          throw Exception('Email or password cannot be empty');
+        }
+
         final user = UserModel.login(
-          email: emailController.text,
-          password_str: passwordController.text,
+          email: email,
+          password_str: password,
         );
 
-        final response = await leagueAdministratorService.loginAccount(
-          user: user,
-        );
+        final response = await leagueAdministratorService
+            .loginAccount(user: user);
 
-        if (context.mounted) {
-          showAppSnackbar(
-            context,
-            message: response.message,
-            title: "Success",
-            contentType: ContentType.success,
-          );
+        if (response.payload != null && context.mounted) {
+          final leagueAdministrator = await leagueAdministratorService
+              .fetchLeagueAdministrator(user_id: response.payload!.user_id);
 
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const LeagueAdministratorMainScreen(),
-            ),
-          );
+          if (leagueAdministrator.payload == null) {
+            throw Exception('Failed to fetch administrator data');
+          }
+
+          scheduleMicrotask(() {
+            if (context.mounted) {
+              final leagueAdministratorProvider =
+                  Provider.of<LeagueAdministratorProvider>(context, listen: false);
+              leagueAdministratorProvider.setCurrentAdministrator(
+                leagueAdministrator.payload!,
+              );
+            }
+          });
+
+          if (context.mounted) {
+            showAppSnackbar(
+              context,
+              message: response.message ?? 'Login successful',
+              title: "Success",
+              variant: SnackbarVariant.success,
+            );
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const LeagueAdministratorMainScreen(),
+              ),
+            );
+          }
+        } else {
+          throw Exception('Invalid login response');
         }
       } catch (e) {
         if (context.mounted) {
           handleErrorCallBack(e, (message) {
             showAppSnackbar(
               context,
-              message: message,
+              message: message ?? 'An unexpected error occurred',
               title: "Error",
-              contentType: ContentType.failure,
+              variant: SnackbarVariant.error,
             );
           });
         }
       } finally {
         if (context.mounted) {
-          setState(() {
-            isLoading = false;
-          });
+          scheduleMicrotask(() => setState(() => isLoading = false));
         }
       }
     }

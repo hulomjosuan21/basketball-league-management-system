@@ -117,8 +117,8 @@ class SubMenuItem extends StatelessWidget {
 
 class AppSidebar extends StatelessWidget {
   final List<SidebarItem> sidebarItems;
-
-  const AppSidebar({super.key, required this.sidebarItems});
+  final List<SidebarItem> sidebarFooterItems;
+  const AppSidebar({super.key, required this.sidebarItems, required this.sidebarFooterItems});
 
   @override
   Widget build(BuildContext context) {
@@ -153,17 +153,19 @@ class AppSidebar extends StatelessWidget {
           ),
 
           // Sidebar footer
-          Container(
+          if (sidebarFooterItems.isNotEmpty) Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(16),
+            height: 200,
             decoration: BoxDecoration(
               border: Border(
                 top: BorderSide(color: appColors.gray600, width: 0.5),
               ),
             ),
-            child: Text(
-              'v1.0.0',
-              style: TextStyle(fontSize: 12, color: appColors.gray1100),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Column(children: sidebarFooterItems),
+              ),
             ),
           ),
         ],

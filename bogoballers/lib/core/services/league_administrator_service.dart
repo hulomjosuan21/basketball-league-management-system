@@ -37,7 +37,7 @@ class LeagueAdministratorService {
     return apiResponse;
   }
 
-  Future<ApiResponse> loginAccount({required UserModel user}) async {
+  Future<ApiResponse<AccessToken>> loginAccount({required UserModel user}) async {
     final api = DioClient().client;
 
     Response response = await api.post(
