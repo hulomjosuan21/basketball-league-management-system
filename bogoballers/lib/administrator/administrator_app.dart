@@ -1,3 +1,4 @@
+import 'package:bogoballers/administrator/league_administrator.dart';
 import 'package:bogoballers/administrator/screen/administrator_auth.dart';
 import 'package:bogoballers/core/components/error.dart';
 import 'package:bogoballers/core/components/loading.dart';
@@ -56,8 +57,15 @@ class _AdministratorMaterialScreenState
         return true;
       }
       return false;
-    } on DioException {
-      return false;
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionError ||
+          e.type == DioExceptionType.unknown) {
+        throw ValidationException(
+          "You are offline. Please check your connection.",
+        );
+      } else {
+        return false;
+      }
     } catch (_) {
       throw ValidationException("Something went wrong!");
     }
@@ -84,7 +92,9 @@ class _AdministratorMaterialScreenState
           }
 
           final isAuthenticated = snapshot.data ?? false;
-          return AdministratorLoginScreen();
+          return isAuthenticated
+              ? LeagueAdministratorMainScreen()
+              : AdministratorLoginScreen();
         },
       ),
       debugShowCheckedModeBanner: false,

@@ -25,6 +25,7 @@ import 'package:flutter/material.dart';
 import 'package:bogoballers/core/models/location_data.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
 
 RichText authNavigator(
   BuildContext context,
@@ -335,7 +336,6 @@ class _AdministratorRegisterScreenState
 
   @override
   Widget build(BuildContext context) {
-// ---------- Row 1: org name + org type ----------
     final infoControls = Row(
       children: [
         Expanded(
@@ -476,142 +476,154 @@ class _AdministratorRegisterScreenState
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: context.appColors.primaryGradient,
-          ),
-          child: Center(
-            child: FutureBuilder(
-              future: _networkDataFuture,
-              builder: (context, asyncSnapshot) {
-                if (asyncSnapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator(
-                    color: context.appColors.accent900,
-                  );
-                } else if (asyncSnapshot.hasError) {
-                  return retryError(context, asyncSnapshot.error, () {
-                    setState(() {
-                      _networkDataFuture = loadNetworkData();
+        child: Focus(
+          autofocus: true,
+          onKeyEvent: (note, event) {
+            if (event is KeyDownEvent) {
+              if (event.logicalKey == LogicalKeyboardKey.enter) {
+                handleRegister();
+                return KeyEventResult.handled;
+              }
+            }
+            return KeyEventResult.ignored;
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: context.appColors.primaryGradient,
+            ),
+            child: Center(
+              child: FutureBuilder(
+                future: _networkDataFuture,
+                builder: (context, asyncSnapshot) {
+                  if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator(
+                      color: context.appColors.accent900,
+                    );
+                  } else if (asyncSnapshot.hasError) {
+                    return retryError(context, asyncSnapshot.error, () {
+                      setState(() {
+                        _networkDataFuture = loadNetworkData();
+                      });
                     });
-                  });
-                }
-
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.all(24),
-                  child: isLoading
-                      ? CircularProgressIndicator(
-                          color: context.appColors.accent900,
-                        )
-                      : ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 550),
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: context.appColors.gray100,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                width: 0.5,
-                                color: context.appColors.gray600,
+                  }
+          
+                  return SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: isLoading
+                        ? CircularProgressIndicator(
+                            color: context.appColors.accent900,
+                          )
+                        : ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 550),
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: context.appColors.gray100,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  width: 0.5,
+                                  color: context.appColors.gray600,
+                                ),
                               ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Center(
-                                  child: Text(
-                                    "Register Organization",
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                infoControls,
-                                const SizedBox(height: 16),
-                                logoWidget,
-                                const SizedBox(height: 16),
-                                placeControls,
-                                const SizedBox(height: 16),
-                                TextField(
-                                  decoration: const InputDecoration(
-                                    labelText: "Email",
-                                  ),
-                                  controller: emailController,
-                                ),
-                                const SizedBox(height: 16),
-                                ...contactControlls,
-                                const SizedBox(height: 16),
-                                Row(
-                                  children: [
-                                    Checkbox(
-                                      value: hasAcceptedTerms,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          hasAcceptedTerms = value ?? false;
-                                        });
-                                      },
-                                    ),
-                                    Expanded(
-                                      child: Text.rich(
-                                        TextSpan(
-                                          text: 'I agree to the ',
-                                          style: TextStyle(
-                                            color: context.appColors.gray1100,
-                                            fontSize: 11,
-                                          ),
-                                          children: [
-                                            TextSpan(
-                                              text: 'Terms and Conditions',
-                                              style: TextStyle(
-                                                color:
-                                                    context.appColors.accent900,
-                                                decoration:
-                                                    TextDecoration.underline,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                              recognizer: TapGestureRecognizer()
-                                                ..onTap = () =>
-                                                    _showTermsDialog(context),
-                                            ),
-                                          ],
-                                        ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Center(
+                                    child: Text(
+                                      "Register Organization",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                                  ],
-                                ),
-                                const SizedBox(height: 16),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    authNavigator(
-                                      context,
-                                      "Already have an account?",
-                                      " Login",
-                                      () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                const AdministratorLoginScreen(),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  infoControls,
+                                  const SizedBox(height: 16),
+                                  logoWidget,
+                                  const SizedBox(height: 16),
+                                  placeControls,
+                                  const SizedBox(height: 16),
+                                  TextField(
+                                    decoration: const InputDecoration(
+                                      labelText: "Email",
+                                    ),
+                                    controller: emailController,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  ...contactControlls,
+                                  const SizedBox(height: 16),
+                                  Row(
+                                    children: [
+                                      Checkbox(
+                                        value: hasAcceptedTerms,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            hasAcceptedTerms = value ?? false;
+                                          });
+                                        },
+                                      ),
+                                      Expanded(
+                                        child: Text.rich(
+                                          TextSpan(
+                                            text: 'I agree to the ',
+                                            style: TextStyle(
+                                              color: context.appColors.gray1100,
+                                              fontSize: 11,
+                                            ),
+                                            children: [
+                                              TextSpan(
+                                                text: 'Terms and Conditions',
+                                                style: TextStyle(
+                                                  color:
+                                                      context.appColors.accent900,
+                                                  decoration:
+                                                      TextDecoration.underline,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                recognizer: TapGestureRecognizer()
+                                                  ..onTap = () =>
+                                                      _showTermsDialog(context),
+                                              ),
+                                            ],
                                           ),
-                                        );
-                                      },
-                                    ),
-                                    AppButton(
-                                      label: "Register",
-                                      onPressed: handleRegister,
-                                      isDisabled: !hasAcceptedTerms,
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      authNavigator(
+                                        context,
+                                        "Already have an account?",
+                                        " Login",
+                                        () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const AdministratorLoginScreen(),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      AppButton(
+                                        label: "Register",
+                                        onPressed: handleRegister,
+                                        isDisabled: !hasAcceptedTerms,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -750,70 +762,82 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: context.appColors.primaryGradient,
-          ),
-          child: Center(
-            child: isLoading
-                ? CircularProgressIndicator(color: context.appColors.accent900)
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
-                    child: Container(
-                      constraints: const BoxConstraints(maxWidth: 400),
+        child: Focus(
+          autofocus: true,
+          onKeyEvent: (node, event) {
+            if (event is KeyDownEvent) {
+              if (event.logicalKey == LogicalKeyboardKey.enter) {
+                handleLogin();
+                return KeyEventResult.handled;
+              }
+            }
+            return KeyEventResult.ignored;
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: context.appColors.primaryGradient,
+            ),
+            child: Center(
+              child: isLoading
+                  ? CircularProgressIndicator(color: context.appColors.accent900)
+                  : SingleChildScrollView(
+                      padding: const EdgeInsets.all(24),
                       child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: context.appColors.gray100,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            width: 0.5,
-                            color: context.appColors.gray600,
+                        constraints: const BoxConstraints(maxWidth: 400),
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: context.appColors.gray100,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              width: 0.5,
+                              color: context.appColors.gray600,
+                            ),
                           ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Center(
-                              child: Text(
-                                "Welcome",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Center(
+                                child: Text(
+                                  "Welcome",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
-                            ),
-                            ...loginControll,
-                            const SizedBox(height: 24),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                authNavigator(
-                                  context,
-                                  "Don't have an account yet?",
-                                  " Register",
-                                  () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const AdministratorRegisterScreen(),
-                                      ),
-                                    );
-                                  },
-                                ),
-                                AppButton(
-                                  label: "Login",
-                                  onPressed: handleLogin,
-                                  isDisabled: isLoading,
-                                ),
-                              ],
-                            ),
-                          ],
+                              ...loginControll,
+                              const SizedBox(height: 24),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  authNavigator(
+                                    context,
+                                    "Don't have an account yet?",
+                                    " Register",
+                                    () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const AdministratorRegisterScreen(),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  AppButton(
+                                    label: "Login",
+                                    onPressed: handleLogin,
+                                    isDisabled: isLoading,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
+            ),
           ),
         ),
       ),

@@ -30,6 +30,7 @@ MaterialApp fullScreenRetryError(
 ) {
   return MaterialApp(
     title: "Error",
+    debugShowCheckedModeBanner: false,
     home: Scaffold(
       body: SafeArea(
         child: Container(

@@ -1,4 +1,6 @@
+import 'package:bogoballers/administrator/contents/bracket_structure_content.dart';
 import 'package:bogoballers/administrator/contents/dashboard_content.dart';
+import 'package:bogoballers/administrator/contents/league_content.dart';
 import 'package:bogoballers/administrator/screen/administrator_auth.dart';
 import 'package:bogoballers/core/components/app_header.dart';
 import 'package:bogoballers/core/components/app_sidebar.dart';
@@ -21,10 +23,10 @@ class _LeagueAdministratorMainScreenState
   int selectedIndex = 0;
   double previousScreenWidth = 0;
 
-  final List<Widget> pages = const [
-    DashboardContent(),
-    Center(child: Text('Settings Page')),
-    Center(child: Text('Account Page')),
+  final List<Widget> contents = [
+    const DashboardContent(),
+    LeagueContent(),
+    const Center(child: Text('Account Page')),
   ];
 
   void toggleSidebar() {
@@ -66,19 +68,27 @@ class _LeagueAdministratorMainScreenState
             label: 'Bracket Structure',
             selected: selectedIndex == 2,
             onTap: () {
-              final leagueAdministratorProvider =
-              Provider.of<LeagueAdministratorProvider>(context, listen: false);
-              leagueAdministratorProvider.clearCurrentAdministrator();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) {
+                    return BracketStructureContent();
+                  },
+                ),
+              );
             },
           ),
           SubMenuItem(
             label: 'More',
             selected: false,
             onTap: () {
-              final token = AppBox.accessTokenBox.get('access_token');
-              if (token != null && !token.isExpired) {
-                debugPrint('User ID: ${token.user_id}');
-              }
+              final leagueAdministratorProvider =
+                  Provider.of<LeagueAdministratorProvider>(
+                    context,
+                    listen: false,
+                  );
+              leagueAdministratorProvider.clearCurrentAdministrator();
+              AppBox.clearAllInBox(AppBox.accessTokenBox);
             },
           ),
         ],
@@ -92,14 +102,8 @@ class _LeagueAdministratorMainScreenState
         selected: selectedIndex == 2,
         onTap: () => onSelectIndex(2),
         subMenu: [
-          SubMenuItem(
-            label: 'About Us',
-            onTap: () {  },
-          ),
-          SubMenuItem(
-            label: 'App Settings',
-            onTap: () {  },
-          ),
+          SubMenuItem(label: 'About Us', onTap: () {}),
+          SubMenuItem(label: 'App Settings', onTap: () {}),
         ],
       ),
     ];
@@ -108,7 +112,11 @@ class _LeagueAdministratorMainScreenState
       body: SafeArea(
         child: Row(
           children: [
-            if (showSidebar) AppSidebar(sidebarItems: sidebarItems,sidebarFooterItems: sidebarFooterItems,),
+            if (showSidebar)
+              AppSidebar(
+                sidebarItems: sidebarItems,
+                sidebarFooterItems: sidebarFooterItems,
+              ),
             Expanded(
               child: Column(
                 children: [
@@ -120,7 +128,9 @@ class _LeagueAdministratorMainScreenState
                             context: context,
                             builder: (context) => AlertDialog(
                               title: const Text('Session Expired'),
-                              content: const Text('Please log in again to continue.'),
+                              content: const Text(
+                                'Please log in again to continue.',
+                              ),
                               actions: [
                                 TextButton(
                                   onPressed: () {
@@ -128,7 +138,8 @@ class _LeagueAdministratorMainScreenState
                                     Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => const AdministratorLoginScreen(),
+                                        builder: (context) =>
+                                            const AdministratorLoginScreen(),
                                       ),
                                     );
                                   },
@@ -144,12 +155,15 @@ class _LeagueAdministratorMainScreenState
                       return AppHeader(
                         showSidebar: showSidebar,
                         onToggleSidebar: toggleSidebar,
-                        leagueAdministrator: provider.getCurrentLeagueAdministrator!,
+                        leagueAdministrator:
+                            provider.getCurrentLeagueAdministrator!,
                       );
                     },
                   ),
                   Expanded(
-                    child: SingleChildScrollView(child: pages[selectedIndex]),
+                    child: SingleChildScrollView(
+                      child: contents[selectedIndex],
+                    ),
                   ),
                 ],
               ),

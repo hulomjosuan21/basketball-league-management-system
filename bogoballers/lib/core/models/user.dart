@@ -1,7 +1,6 @@
 // ignore_for_file: non_constant_identifier_names
 
 import 'package:bogoballers/core/enums/user_enum.dart';
-import 'package:flutter/foundation.dart';
 
 AccountTypeEnum? accountTypeFromString(String? type) {
   if (type == null) return null;
