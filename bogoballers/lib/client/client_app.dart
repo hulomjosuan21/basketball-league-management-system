@@ -1,4 +1,4 @@
-import 'package:bogoballers/client/player/player.dart';
+import 'package:bogoballers/client/player/screens/player_screen.dart';
 import 'package:bogoballers/core/theme/theme.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';

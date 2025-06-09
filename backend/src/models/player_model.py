@@ -13,7 +13,12 @@ class PlayerModel(db.Model):
         nullable=False
     )
 
-    user = db.relationship('UserModel', back_populates='player')
+    user = db.relationship(
+        'UserModel',
+        back_populates='player',
+        cascade='all, delete-orphan',
+        single_parent=True
+    )
 
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)

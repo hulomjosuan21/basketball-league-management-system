@@ -77,7 +77,22 @@ class UserModel(db.Model):
         uselist=False,
         single_parent=True
     )
-    player = db.relationship('PlayerModel', back_populates='user', uselist=False)
+
+    # one to one
+    player = db.relationship(
+        'PlayerModel',
+        back_populates='user',
+        cascade='all, delete-orphan',
+        uselist=False,
+        single_parent=True
+    )
+    
+    # one to many
+    teams = db.relationship(
+        'TeamModel',
+        back_populates='user',
+        cascade='all, delete-orphan'
+    )
 
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)

@@ -7,7 +7,7 @@ class PlayerMainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Player Dashboard')),
-      body: Center(child: Text('Welcome to the Player Dashboard')),
+      body: Center(child: Text('Hello world')),
     );
   }
 }

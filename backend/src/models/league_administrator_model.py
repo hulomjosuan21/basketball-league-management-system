@@ -54,6 +54,13 @@ class LeagueAdministratorModel(db.Model):
         cascade='all, delete-orphan',
         single_parent=True
     )
+
+    created_leagues = db.relationship(
+        'LeagueModel',
+        back_populates='league_administrator',
+        cascade='all, delete-orphan'
+    )
+
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)
 
