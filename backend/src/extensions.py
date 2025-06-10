@@ -8,6 +8,11 @@ from argon2 import PasswordHasher
 import json
 import os
 from flask_socketio import SocketIO
+from supabase import create_client, Client
+from flask import current_app
+from dotenv import load_dotenv
+
+load_dotenv()
 
 limiter = Limiter(
     key_func=get_remote_address,
@@ -20,6 +25,13 @@ jwt = JWTManager()
 socketio = SocketIO(cors_allowed_origins="*")
 
 ph = PasswordHasher()
+
+def get_supabase_client() -> Client:
+    supabase_url = current_app.config.get('SUPABASE_URL')
+    supabase_key = current_app.config.get('SUPABASE_KEY')
+    if not supabase_url or not supabase_key:
+        raise ValueError("Supabase URL and Key must be configured in app settings.")
+    return create_client(supabase_url, supabase_key)
 
 class PlaceLoader:
     def __init__(self, json_path='../assets/LGU_barangays.json', city_key='City'):

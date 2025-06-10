@@ -25,7 +25,7 @@ class FileRoutes:
             if not file_url:
                 return jsonify({'error': 'File URL required'}), 400
 
-            success = delete_file_by_url(file_url)
+            success = delete_file_by_url(file_url,'supabase')
             if success:
                 return jsonify({'message': 'File deleted successfully'}), 200
             else:

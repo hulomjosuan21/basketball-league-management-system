@@ -16,7 +16,7 @@ class TeamModel(db.Model):
     user = db.relationship(
         'UserModel',
         back_populates='teams',
-        cascade='all, delete-orphan'
+        single_parent=True
     )
 
     league_registrations = db.relationship(
