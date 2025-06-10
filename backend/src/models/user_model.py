@@ -94,5 +94,8 @@ class UserModel(db.Model):
         cascade='all, delete-orphan'
     )
 
+    def teams_to_json(self) -> list:
+        return [team.to_json for team in self.teams]
+
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)

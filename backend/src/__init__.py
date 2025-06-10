@@ -14,6 +14,8 @@ from src.routes.file_routes import FileRoutes
 from src.models.player_model import *
 from src.models.user_model import *
 from src.models.league_administrator_model import *
+from src.models.league_model import *
+from src.models.team_model import *
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 

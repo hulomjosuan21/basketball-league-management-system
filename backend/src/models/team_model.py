@@ -19,6 +19,12 @@ class TeamModel(db.Model):
         cascade='all, delete-orphan'
     )
 
+    league_registrations = db.relationship(
+        'LeagueTeamModel',
+        back_populates='team',
+        cascade='all, delete-orphan'
+    )
+
     # use for founded_at
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)
@@ -32,6 +38,7 @@ class TeamModel(db.Model):
             "championships_won": self.championships_won,
             "coach_name": self.coach_name,
             "user": self.user.to_json() if self.user else None,
+            "league_registrations": [assoc.league.to_json() for assoc in self.league_registrations] if self.league_registrations else [],
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }

@@ -60,7 +60,7 @@ class AdministratorAuthControllers:
         
     async def fetch_administrator(self, user_id):
         try:
-            user = UserModel.query.filter(UserModel.user_id == user_id).first()
+            user = UserModel.query.get(user_id)
             if not user:
                 raise AuthException("No User found.", 401)
             
