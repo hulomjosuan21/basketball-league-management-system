@@ -42,7 +42,7 @@ class AdministratorAuthControllers:
                 municipality_name=municipality_name
             )
             
-            full_url = save_file(organization_logo_file, 'images', request, 'supabase')
+            full_url = await save_file(organization_logo_file, 'images', request, 'supabase')
             league_administrator.organization_logo_url = full_url
 
             db.session.add(user)

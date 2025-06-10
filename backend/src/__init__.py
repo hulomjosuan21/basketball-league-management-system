@@ -3,13 +3,14 @@ from flask_cors import CORS
 from src.config import Config
 from src.controllers.organization_type import getOrganizationTypes
 from src.controllers.places import getCityAndBarangays
-from src.extensions import db, migrate, jwt, limiter, socketio
+from src.extensions import db, migrate, jwt, limiter, socketio, supabase_client
 import os
 
 from src.routes.administrator.administrator_route import administrator_bp
 from src.routes.test_route import test_bp
 from src.routes.user.user_route import user_bp
 from src.routes.file_routes import FileRoutes
+from src.routes.client.client_route import client_bp
 
 from src.models.player_model import *
 from src.models.user_model import *
@@ -49,8 +50,10 @@ class FlaskServer:
         self.server.register_blueprint(user_bp)
         self.server.register_blueprint(administrator_bp)
         self.server.register_blueprint(test_bp)
+        self.server.register_blueprint(client_bp)
         file_routes = FileRoutes(self.server)
         self.server.register_blueprint(file_routes.get_blueprint())
+        
         print(f"APP URL MAP: {self.server.url_map}")
     
     def init_server(self):
