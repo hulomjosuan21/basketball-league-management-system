@@ -8,6 +8,9 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv("SUPABASE_DATABASE_URL")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    SUPABASE_URL = os.getenv('SUPABASE_URL')
+    SUPABASE_KEY = os.getenv('SUPABASE_KEY')
+
     JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'super-secret')
     JWT_COOKIE_SECURE = False
     JWT_COOKIE_HTTPONLY = True

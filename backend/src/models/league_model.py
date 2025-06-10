@@ -21,7 +21,8 @@ class LeagueModel(db.Model):
     league_administrator = db.relationship(
         'LeagueAdministratorModel',
         back_populates='created_leagues',
-        cascade='all, delete-orphan'
+        cascade='all, delete-orphan',
+        single_parent=True
     )
 
     categories = db.relationship(
