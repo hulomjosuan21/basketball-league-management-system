@@ -57,6 +57,15 @@ final lightAppColors = AppColors(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   ),
+  secondaryGradient: LinearGradient(
+    colors: [
+      Color(0xfff9f9fb),
+      Color(0xffffe9de),
+    ], // Light color first, orange last
+    stops: [0.25, 0.75],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  ),
 );
 
 final darkAppColors = AppColors(
@@ -90,6 +99,12 @@ final darkAppColors = AppColors(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   ),
+  secondaryGradient: LinearGradient(
+    colors: [Color(0xfffefcfb), Color(0xffffe9de)],
+    stops: [0.25, 0.75],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  ),
 );
 
 @immutable
@@ -120,6 +135,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color gray1000;
   final Color gray1100;
   final LinearGradient primaryGradient;
+  final LinearGradient secondaryGradient;
 
   const AppColors({
     required this.accent100,
@@ -147,6 +163,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.gray1000,
     required this.gray1100,
     required this.primaryGradient,
+    required this.secondaryGradient,
   });
 
   @override
@@ -176,6 +193,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? gray1000,
     Color? gray1100,
     LinearGradient? primaryGradient,
+    LinearGradient? secondaryGradient,
   }) {
     return AppColors(
       accent100: accent100 ?? this.accent100,
@@ -203,6 +221,7 @@ class AppColors extends ThemeExtension<AppColors> {
       gray1000: gray1000 ?? this.gray1000,
       gray1100: gray1100 ?? this.gray1100,
       primaryGradient: primaryGradient ?? this.primaryGradient,
+      secondaryGradient: secondaryGradient ?? this.secondaryGradient,
     );
   }
 
@@ -237,6 +256,11 @@ class AppColors extends ThemeExtension<AppColors> {
       primaryGradient: LinearGradient.lerp(
         primaryGradient,
         other.primaryGradient,
+        t,
+      )!,
+      secondaryGradient: LinearGradient.lerp(
+        secondaryGradient,
+        other.secondaryGradient,
         t,
       )!,
     );

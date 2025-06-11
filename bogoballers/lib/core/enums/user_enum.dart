@@ -2,7 +2,7 @@
 
 enum AccountTypeEnum {
   Player,
-  Team_Account,
+  Team_Creator,
   League_Administrator,
   City_Administrator,
 }

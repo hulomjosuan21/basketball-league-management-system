@@ -13,6 +13,7 @@ AccountTypeEnum? accountTypeFromString(String? type) {
 class UserModel {
   String? user_id;
   String email;
+  late String contact_number;
   String? password_str;
   AccountTypeEnum? account_type;
   bool? is_verified;
@@ -22,6 +23,7 @@ class UserModel {
   UserModel.set({
     this.user_id,
     required this.email,
+    required this.contact_number,
     required this.account_type,
     required this.is_verified,
     required this.created_at,
@@ -30,6 +32,7 @@ class UserModel {
 
   UserModel.create({
     required this.email,
+    required this.contact_number,
     required this.password_str,
     this.account_type = AccountTypeEnum.League_Administrator,
   });
@@ -44,6 +47,7 @@ class UserModel {
     return {
       'email': email,
       'password_str': password_str,
+      'contact_number': contact_number,
       'account_type': account_type?.name,
     };
   }
@@ -52,6 +56,7 @@ class UserModel {
     return UserModel.set(
       user_id: json['user_id'],
       email: json['email'],
+      contact_number: json['contact_number'],
       account_type: accountTypeFromString(json['account_type']),
       is_verified: json['is_verified'],
       created_at: DateTime.parse(json['created_at']),

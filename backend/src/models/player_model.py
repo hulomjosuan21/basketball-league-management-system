@@ -5,13 +5,33 @@ class PlayerModel(db.Model):
     __tablename__ = 'players_table'
 
     player_id = UUIDGenerator(db,'player')
-
     user_id = db.Column(
         db.String,
-        db.ForeignKey('users_table.user_id'),
+        db.ForeignKey('users_table.user_id', ondelete='CASCADE'),
         unique=True,
         nullable=False
     )
+
+    first_name = db.Column(db.String(100), nullable=False)
+    last_name = db.Column(db.String(100), nullable=False)
+    gender = db.Column(db.String(10), nullable=False)
+    birth_date = db.Column(db.Date, nullable=False)
+
+    jersey_name = db.Column(db.String(1000), nullable=False)
+    jersey_number = db.Column(db.Float, nullable=False)
+    position = db.Column(db.String(250), nullable=False)
+
+    height_in = db.Column(db.Float, nullable=True)
+    weight_kg = db.Column(db.Float, nullable=True)
+    
+    games_played = db.Column(db.Integer, default=0, nullable=False)
+    points_scored = db.Column(db.Integer, default=0, nullable=False)
+    assists = db.Column(db.Integer, default=0, nullable=False)
+    rebounds = db.Column(db.Integer, default=0, nullable=False)
+
+    profile_image_url = db.Column(db.String(1000), nullable=False)
+    document_url_1 = db.Column(db.String(1000), nullable=True)
+    document_url_2 = db.Column(db.String(1000), nullable=True)
 
     user = db.relationship(
         'UserModel',
@@ -20,5 +40,33 @@ class PlayerModel(db.Model):
         single_parent=True
     )
 
+    my_teams = db.relationship('PlayerTeamModel', back_populates='player', cascade='all, delete-orphan')
+
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)
+
+    def to_json(self) -> dict:
+        return {
+            "player_id": self.player_id,
+            "user_id": self.user_id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "gender": self.gender,
+            "birth_date": self.birth_date.isoformat(),
+            "jersey_name": self.jersey_name,
+            "jersey_number": self.jersey_number,
+            "position": self.position,
+            "height_in": float(self.height_in),
+            "weight_kg": float(self.weight_kg),
+            "games_played": self.games_played,
+            "points_scored": self.points_scored,
+            "assists": self.assists,
+            "rebounds": self.rebounds,
+            "profile_image_url": self.profile_image_url,
+            "document_url_1": self.document_url_1 if self.created_at else None,
+            "document_url_2": self.document_url_2 if self.created_at else None,
+            "teams": [assoc.team.to_json() for assoc in self.my_teams] if self.my_teams else [],
+            "user": self.user.to_json() if self.user else None,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }

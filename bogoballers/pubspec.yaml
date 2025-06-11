@@ -48,6 +48,8 @@ dependencies:
   extended_image: ^10.0.1
   path: ^1.9.1
   http: ^1.4.0
+  supabase_flutter: ^2.9.0
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:
@@ -164,15 +166,3 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
-flutter_native_splash:
-  color: "#FCFCFD"
-  image: assets/images/app_logo.png
-  android: true
-  android_gravity: center
-  windows_gravity: center
-  fullscreen: true
-  preserve: true
-
-  dark:
-    color: "#1E1F24"
-    image: assets/images/app_logo.png

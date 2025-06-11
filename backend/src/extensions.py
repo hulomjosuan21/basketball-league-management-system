@@ -8,9 +8,9 @@ from argon2 import PasswordHasher
 import json
 import os
 from flask_socketio import SocketIO
-from supabase import create_client, Client
 from flask import current_app
 from dotenv import load_dotenv
+from supabase import create_client, Client
 
 load_dotenv()
 
@@ -26,7 +26,7 @@ socketio = SocketIO(cors_allowed_origins="*")
 
 ph = PasswordHasher()
 
-def get_supabase_client() -> Client:
+def supabase_client() -> Client:
     supabase_url = current_app.config.get('SUPABASE_URL')
     supabase_key = current_app.config.get('SUPABASE_KEY')
     if not supabase_url or not supabase_key:
