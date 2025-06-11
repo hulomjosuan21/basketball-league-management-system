@@ -5,6 +5,7 @@ class PlayerModel(db.Model):
     __tablename__ = 'players_table'
 
     player_id = UUIDGenerator(db,'player')
+    
     user_id = db.Column(
         db.String,
         db.ForeignKey('users_table.user_id', ondelete='CASCADE'),
@@ -16,6 +17,16 @@ class PlayerModel(db.Model):
     last_name = db.Column(db.String(100), nullable=False)
     gender = db.Column(db.String(10), nullable=False)
     birth_date = db.Column(db.Date, nullable=False)
+
+    barangay_name = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
+    municipality_name = db.Column(
+        db.String(100),
+        nullable=False
+    )
 
     jersey_name = db.Column(db.String(1000), nullable=False)
     jersey_number = db.Column(db.Float, nullable=False)
@@ -53,6 +64,8 @@ class PlayerModel(db.Model):
             "last_name": self.last_name,
             "gender": self.gender,
             "birth_date": self.birth_date.isoformat(),
+            "barangay_name": self.barangay_name,
+            "municipality_name": self.municipality_name,
             "jersey_name": self.jersey_name,
             "jersey_number": self.jersey_number,
             "position": self.position,

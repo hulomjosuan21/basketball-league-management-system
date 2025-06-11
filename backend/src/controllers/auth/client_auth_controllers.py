@@ -32,6 +32,9 @@ class ClientAuthControllers:
                 gender = request.form.get('gender')
                 birth_date = request.form.get('birth_date')
 
+                barangay_name = request.form.get('barangay_name')
+                municipality_name = request.form.get('municipality_name')
+
                 jersey_name = request.form.get('jersey_name')
                 jersey_number = request.form.get('jersey_number')
                 position = request.form.get('position')
@@ -41,7 +44,7 @@ class ClientAuthControllers:
 
                 profile_image_file = request.files.get('profile_image_file')
 
-                if not all([first_name, last_name, gender, birth_date, jersey_name, jersey_number, position, profile_image_file]):
+                if not all([first_name, last_name, gender, birth_date, jersey_name, jersey_number, position, profile_image_file, barangay_name, municipality_name]):
                     raise ValueError("All fields must be provided and not empty.")
 
                 full_url = await save_file(profile_image_file, 'profiles', request, 'supabase')
@@ -50,6 +53,8 @@ class ClientAuthControllers:
                     last_name=last_name,
                     gender=gender,
                     birth_date=birth_date,
+                    barangay_name=barangay_name,
+                    municipality_name=municipality_name,
                     jersey_name=jersey_name,
                     jersey_number=jersey_number,
                     position=position,

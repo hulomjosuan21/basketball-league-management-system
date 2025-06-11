@@ -1,117 +1,28 @@
 // ignore_for_file: non_constant_identifier_names
 import 'dart:async';
-
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:bogoballers/administrator/league_administrator.dart';
 import 'package:bogoballers/core/components/app_button.dart';
+import 'package:bogoballers/core/components/auth_navigator.dart';
 import 'package:bogoballers/core/components/error.dart';
 import 'package:bogoballers/core/components/image_picker.dart';
 import 'package:bogoballers/core/components/password_field.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
 import 'package:bogoballers/core/models/league_administrator.dart';
 import 'package:bogoballers/core/providers/league_adminstrator_provider.dart';
+import 'package:bogoballers/core/utils/terms.dart';
 import 'package:bogoballers/core/utils/validators.dart';
+import 'package:bogoballers/core/validations/auth_validations.dart';
 import 'dart:convert';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:bogoballers/core/models/user.dart';
-import 'package:bogoballers/core/network/api_response.dart';
-import 'package:bogoballers/core/network/dio_client.dart';
 import 'package:bogoballers/core/services/league_administrator_service.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:bogoballers/core/models/location_data.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
-
-RichText authNavigator(
-  BuildContext context,
-  String text,
-  String textTo,
-  void Function() callback,
-) {
-  return RichText(
-    text: TextSpan(
-      text: text,
-      style: TextStyle(color: context.appColors.gray1100, fontSize: 12),
-      children: [
-        TextSpan(
-          text: textTo,
-          style: TextStyle(
-            color: context.appColors.accent900,
-            fontWeight: FontWeight.w600,
-          ),
-          recognizer: TapGestureRecognizer()
-            ..onTap = () {
-              callback();
-            },
-        ),
-      ],
-    ),
-  );
-}
-
-Future<List<String>> getOrganizationTypes() async {
-  final dioClient = DioClient();
-  Response response = await dioClient.client.get('/organization-types');
-
-  final apiResponse = ApiResponse<List<String>>.fromJson(
-    response.data,
-    (json) => List<String>.from(json),
-  );
-  return apiResponse.payload ?? [];
-}
-
-Future<LocationData> getLocationData() async {
-  final dioClient = DioClient();
-  final response = await dioClient.client.get('/places');
-
-  final apiResponse = ApiResponse<LocationData>.fromJson(
-    response.data,
-    (json) => LocationData.fromJson(json),
-  );
-
-  debugPrint(apiResponse.payload!.municipalities.toString());
-  return apiResponse.payload!;
-}
-
-void validateOrganizationFields({
-  required TextEditingController orgNameController,
-  required String? selectedOrgType,
-  required String? selectedMunicipality,
-  required String? selectedBarangay,
-  required TextEditingController emailController,
-  required TextEditingController passwordController,
-  required String? fullPhoneNumber,
-}) {
-  if (orgNameController.text.trim().isEmpty) {
-    throw ValidationException("Organization name cannot be empty");
-  }
-  if (selectedOrgType == null || selectedOrgType.trim().isEmpty) {
-    throw ValidationException("Organization type must be selected");
-  }
-  if (selectedMunicipality == null || selectedMunicipality.trim().isEmpty) {
-    throw ValidationException("Municipality must be selected");
-  }
-  if (selectedBarangay == null || selectedBarangay.trim().isEmpty) {
-    throw ValidationException("Barangay must be selected");
-  }
-  if (emailController.text.trim().isEmpty) {
-    throw ValidationException("Email cannot be empty");
-  }
-  if (passwordController.text.trim().isEmpty) {
-    throw ValidationException("Password cannot be empty");
-  }
-  if (fullPhoneNumber == null || fullPhoneNumber.trim().isEmpty) {
-    throw ValidationException("Phone number cannot be empty");
-  }
-  if (!isValidateContactNumber(fullPhoneNumber)) {
-    throw ValidationException("Invalid Phone number");
-  }
-}
 
 class AdministratorRegisterScreen extends StatefulWidget {
   const AdministratorRegisterScreen({super.key});
@@ -188,50 +99,6 @@ class _AdministratorRegisterScreenState
     } catch (e) {
       return 'Failed to load terms and conditions.';
     }
-  }
-
-  void _showTermsDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return FutureBuilder<String>(
-          future: _termsFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return AlertDialog(
-                title: Text("Terms and Conditions"),
-                content: CircularProgressIndicator(),
-              );
-            } else if (snapshot.hasError) {
-              return AlertDialog(
-                title: Text("Error"),
-                content: Text("Error loading terms: ${snapshot.error}"),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text("Close"),
-                  ),
-                ],
-              );
-            } else {
-              return AlertDialog(
-                title: Text(
-                  "Terms and Conditions",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-                content: SingleChildScrollView(child: Text(snapshot.data!)),
-                actions: [
-                  MaterialButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text("Close"),
-                  ),
-                ],
-              );
-            }
-          },
-        );
-      },
-    );
   }
 
   void _onOrgTypeChanged(String? orgtype) {
@@ -556,47 +423,15 @@ class _AdministratorRegisterScreenState
                                   const SizedBox(height: 16),
                                   ...contactControlls,
                                   const SizedBox(height: 16),
-                                  Row(
-                                    children: [
-                                      Checkbox(
-                                        value: hasAcceptedTerms,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            hasAcceptedTerms = value ?? false;
-                                          });
-                                        },
-                                      ),
-                                      Expanded(
-                                        child: Text.rich(
-                                          TextSpan(
-                                            text: 'I agree to the ',
-                                            style: TextStyle(
-                                              color: context.appColors.gray1100,
-                                              fontSize: 11,
-                                            ),
-                                            children: [
-                                              TextSpan(
-                                                text: 'Terms and Conditions',
-                                                style: TextStyle(
-                                                  color: context
-                                                      .appColors
-                                                      .accent900,
-                                                  decoration:
-                                                      TextDecoration.underline,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                                recognizer:
-                                                    TapGestureRecognizer()
-                                                      ..onTap = () =>
-                                                          _showTermsDialog(
-                                                            context,
-                                                          ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                  termAndCondition(
+                                    context,
+                                    hasAcceptedTerms,
+                                    _termsFuture,
+                                    (value) {
+                                      setState(() {
+                                        hasAcceptedTerms = value ?? false;
+                                      });
+                                    },
                                   ),
                                   const SizedBox(height: 16),
                                   Row(
@@ -724,7 +559,7 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
           if (context.mounted) {
             showAppSnackbar(
               context,
-              message: response.message ?? 'Login successful',
+              message: response.message,
               title: "Success",
               variant: SnackbarVariant.success,
             );
@@ -744,7 +579,7 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
           handleErrorCallBack(e, (message) {
             showAppSnackbar(
               context,
-              message: message ?? 'An unexpected error occurred',
+              message: message,
               title: "Error",
               variant: SnackbarVariant.error,
             );
