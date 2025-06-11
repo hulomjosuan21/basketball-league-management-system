@@ -18,7 +18,7 @@ class LeagueAdministratorService {
       '/administrator/register-account',
       data: leagueAdministrator.toFormDataForCreation(),
     );
-    final apiResponse = ApiResponse<UserModel>.fromJsonNoPayload(response.data);
+    final apiResponse = ApiResponse.fromJsonNoPayload(response.data);
     return apiResponse.message;
   }
 
@@ -37,7 +37,9 @@ class LeagueAdministratorService {
     return apiResponse;
   }
 
-  Future<ApiResponse<AccessToken>> loginAccount({required UserModel user}) async {
+  Future<ApiResponse<AccessToken>> loginAccount({
+    required UserModel user,
+  }) async {
     final api = DioClient().client;
 
     Response response = await api.post(

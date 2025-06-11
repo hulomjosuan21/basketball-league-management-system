@@ -139,9 +139,9 @@ class _AdministratorRegisterScreenState
   String? _selectedMunicipality;
   String? _selectedBarangay;
 
-  String? fullPhoneNumber;
-  bool isValidPhoneNumber = false;
   String initialCountry = 'PH';
+  bool isValidPhoneNumber = false;
+  String? fullPhoneNumber;
   PhoneNumber number = PhoneNumber(isoCode: 'PH');
   late Future<void> _networkDataFuture;
 
@@ -244,7 +244,7 @@ class _AdministratorRegisterScreenState
     setState(() {
       _selectedMunicipality = muni;
       _filteredBarangays = muni != null ? (_barangaysMap[muni] ?? []) : [];
-      _selectedBarangay = null; 
+      _selectedBarangay = null;
     });
   }
 
@@ -278,6 +278,7 @@ class _AdministratorRegisterScreenState
       final user = UserModel.create(
         email: emailController.text,
         password_str: passwordController.text,
+        contact_number: fullPhoneNumber!,
       );
 
       final multipartFile = logoController.multipartFile;
@@ -290,7 +291,6 @@ class _AdministratorRegisterScreenState
         organization_type: _selectedOrgType!,
         municipality_name: _selectedMunicipality!,
         barangay_name: _selectedBarangay!,
-        contact_number: fullPhoneNumber!,
         user: user,
         organization_logo_file: multipartFile,
       );
@@ -304,7 +304,7 @@ class _AdministratorRegisterScreenState
           context,
           message: response,
           title: "Success",
-          variant: SnackbarVariant.success
+          variant: SnackbarVariant.success,
         );
 
         Navigator.push(
@@ -381,7 +381,9 @@ class _AdministratorRegisterScreenState
             onTap: () {
               if (_selectedMunicipality == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Please select municipality first')),
+                  const SnackBar(
+                    content: Text('Please select municipality first'),
+                  ),
                 );
               }
             },
@@ -495,7 +497,8 @@ class _AdministratorRegisterScreenState
               child: FutureBuilder(
                 future: _networkDataFuture,
                 builder: (context, asyncSnapshot) {
-                  if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+                  if (asyncSnapshot.connectionState ==
+                      ConnectionState.waiting) {
                     return CircularProgressIndicator(
                       color: context.appColors.accent900,
                     );
@@ -506,7 +509,7 @@ class _AdministratorRegisterScreenState
                       });
                     });
                   }
-          
+
                   return SingleChildScrollView(
                     padding: const EdgeInsets.all(24),
                     child: isLoading
@@ -575,15 +578,19 @@ class _AdministratorRegisterScreenState
                                               TextSpan(
                                                 text: 'Terms and Conditions',
                                                 style: TextStyle(
-                                                  color:
-                                                      context.appColors.accent900,
+                                                  color: context
+                                                      .appColors
+                                                      .accent900,
                                                   decoration:
                                                       TextDecoration.underline,
                                                   fontWeight: FontWeight.bold,
                                                 ),
-                                                recognizer: TapGestureRecognizer()
-                                                  ..onTap = () =>
-                                                      _showTermsDialog(context),
+                                                recognizer:
+                                                    TapGestureRecognizer()
+                                                      ..onTap = () =>
+                                                          _showTermsDialog(
+                                                            context,
+                                                          ),
                                               ),
                                             ],
                                           ),
@@ -687,13 +694,11 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
           throw Exception('Email or password cannot be empty');
         }
 
-        final user = UserModel.login(
-          email: email,
-          password_str: password,
-        );
+        final user = UserModel.login(email: email, password_str: password);
 
-        final response = await leagueAdministratorService
-            .loginAccount(user: user);
+        final response = await leagueAdministratorService.loginAccount(
+          user: user,
+        );
 
         if (response.payload != null && context.mounted) {
           final leagueAdministrator = await leagueAdministratorService
@@ -706,7 +711,10 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
           scheduleMicrotask(() {
             if (context.mounted) {
               final leagueAdministratorProvider =
-                  Provider.of<LeagueAdministratorProvider>(context, listen: false);
+                  Provider.of<LeagueAdministratorProvider>(
+                    context,
+                    listen: false,
+                  );
               leagueAdministratorProvider.setCurrentAdministrator(
                 leagueAdministrator.payload!,
               );
@@ -779,7 +787,9 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
             ),
             child: Center(
               child: isLoading
-                  ? CircularProgressIndicator(color: context.appColors.accent900)
+                  ? CircularProgressIndicator(
+                      color: context.appColors.accent900,
+                    )
                   : SingleChildScrollView(
                       padding: const EdgeInsets.all(24),
                       child: Container(
@@ -809,7 +819,8 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
                               ...loginControll,
                               const SizedBox(height: 24),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   authNavigator(
                                     context,

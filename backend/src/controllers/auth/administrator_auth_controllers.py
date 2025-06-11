@@ -18,10 +18,10 @@ class AdministratorAuthControllers:
             email = request.form.get('user[email]')
             password_str = request.form.get('user[password_str]')
             account_type = request.form.get('user[account_type]')
+            contact_number = request.form.get('contact_number')
 
             organization_type = request.form.get('organization_type')
             organization_name = request.form.get('organization_name')
-            contact_number = request.form.get('contact_number')
             barangay_name = request.form.get('barangay_name')
             municipality_name = request.form.get('municipality_name')
 
@@ -29,7 +29,10 @@ class AdministratorAuthControllers:
             if not all([email, password_str, account_type, organization_name, contact_number, barangay_name, municipality_name]):
                 raise ValueError("All fields must be provided and not empty.")
             
-            user = UserModel(email=email)
+            user = UserModel(
+                email=email,
+                contact_number=contact_number
+            )
             user.set_account_type(account_type)
             user.set_password(password_str)
 
@@ -37,7 +40,6 @@ class AdministratorAuthControllers:
                 user=user,
                 organization_type=organization_type,
                 organization_name=organization_name,
-                contact_number=contact_number,
                 barangay_name=barangay_name,
                 municipality_name=municipality_name
             )
@@ -82,16 +84,11 @@ class AdministratorAuthControllers:
 
             user = UserModel.query.filter(UserModel.email == email).first()
 
-            if not user:
+            if not user or not user.verify_password(password_str):
                 raise AuthException("Invalid email or password.", 401)
 
             if not user.is_verified:
                 raise AuthException("Your account is not verified.", 403)
-
-            if not user.verify_password(password_str):
-                raise AuthException("Invalid email or password.", 401)
-
-            user.verify_password(password_str)
 
             access_token = create_access_token(identity=user.user_id,expires_delta=timedelta(weeks=1))
 

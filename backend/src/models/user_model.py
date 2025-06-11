@@ -9,7 +9,7 @@ import re
 
 class AccountTypeEnum(Enum):
     PLAYER = "Player"
-    TEAM_ACCOUNT = "Team_Account"
+    TEAM_CREATOR = "Team_Creator"
     LEAGUE_ADMINISTRATOR = "League_Administrator"
     CITY_ADMINISTRATOR = "City_Administrator"
 
@@ -19,6 +19,12 @@ class UserModel(db.Model):
     user_id = UUIDGenerator(db,'user')
 
     email = db.Column(db.String(120), unique=True, nullable=False)
+
+    contact_number = db.Column(
+        db.String(15),
+        nullable=False,
+    )
+
     password_hash = db.Column(db.String, nullable=False)
     is_verified = db.Column(db.Boolean, default=False)
 
@@ -64,6 +70,7 @@ class UserModel(db.Model):
         return {
             "user_id": self.user_id,
             "email": self.email,
+            "contact_number": self.contact_number,
             "is_verified": self.is_verified,
             "account_type": self.account_type.value,
             "created_at": self.created_at.isoformat() if self.created_at else None,

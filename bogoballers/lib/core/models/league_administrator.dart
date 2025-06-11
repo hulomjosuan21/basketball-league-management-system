@@ -7,7 +7,6 @@ class LeagueAdministratorModel {
   late String league_administrator_id;
   String organization_type;
   String organization_name;
-  String contact_number;
   String barangay_name;
   String municipality_name;
   String? organization_photo_url;
@@ -21,7 +20,6 @@ class LeagueAdministratorModel {
     required this.league_administrator_id,
     required this.organization_type,
     required this.organization_name,
-    required this.contact_number,
     required this.barangay_name,
     required this.municipality_name,
     this.organization_photo_url,
@@ -34,7 +32,6 @@ class LeagueAdministratorModel {
   LeagueAdministratorModel.create({
     required this.organization_type,
     required this.organization_name,
-    required this.contact_number,
     required this.barangay_name,
     required this.municipality_name,
     required this.user,
@@ -46,7 +43,6 @@ class LeagueAdministratorModel {
       league_administrator_id: json['league_administrator_id'],
       organization_type: json['organization_type'],
       organization_name: json['organization_name'],
-      contact_number: json['contact_number'] ?? '',
       barangay_name: json['barangay_name'],
       municipality_name: json['municipality_name'],
       organization_photo_url: json['organization_photo_url'],
@@ -62,7 +58,6 @@ class LeagueAdministratorModel {
     final formMap = {
       'organization_type': organization_type,
       'organization_name': organization_name,
-      'contact_number': contact_number,
       'barangay_name': barangay_name,
       'municipality_name': municipality_name,
       'organization_logo_file': organization_logo_file,
@@ -79,7 +74,6 @@ class LeagueAdministratorModel {
     return {
       'organization_type': organization_type,
       'organization_name': organization_name,
-      'contact_number': contact_number,
       'barangay_name': barangay_name,
       'municipality_name': municipality_name,
       'organization_photo_url': organization_photo_url,

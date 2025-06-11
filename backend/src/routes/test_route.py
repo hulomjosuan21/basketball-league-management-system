@@ -32,7 +32,24 @@ def add_test():
         db.session.rollback()
         return ApiResponse.error(e)
 
+@test_bp.put('')
+def update_test():
+    try:
+        data = request.get_json()
+        new_content = data.get('content')
 
+        test = TestModel.query.get(1)
+        if test is None:
+            return ApiResponse.error("Record not found"), 404
+
+        test.content = new_content
+        db.session.commit()
+
+        return ApiResponse.success("Update successful")
+    except Exception as e:
+        db.session.rollback()
+        return ApiResponse.error(str(e)), 500
+    
 @test_bp.get('')
 def list_tests():
     try:
