@@ -11,6 +11,7 @@ from flask_socketio import SocketIO
 from flask import current_app
 from dotenv import load_dotenv
 from supabase import create_client, Client
+from apscheduler.schedulers.background import BackgroundScheduler
 
 load_dotenv()
 
@@ -19,6 +20,7 @@ limiter = Limiter(
     default_limits=["1000 per hour", "5000 per day"],
     headers_enabled=True
 )
+scheduler = BackgroundScheduler()
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
