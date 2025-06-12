@@ -1,11 +1,14 @@
 from flask import Flask
 from flask_cors import CORS
+from src.workers.test import job_wrapper
 from src.config import Config
 from src.controllers.organization_type import getOrganizationTypes
 from src.controllers.places import getCityAndBarangays
-from src.extensions import db, migrate, jwt, limiter, socketio, supabase_client
+from src.extensions import db, migrate, jwt, limiter, socketio, scheduler
 import os
-
+import atexit
+from functools import partial
+from apscheduler.triggers.interval import IntervalTrigger
 from src.routes.administrator.administrator_route import administrator_bp
 from src.routes.test_route import test_bp
 from src.routes.user.user_route import user_bp
@@ -30,6 +33,22 @@ class FlaskServer:
             static_folder=os.path.join(BASE_DIR, 'uploads')
         )
         self.configure()
+        self._init_scheduler()
+
+    def _init_scheduler(self):
+        if not scheduler.running:
+            scheduler.add_job(
+                partial(job_wrapper, self.server),
+                'interval',
+                seconds=5
+            )
+            
+            @self.server.before_request
+            def start_scheduler():
+                if not scheduler.running:
+                    scheduler.start()
+                    atexit.register(scheduler.shutdown)
+
 
     def configure(self):
         self.server.config.from_object(Config)
