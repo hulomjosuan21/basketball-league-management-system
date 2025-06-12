@@ -18,7 +18,7 @@ class AdministratorAuthControllers:
             email = request.form.get('user[email]')
             password_str = request.form.get('user[password_str]')
             account_type = request.form.get('user[account_type]')
-            contact_number = request.form.get('contact_number')
+            contact_number = request.form.get('user[contact_number]')
 
             organization_type = request.form.get('organization_type')
             organization_name = request.form.get('organization_name')
@@ -26,6 +26,7 @@ class AdministratorAuthControllers:
             municipality_name = request.form.get('municipality_name')
 
             organization_logo_file = request.files.get('organization_logo_file')
+
             if not all([email, password_str, account_type, organization_name, contact_number, barangay_name, municipality_name]):
                 raise ValueError("All fields must be provided and not empty.")
             
