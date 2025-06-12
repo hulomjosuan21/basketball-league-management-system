@@ -7,7 +7,7 @@ class PlayerService {
   Future<String> registerAccount(PlayerModel player) async {
     final api = DioClient().client;
     Response response = await api.post(
-      '/client/register-account',
+      '/player/register-account',
       data: player.toFormDataForCreation(),
     );
     final apiResponse = ApiResponse.fromJsonNoPayload(response.data);

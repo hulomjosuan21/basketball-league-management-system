@@ -11,6 +11,7 @@ import 'package:bogoballers/core/models/location_data.dart';
 import 'package:bogoballers/core/models/player_model.dart';
 import 'package:bogoballers/core/models/user.dart';
 import 'package:bogoballers/core/services/player_services.dart';
+import 'package:bogoballers/core/services/team_creator_service.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:bogoballers/core/utils/terms.dart';
@@ -182,9 +183,9 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
         profile_image_file: multipartFile,
       );
 
-      final client = PlayerService();
+      final service = PlayerService();
 
-      final response = await client.registerAccount(player);
+      final response = await service.registerAccount(player);
       if (mounted) {
         showAppSnackbar(
           context,
@@ -192,10 +193,6 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
           title: "Success",
           variant: SnackbarVariant.success,
         );
-
-        setState(() {
-          isRegistering = false;
-        });
       }
     } catch (e) {
       if (context.mounted) {
@@ -221,10 +218,50 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
     setState(() {
       isRegistering = true;
     });
-    await Future.delayed(Duration(seconds: 3));
-    setState(() {
-      isRegistering = false;
-    });
+    try {
+      validateTeamCreatorFields(
+        emailController: emailController,
+        passwordController: passwordController,
+        confirmPassController: confirmPassController,
+        fullPhoneNumber: fullPhoneNumber,
+      );
+
+      final user = UserModel.create(
+        email: emailController.text,
+        contact_number: fullPhoneNumber!,
+        password_str: passwordController.text,
+      );
+
+      final service = TeamCreatorService();
+
+      final response = await service.registerAccount(user);
+
+      if (mounted) {
+        showAppSnackbar(
+          context,
+          message: response,
+          title: "Success",
+          variant: SnackbarVariant.success,
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        handleErrorCallBack(e, (message) {
+          showAppSnackbar(
+            context,
+            message: message,
+            title: "Error",
+            variant: SnackbarVariant.error,
+          );
+        });
+      }
+    } finally {
+      if (context.mounted) {
+        setState(() {
+          isRegistering = false;
+        });
+      }
+    }
   }
 
   @override

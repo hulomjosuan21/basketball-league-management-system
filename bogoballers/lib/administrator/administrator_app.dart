@@ -1,5 +1,6 @@
 import 'package:bogoballers/administrator/league_administrator.dart';
-import 'package:bogoballers/administrator/screen/administrator_auth.dart';
+import 'package:bogoballers/administrator/screen/administrator_login_screen.dart';
+import 'package:bogoballers/administrator/screen/administrator_register_screen.dart';
 import 'package:bogoballers/core/components/error.dart';
 import 'package:bogoballers/core/components/loading.dart';
 import 'package:bogoballers/core/hive/app_box.dart';

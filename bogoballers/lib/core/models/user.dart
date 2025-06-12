@@ -68,6 +68,7 @@ class UserModel {
     return {
       'user_id': user_id,
       'email': email,
+      'contact_number': account_type!.name,
       'account_type': account_type?.name,
       'created_at': created_at.toIso8601String(),
       'updated_at': updated_at.toIso8601String(),

@@ -104,3 +104,47 @@ void validatePlayerFields({
     throw ValidationException("Barangay must be selected");
   }
 }
+
+void validateTeamCreatorFields({
+  required TextEditingController emailController,
+  required TextEditingController passwordController,
+  required TextEditingController confirmPassController,
+  required String? fullPhoneNumber,
+}) {
+  if (emailController.text.trim().isEmpty) {
+    throw ValidationException("Email cannot be empty");
+  }
+  if (passwordController.text.trim().isEmpty) {
+    throw ValidationException("Password cannot be empty");
+  }
+
+  if (passwordController.text.trim() != confirmPassController.text.trim()) {
+    throw ValidationException("Passwords do not match");
+  }
+  if (fullPhoneNumber == null || fullPhoneNumber.trim().isEmpty) {
+    throw ValidationException("Phone number cannot be empty");
+  }
+  if (!isValidateContactNumber(fullPhoneNumber)) {
+    throw ValidationException("Invalid Phone number");
+  }
+}
+
+void validateLoginFields({
+  required TextEditingController emailController,
+  required TextEditingController passwordController,
+}) {
+  final email = emailController.text.trim();
+  final password = passwordController.text.trim();
+
+  if (email.isEmpty) {
+    throw ValidationException("Email cannot be empty");
+  }
+
+  if (!isValidEmail(email)) {
+    throw ValidationException("Invalid email format");
+  }
+
+  if (password.isEmpty) {
+    throw ValidationException("Password cannot be empty");
+  }
+}
