@@ -7,40 +7,75 @@ class BracketStructureContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appColors = context.appColors;
-    const organizationName = "Bogo City League";
 
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 34,
-        centerTitle: true,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_rounded,
-            color: appColors.accent100,
-            size: 14,
-          ),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-        title: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 200),
-          child: Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 12),
+      body: Column(
+        children: [
+          Container(
+            height: 42,
+            padding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
             decoration: BoxDecoration(
-              border: Border.all(width: 0.5, color: appColors.gray100),
-              borderRadius: BorderRadius.circular(4),
+              color: appColors.gray100,
+              border: Border(
+                bottom: BorderSide(width: 0.5, color: appColors.gray600),
+              ),
             ),
-            child: Text(
-              organizationName,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-              style: TextStyle(fontSize: 11, color: appColors.accent100),
-              textAlign: TextAlign.center,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Center(
+                  child: Text(
+                    "Bracket Structure",
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: Icon(Icons.arrow_back, size: 14),
+                  ),
+                ),
+
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text("Category", style: TextStyle(fontSize: 11)),
+                          DropdownButton<String>(
+                            icon: Icon(Icons.arrow_drop_down, size: 14),
+                            iconSize: 14,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: appColors.gray1100,
+                            ),
+                            underline: SizedBox(),
+                            onChanged: (String? newValue) {},
+                            items: ['A', 'B', 'C'].map((value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(value),
+                              );
+                            }).toList(),
+                          ),
+                          SizedBox(width: 16),
+                          IconButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            icon: Icon(Icons.check, size: 14),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }
