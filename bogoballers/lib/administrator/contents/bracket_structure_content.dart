@@ -1,3 +1,4 @@
+import 'package:bogoballers/client/bracket/bracket.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
@@ -73,6 +74,22 @@ class BracketStructureContent extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+          Expanded(
+            child: FutureBuilder<bool>(
+              future: Future.delayed(Duration(milliseconds: 500), () => true),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return TournamentHome();
+                } else {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      color: appColors.accent900,
+                    ),
+                  );
+                }
+              },
             ),
           ),
         ],
