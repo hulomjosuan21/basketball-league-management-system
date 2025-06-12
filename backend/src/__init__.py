@@ -33,7 +33,6 @@ class FlaskServer:
             static_folder=os.path.join(BASE_DIR, 'uploads')
         )
         self.configure()
-        self._init_scheduler()
 
     def _init_scheduler(self):
         if not scheduler.running:
