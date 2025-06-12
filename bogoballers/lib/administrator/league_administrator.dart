@@ -1,7 +1,7 @@
 import 'package:bogoballers/administrator/contents/bracket_structure_content.dart';
 import 'package:bogoballers/administrator/contents/dashboard_content.dart';
 import 'package:bogoballers/administrator/contents/league_content.dart';
-import 'package:bogoballers/administrator/screen/administrator_auth.dart';
+import 'package:bogoballers/administrator/screen/administrator_login_screen.dart';
 import 'package:bogoballers/core/components/app_header.dart';
 import 'package:bogoballers/core/components/app_sidebar.dart';
 import 'package:bogoballers/core/hive/app_box.dart';

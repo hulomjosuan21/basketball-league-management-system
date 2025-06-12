@@ -1,88 +1,32 @@
 import 'dart:convert';
-
+import 'package:bogoballers/client/screens/client_login_screen.dart';
 import 'package:bogoballers/core/components/app_button.dart';
+import 'package:bogoballers/core/components/auth_navigator.dart';
+import 'package:bogoballers/core/components/error.dart';
 import 'package:bogoballers/core/components/image_picker.dart';
 import 'package:bogoballers/core/components/password_field.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
+import 'package:bogoballers/core/enums/gender_enum.dart';
 import 'package:bogoballers/core/enums/user_enum.dart';
+import 'package:bogoballers/core/models/location_data.dart';
 import 'package:bogoballers/core/models/player_model.dart';
 import 'package:bogoballers/core/models/user.dart';
 import 'package:bogoballers/core/services/player_services.dart';
+import 'package:bogoballers/core/services/team_creator_services.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
-import 'package:bogoballers/core/utils/validators.dart';
-import 'package:flutter/gestures.dart';
+import 'package:bogoballers/core/utils/terms.dart';
+import 'package:bogoballers/core/validations/auth_validations.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ClientRegisterScreen extends StatefulWidget {
   const ClientRegisterScreen({super.key});
 
   @override
   State<ClientRegisterScreen> createState() => _ClientRegisterScreenState();
-}
-
-enum Gender { Male, Female }
-
-void validatePlayerFields({
-  required TextEditingController firstNameController,
-  required TextEditingController lastNameController,
-  required ValueNotifier<Gender?> selectedGender,
-  required TextEditingController birthdateController,
-  required TextEditingController jerseyNameController,
-  required TextEditingController jerseyNumberController,
-  required ValueNotifier<Set<String>> selectedPositions,
-  required TextEditingController emailController,
-  required TextEditingController passwordController,
-  required TextEditingController confirmPassController,
-  required String? fullPhoneNumber,
-}) {
-  if (firstNameController.text.trim().isEmpty) {
-    throw ValidationException("First name cannot be empty");
-  }
-  if (lastNameController.text.trim().isEmpty) {
-    throw ValidationException("Last name cannot be empty");
-  }
-  if (selectedGender.value == null) {
-    throw ValidationException("Gender must be selected");
-  }
-  if (birthdateController.text.trim().isEmpty) {
-    throw ValidationException("Birthdate must be selected");
-  }
-  if (jerseyNameController.text.trim().isEmpty) {
-    throw ValidationException("Jersey name cannot be empty");
-  }
-  if (jerseyNumberController.text.trim().isEmpty) {
-    throw ValidationException("Jersey number cannot be empty");
-  }
-  if (double.tryParse(jerseyNumberController.text) == null) {
-    throw ValidationException("Jersey number must be numeric");
-  }
-  if (selectedPositions.value.isEmpty) {
-    throw ValidationException("At least one position must be selected");
-  }
-  if (selectedPositions.value.length > 2) {
-    throw ValidationException("You can only select up to two positions");
-  }
-  if (emailController.text.trim().isEmpty) {
-    throw ValidationException("Email cannot be empty");
-  }
-  if (passwordController.text.trim().isEmpty) {
-    throw ValidationException("Password cannot be empty");
-  }
-
-  if (passwordController.text.trim() != confirmPassController.text.trim()) {
-    throw ValidationException("Passwords do not match");
-  }
-  if (fullPhoneNumber == null || fullPhoneNumber.trim().isEmpty) {
-    throw ValidationException("Phone number cannot be empty");
-  }
-  if (!isValidateContactNumber(fullPhoneNumber)) {
-    throw ValidationException("Invalid Phone number");
-  }
 }
 
 class _ClientRegisterScreenState extends State<ClientRegisterScreen>
@@ -94,6 +38,13 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
   final List<String> positions = ["Guard", "Forward", "Center"];
   final ValueNotifier<Set<String>> selectedPositions = ValueNotifier({});
   AppImagePickerController profileImageController = AppImagePickerController();
+
+  List<String> _municipalities = [];
+  Map<String, List<String>> _barangaysMap = {};
+  List<String> _filteredBarangays = [];
+
+  String? _selectedMunicipality;
+  String? _selectedBarangay;
 
   final firstNameController = TextEditingController();
   final lastNameController = TextEditingController();
@@ -111,7 +62,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
   final confirmPassController = TextEditingController();
   bool hasAcceptedTerms = false;
   late Future<String> _termsFuture;
-
+  late Future<void> _networkDataFuture;
   String? selectedAccountType;
 
   bool isRegistering = false;
@@ -132,13 +83,27 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
   @override
   void initState() {
     super.initState();
-    loadNetworkData();
+    _networkDataFuture = loadNetworkData();
     _tabController = TabController(length: 2, vsync: this);
   }
 
   Future<void> loadNetworkData() async {
-    final t = await _loadTermsAndConditions();
-    _termsFuture = Future.value(t);
+    try {
+      final results = await Future.wait([
+        getLocationData(),
+        _loadTermsAndConditions(),
+      ]);
+      LocationData? locations = results[0] as LocationData?;
+      _termsFuture = Future.value(results[1] as String);
+      if (locations != null) {
+        _municipalities = locations.municipalities;
+        _barangaysMap = locations.barangays;
+      }
+    } on DioException catch (_) {
+      throw AppException("Network error!");
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
@@ -155,55 +120,21 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
     }
   }
 
-  void _navigateToLogin() {
-    debugPrint("Login");
+  void _onMunicipalityChanged(String? muni) {
+    setState(() {
+      _selectedMunicipality = muni;
+      _filteredBarangays = muni != null ? (_barangaysMap[muni] ?? []) : [];
+      _selectedBarangay = null;
+    });
   }
 
-  void _showTermsDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return FutureBuilder<String>(
-          future: _termsFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return AlertDialog(
-                title: Text("Terms and Conditions"),
-                content: CircularProgressIndicator(),
-              );
-            } else if (snapshot.hasError) {
-              return AlertDialog(
-                title: Text("Error"),
-                content: Text("Error loading terms: ${snapshot.error}"),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text("Close"),
-                  ),
-                ],
-              );
-            } else {
-              return AlertDialog(
-                title: Text(
-                  "Terms and Conditions",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-                content: SingleChildScrollView(child: Text(snapshot.data!)),
-                actions: [
-                  MaterialButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text("Close"),
-                  ),
-                ],
-              );
-            }
-          },
-        );
-      },
-    );
+  void _onBarangayChanged(String? barangay) {
+    setState(() {
+      _selectedBarangay = barangay;
+    });
   }
 
-  Future<void> handleRegister() async {
+  Future<void> handleRegisterPlayer() async {
     setState(() {
       isRegistering = true;
     });
@@ -221,6 +152,8 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
         passwordController: passwordController,
         confirmPassController: confirmPassController,
         fullPhoneNumber: fullPhoneNumber,
+        selectedMunicipality: _selectedMunicipality,
+        selectedBarangay: _selectedBarangay,
       );
       final multipartFile = profileImageController.multipartFile;
       final user = UserModel.create(
@@ -238,6 +171,8 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
         last_name: lastNameController.text,
         gender: selectedGender.value!.name,
         birth_date: DateTime.parse(birthdateController.text),
+        barangay_name: _selectedBarangay!,
+        municipality_name: _selectedMunicipality!,
         jersey_name: jerseyNameController.text,
         jersey_number: double.parse(jerseyNumberController.text),
         position: selectedPositions.value.join(', '),
@@ -245,9 +180,9 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
         profile_image_file: multipartFile,
       );
 
-      final client = PlayerService();
+      final service = PlayerServices();
 
-      final response = await client.registerAccount(player);
+      final response = await service.registerAccount(player);
       if (mounted) {
         showAppSnackbar(
           context,
@@ -255,10 +190,56 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
           title: "Success",
           variant: SnackbarVariant.success,
         );
-
+      }
+    } catch (e) {
+      if (context.mounted) {
+        handleErrorCallBack(e, (message) {
+          showAppSnackbar(
+            context,
+            message: message,
+            title: "Error",
+            variant: SnackbarVariant.error,
+          );
+        });
+      }
+    } finally {
+      if (context.mounted) {
         setState(() {
           isRegistering = false;
         });
+      }
+    }
+  }
+
+  Future<void> handleRegisterTeamCreator() async {
+    setState(() {
+      isRegistering = true;
+    });
+    try {
+      validateTeamCreatorFields(
+        emailController: emailController,
+        passwordController: passwordController,
+        confirmPassController: confirmPassController,
+        fullPhoneNumber: fullPhoneNumber,
+      );
+
+      final user = UserModel.create(
+        email: emailController.text,
+        contact_number: fullPhoneNumber!,
+        password_str: passwordController.text,
+      );
+
+      final service = TeamCreatorServices();
+
+      final response = await service.registerAccount(user);
+
+      if (mounted) {
+        showAppSnackbar(
+          context,
+          message: response,
+          title: "Success",
+          variant: SnackbarVariant.success,
+        );
       }
     } catch (e) {
       if (context.mounted) {
@@ -341,7 +322,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                 SizedBox(height: 16),
                 buildAccountTypeItemCard("Team Creator", Icons.groups, () {
                   setState(() {
-                    selectedAccountType = "Team_Account";
+                    selectedAccountType = "Team_Creator";
                   });
                 }),
               ],
@@ -474,6 +455,53 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
               },
             ),
             SizedBox(height: 16),
+            Center(
+              child: SizedBox(
+                width: double.infinity,
+                child: DropdownMenu<String>(
+                  key: const ValueKey('muni_dropdown'),
+                  initialSelection: _selectedMunicipality,
+                  onSelected: _onMunicipalityChanged,
+                  enableFilter: true,
+                  enableSearch: true,
+                  dropdownMenuEntries: _municipalities
+                      .map((m) => DropdownMenuEntry(value: m, label: m))
+                      .toList(),
+                  label: const Text('Select Municipality'),
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+            GestureDetector(
+              onTap: () {
+                if (_selectedMunicipality == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please select municipality first'),
+                    ),
+                  );
+                }
+              },
+              child: AbsorbPointer(
+                absorbing: _selectedMunicipality == null,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: DropdownMenu<String>(
+                    key: const ValueKey('brgy_dropdown'),
+                    enabled: _selectedMunicipality != null,
+                    initialSelection: _selectedBarangay,
+                    onSelected: _onBarangayChanged,
+                    enableFilter: true,
+                    enableSearch: true,
+                    dropdownMenuEntries: _filteredBarangays
+                        .map((b) => DropdownMenuEntry(value: b, label: b))
+                        .toList(),
+                    label: const Text('Select Barangay'),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
             TextField(
               controller: jerseyNameController,
               decoration: InputDecoration(label: Text("Jersey name")),
@@ -537,16 +565,16 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
               ignoreBlank: false,
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Phone number is required';
+                  return 'Phone number\nis required';
                 }
 
                 final digitsOnly = value.replaceAll(RegExp(r'\D'), '');
 
                 if (digitsOnly.length != 10) {
-                  return 'Phone number must be exactly 10 digits';
+                  return 'Phone number must\nbe exactly 10 digits';
                 }
                 if (!digitsOnly.startsWith('9')) {
-                  return 'Phone number must start with 9';
+                  return 'Phone number must\nstart with 9';
                 }
                 return null;
               },
@@ -566,49 +594,126 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
               hintText: 'Confirm Passowrd',
             ),
             SizedBox(height: 16),
-            Row(
-              children: [
-                Checkbox(
-                  value: hasAcceptedTerms,
-                  onChanged: (value) {
-                    setState(() {
-                      hasAcceptedTerms = value ?? false;
-                    });
-                  },
-                ),
-                Expanded(
-                  child: Text.rich(
-                    TextSpan(
-                      text: 'I agree to the ',
-                      style: TextStyle(
-                        color: context.appColors.gray1100,
-                        fontSize: 11,
-                      ),
-                      children: [
-                        TextSpan(
-                          text: 'Terms and Conditions',
-                          style: TextStyle(
-                            color: context.appColors.accent900,
-                            decoration: TextDecoration.underline,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () => _showTermsDialog(context),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+            termAndCondition(context, hasAcceptedTerms, _termsFuture, (value) {
+              setState(() {
+                hasAcceptedTerms = value ?? false;
+              });
+            }),
             SizedBox(height: 24),
             AppButton(
               label: "Register",
-              onPressed: handleRegister,
+              onPressed: handleRegisterPlayer,
               size: ButtonSize.sm,
               isDisabled: !hasAcceptedTerms,
             ),
           ],
+        ),
+      );
+    }
+
+    Widget buildTeamCreatorRegisterInputs() {
+      return SizedBox(
+        height: MediaQuery.of(context).size.height * 0.8,
+        child: Center(
+          child: Container(
+            constraints: BoxConstraints(maxWidth: 350),
+            margin: EdgeInsets.symmetric(vertical: 16),
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: appColors.gray100,
+              border: Border.all(width: 0.5, color: appColors.gray600),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Register as a Team Creator",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        "Fill in the required details below to create your profile.",
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: appColors.gray800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 16),
+                InternationalPhoneNumberInput(
+                  countries: ['PH'],
+                  onInputChanged: (PhoneNumber number) {
+                    setState(() {
+                      fullPhoneNumber = number.phoneNumber ?? '';
+                    });
+                  },
+                  onInputValidated: (_) {
+                    setState(() {
+                      isValidPhoneNumber = true;
+                    });
+                  },
+                  ignoreBlank: false,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Phone number\nis required';
+                    }
+
+                    final digitsOnly = value.replaceAll(RegExp(r'\D'), '');
+
+                    if (digitsOnly.length != 10) {
+                      return 'Phone number must\nbe exactly 10 digits';
+                    }
+                    if (!digitsOnly.startsWith('9')) {
+                      return 'Phone number must\nstart with 9';
+                    }
+                    return null;
+                  },
+                  autoValidateMode: AutovalidateMode.onUserInteraction,
+                  initialValue: number,
+                ),
+                SizedBox(height: 16),
+                TextField(
+                  controller: emailController,
+                  decoration: InputDecoration(label: Text("Email")),
+                ),
+                SizedBox(height: 16),
+                PasswordField(
+                  controller: passwordController,
+                  hintText: 'Password',
+                ),
+                SizedBox(height: 16),
+                PasswordField(
+                  controller: confirmPassController,
+                  hintText: 'Confirm Passowrd',
+                ),
+                SizedBox(height: 16),
+                termAndCondition(context, hasAcceptedTerms, _termsFuture, (
+                  value,
+                ) {
+                  setState(() {
+                    hasAcceptedTerms = value ?? false;
+                  });
+                }),
+                SizedBox(height: 24),
+                AppButton(
+                  label: "Register",
+                  onPressed: handleRegisterTeamCreator,
+                  size: ButtonSize.sm,
+                  isDisabled: !hasAcceptedTerms,
+                ),
+              ],
+            ),
+          ),
         ),
       );
     }
@@ -618,7 +723,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
         child: Center(
           child: selectedAccountType == "Player"
               ? buildPlayerRegisterInputs()
-              : Text("Register Team"),
+              : buildTeamCreatorRegisterInputs(),
         ),
       );
     }
@@ -629,71 +734,95 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
           decoration: BoxDecoration(
             gradient: context.appColors.secondaryGradient,
           ),
-          child: isRegistering
-              ? Center(
+          child: FutureBuilder(
+            future: _networkDataFuture,
+            builder: (context, asyncSnapshot) {
+              if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+                return Center(
                   child: CircularProgressIndicator(
                     color: context.appColors.accent900,
                   ),
-                )
-              : Column(
-                  children: [
-                    Container(
-                      height: 12,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            context.appColors.gray100.withAlpha(255),
-                            context.appColors.gray100.withAlpha(0),
-                          ],
-                        ),
+                );
+              } else if (asyncSnapshot.hasError) {
+                return Center(
+                  child: retryError(context, asyncSnapshot.error, () {
+                    setState(() {
+                      _networkDataFuture = loadNetworkData();
+                    });
+                  }),
+                );
+              }
+
+              return isRegistering
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        color: context.appColors.accent900,
                       ),
-                    ),
-                    Expanded(
-                      child: TabBarView(
-                        controller: _tabController,
-                        physics: const NeverScrollableScrollPhysics(),
-                        children: [
-                          buildSelectAccountType(),
-                          buildTabTwoContent(),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Column(
-                        children: [
-                          if (_tabController.index > 0)
-                            GestureDetector(
-                              onTap: _goToPreviousTab,
-                              child: Text(
-                                'Back',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: context.appColors.gray1100,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ),
-                          SizedBox(height: 8),
-                          GestureDetector(
-                            onTap: _navigateToLogin,
-                            child: Text(
-                              'Already have an account? Login',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: context.appColors.gray1100,
-                                decoration: TextDecoration.underline,
-                              ),
+                    )
+                  : Column(
+                      children: [
+                        Container(
+                          height: 12,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                context.appColors.gray100.withAlpha(255),
+                                context.appColors.gray100.withAlpha(0),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 12),
-                  ],
-                ),
+                        ),
+                        Expanded(
+                          child: TabBarView(
+                            controller: _tabController,
+                            physics: const NeverScrollableScrollPhysics(),
+                            children: [
+                              buildSelectAccountType(),
+                              buildTabTwoContent(),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Column(
+                            children: [
+                              if (_tabController.index > 0)
+                                GestureDetector(
+                                  onTap: _goToPreviousTab,
+                                  child: Text(
+                                    'Back',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: context.appColors.gray1100,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ),
+                              SizedBox(height: 8),
+                              authNavigator(
+                                context,
+                                "Already have an account?",
+                                " Login",
+                                () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ClientLoginScreen(),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                      ],
+                    );
+            },
+          ),
         ),
       ),
     );

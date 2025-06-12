@@ -1,4 +1,5 @@
-import 'package:bogoballers/client/screens/client_auth_screen.dart';
+import 'package:bogoballers/client/screens/client_login_screen.dart';
+import 'package:bogoballers/client/screens/client_register_screen.dart';
 import 'package:bogoballers/core/theme/theme.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +35,7 @@ class ClientMaterialScreen extends StatelessWidget {
         return MaterialApp(
           title: 'BogoBallers',
           theme: lightTheme(context),
-          home: ClientRegisterScreen(),
+          home: ClientLoginScreen(),
           debugShowCheckedModeBanner: false,
         );
       },
