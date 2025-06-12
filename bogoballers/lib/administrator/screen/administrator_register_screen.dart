@@ -12,7 +12,7 @@ import 'package:bogoballers/core/utils/terms.dart';
 import 'package:bogoballers/core/validations/auth_validations.dart';
 import 'dart:convert';
 import 'package:bogoballers/core/models/user.dart';
-import 'package:bogoballers/core/services/league_administrator_service.dart';
+import 'package:bogoballers/core/services/league_administrator_services.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:dio/dio.dart';
@@ -123,7 +123,7 @@ class _AdministratorRegisterScreenState
       isLoading = true;
     });
     try {
-      final leagueAdministratorService = LeagueAdministratorService();
+      final leagueAdministratorService = LeagueAdministratorServices();
 
       validateOrganizationFields(
         orgNameController: orgNameController,

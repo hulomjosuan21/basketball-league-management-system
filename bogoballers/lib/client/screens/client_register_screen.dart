@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bogoballers/client/screens/client_login_screen.dart';
 import 'package:bogoballers/core/components/app_button.dart';
 import 'package:bogoballers/core/components/auth_navigator.dart';
 import 'package:bogoballers/core/components/error.dart';
@@ -11,7 +12,7 @@ import 'package:bogoballers/core/models/location_data.dart';
 import 'package:bogoballers/core/models/player_model.dart';
 import 'package:bogoballers/core/models/user.dart';
 import 'package:bogoballers/core/services/player_services.dart';
-import 'package:bogoballers/core/services/team_creator_service.dart';
+import 'package:bogoballers/core/services/team_creator_services.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:bogoballers/core/utils/terms.dart';
@@ -133,10 +134,6 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
     });
   }
 
-  void _navigateToLogin() {
-    debugPrint("Login");
-  }
-
   Future<void> handleRegisterPlayer() async {
     setState(() {
       isRegistering = true;
@@ -183,7 +180,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
         profile_image_file: multipartFile,
       );
 
-      final service = PlayerService();
+      final service = PlayerServices();
 
       final response = await service.registerAccount(player);
       if (mounted) {
@@ -232,7 +229,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
         password_str: passwordController.text,
       );
 
-      final service = TeamCreatorService();
+      final service = TeamCreatorServices();
 
       final response = await service.registerAccount(user);
 
@@ -808,7 +805,15 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                                 context,
                                 "Already have an account?",
                                 " Login",
-                                _navigateToLogin,
+                                () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ClientLoginScreen(),
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),

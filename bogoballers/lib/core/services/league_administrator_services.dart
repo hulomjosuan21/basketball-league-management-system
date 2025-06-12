@@ -9,7 +9,7 @@ import 'package:bogoballers/core/network/dio_client.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
-class LeagueAdministratorService {
+class LeagueAdministratorServices {
   Future<String> registerAccount({
     required LeagueAdministratorModel leagueAdministrator,
   }) async {

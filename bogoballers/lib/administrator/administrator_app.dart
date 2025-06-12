@@ -1,11 +1,10 @@
 import 'package:bogoballers/administrator/league_administrator.dart';
 import 'package:bogoballers/administrator/screen/administrator_login_screen.dart';
-import 'package:bogoballers/administrator/screen/administrator_register_screen.dart';
 import 'package:bogoballers/core/components/error.dart';
 import 'package:bogoballers/core/components/loading.dart';
 import 'package:bogoballers/core/hive/app_box.dart';
 import 'package:bogoballers/core/providers/league_adminstrator_provider.dart';
-import 'package:bogoballers/core/services/league_administrator_service.dart';
+import 'package:bogoballers/core/services/league_administrator_services.dart';
 import 'package:bogoballers/core/theme/theme.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +37,7 @@ class _AdministratorMaterialScreenState
     }
 
     try {
-      final service = LeagueAdministratorService();
+      final service = LeagueAdministratorServices();
       final response = await service.fetchLeagueAdministrator(
         user_id: token.user_id,
       );

@@ -5,7 +5,7 @@ import 'package:bogoballers/core/network/dio_client.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/rendering.dart';
 
-class TeamCreatorService {
+class TeamCreatorServices {
   Future<String> registerAccount(UserModel user) async {
     user.account_type = AccountTypeEnum.Team_Creator;
     final api = DioClient().client;
