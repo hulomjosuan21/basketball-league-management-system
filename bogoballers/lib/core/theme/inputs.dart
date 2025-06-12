@@ -26,11 +26,11 @@ InputDecorationTheme appInputDecorationTheme(BuildContext context) {
         width: borderWidth,
       ),
     ),
-    labelStyle: TextStyle(color: context.appColors.gray1100, fontSize: 13),
+    labelStyle: TextStyle(color: context.appColors.gray1100, fontSize: 12),
     prefixIconColor: context.appColors.gray600,
     focusColor: context.appColors.accent900,
     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-    hintStyle: TextStyle(color: context.appColors.gray1000, fontSize: 13),
+    hintStyle: TextStyle(color: context.appColors.accent400, fontSize: 12),
     isDense: true,
   );
 }

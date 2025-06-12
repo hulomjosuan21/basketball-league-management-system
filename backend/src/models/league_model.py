@@ -1,21 +1,29 @@
 from src.utils.db_utils import CreatedAt, UUIDGenerator, UpdatedAt
 from src.extensions import db
+from datetime import datetime
 
 class LeagueModel(db.Model):
     __tablename__ = 'leagues_table'
 
-    league_id = UUIDGenerator(db, 'team')
+    league_id = UUIDGenerator(db, 'league')
     league_administrator_id = db.Column(db.String, db.ForeignKey('league_administrator_table.league_administrator_id'))
 
-    league_name = db.Column(db.String(100), nullable=False)
-    league_description = db.Column(db.Text, nullable=False)
+    league_title = db.Column(db.String(100), nullable=False)
     league_picture_url = db.Column(db.String, nullable=False)
     league_budget = db.Column(db.Float, nullable=True, default=0.0)
 
     registration_deadline = db.Column(db.DateTime, nullable=False)
 
     championship_trophy_url = db.Column(db.String, nullable=True)
-    season_year = db.Column(db.Integer, nullable=False)
+    banner_url = db.Column(db.String, nullable=True)
+    season_year = db.Column(db.Integer, nullable=False, default=datetime.now().year)
+
+    status = db.Column(db.String(100), nullable=False, default="Scheduled")
+    # Scheduled, Ongoing, Completed, Postponed, Cancelled
+    format = db.Column(db.Text, nullable=False)
+    rules = db.Column(db.Text, nullable=False)
+    sponsors = db.Column(db.Text, nullable=True)
+    start_date = db.Column(db.DateTime, nullable=False)
 
     # many to one
     league_administrator = db.relationship(
@@ -115,6 +123,7 @@ class LeagueCategoryModel(db.Model):
     category_teams = db.relationship('LeagueTeamModel', back_populates='category')
 
     league = db.relationship('LeagueModel', back_populates='categories')
+    stage = db.Column(db.String(100), nullable=False, default="Group Stage")
 
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)
