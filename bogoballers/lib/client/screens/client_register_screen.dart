@@ -13,6 +13,7 @@ import 'package:bogoballers/core/models/player_model.dart';
 import 'package:bogoballers/core/models/user.dart';
 import 'package:bogoballers/core/services/player_services.dart';
 import 'package:bogoballers/core/services/team_creator_services.dart';
+import 'package:bogoballers/core/theme/datime_picker.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:bogoballers/core/utils/terms.dart';
@@ -433,26 +434,9 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
               ],
             ),
             SizedBox(height: 16),
-            TextField(
-              controller: birthdateController,
-              readOnly: true,
-              decoration: InputDecoration(
-                labelText: "Birthdate",
-                suffixIcon: Icon(Icons.calendar_today),
-              ),
-              onTap: () async {
-                DateTime? pickedDate = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(1900),
-                  lastDate: DateTime.now(),
-                );
-                if (pickedDate != null) {
-                  birthdateController.text = "${pickedDate.toLocal()}".split(
-                    ' ',
-                  )[0];
-                }
-              },
+            DateTimePickerField(
+              controller: bdayController,
+              labelText: 'Birthdate',
             ),
             SizedBox(height: 16),
             Center(

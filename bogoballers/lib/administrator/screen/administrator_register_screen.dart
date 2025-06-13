@@ -163,20 +163,19 @@ class _AdministratorRegisterScreenState
         leagueAdministrator: leagueAdministrator,
       );
 
-      if (mounted) {
+      if (mounted &&
+          response.redirect != null &&
+          response.redirect! == "/administrator/login") {
         showAppSnackbar(
           context,
-          message: response,
+          message: response.message,
           title: "Success",
           variant: SnackbarVariant.success,
         );
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const AdministratorLoginScreen(),
-          ),
-        );
+        Navigator.pushNamed(context, response.redirect!);
+      } else {
+        throw AppException("Something went wrong!");
       }
     } catch (e) {
       if (context.mounted) {

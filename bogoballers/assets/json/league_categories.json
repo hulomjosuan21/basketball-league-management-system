@@ -1,0 +1,74 @@
+[
+  {
+    "value": "10–Under Boys (Mini)",
+    "label": "10–Under Boys (Mini)"
+  },
+  {
+    "value": "10–Under Girls (Mini)",
+    "label": "10–Under Girls (Mini)"
+  },
+  {
+    "value": "13–Under Boys (Midget)",
+    "label": "13–Under Boys (Midget)"
+  },
+  {
+    "value": "13–Under Girls (Midget)",
+    "label": "13–Under Girls (Midget)"
+  },
+  {
+    "value": "18–Under Boys",
+    "label": "18–Under Boys"
+  },
+  {
+    "value": "18–Under Girls",
+    "label": "18–Under Girls"
+  },
+  {
+    "value": "21–Under Men (Youth)",
+    "label": "21–Under Men (Youth)"
+  },
+  {
+    "value": "21–Under Women (Youth)",
+    "label": "21–Under Women (Youth)"
+  },
+  {
+    "value": "24–Under Men (Young Adults)",
+    "label": "24–Under Men (Young Adults)"
+  },
+  {
+    "value": "24–Under Women (Young Adults)",
+    "label": "24–Under Women (Young Adults)"
+  },
+  {
+    "value": "35–Above Men",
+    "label": "35–Above Men"
+  },
+  {
+    "value": "35–Above Women",
+    "label": "35–Above Women"
+  },
+  {
+    "value": "Open Men",
+    "label": "Open Men"
+  },
+  {
+    "value": "Open Women",
+    "label": "Open Women"
+  },
+  {
+    "value": "Invitational Men",
+    "label": "Invitational Men"
+  },
+  {
+    "value": "Invitational Women",
+    "label": "Invitational Women"
+  },
+  {
+    "value": "PWD Category Men",
+    "label": "PWD Category Men"
+  },
+  {
+    "value": "PWD Category Women",
+    "label": "PWD Category Women"
+  }
+]

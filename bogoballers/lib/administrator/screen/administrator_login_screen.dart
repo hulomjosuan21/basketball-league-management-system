@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:bogoballers/administrator/league_administrator.dart';
 import 'package:bogoballers/administrator/screen/administrator_register_screen.dart';
 import 'package:bogoballers/core/components/app_button.dart';
 import 'package:bogoballers/core/components/auth_navigator.dart';
@@ -77,23 +76,19 @@ class _AdministratorLoginScreenState extends State<AdministratorLoginScreen> {
             }
           });
 
-          if (context.mounted) {
+          if (context.mounted &&
+              response.redirect != null &&
+              response.redirect! == "/administrator/main/screen") {
             showAppSnackbar(
               context,
               message: response.message,
               title: "Success",
               variant: SnackbarVariant.success,
             );
-
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const LeagueAdministratorMainScreen(),
-              ),
-            );
+            Navigator.pushNamed(context, response.redirect!);
           }
         } else {
-          throw Exception('Invalid login response');
+          throw AppException("Something went wrong!");
         }
       } catch (e) {
         if (context.mounted) {

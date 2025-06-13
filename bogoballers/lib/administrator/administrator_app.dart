@@ -77,11 +77,24 @@ class _AdministratorMaterialScreenState
     });
   }
 
+  // final Map<String, WidgetBuilder> appRoutes = {
+  //   '/': (context) => HomePage(),
+  //   '/login': (context) => LoginPage(),
+  //   '/dashboard': (context) => DashboardPage(),
+  //   '/settings': (context) => SettingsPage(),
+  // };
+
+  final Map<String, WidgetBuilder> appRoutes = {
+    '/administrator/login': (context) => AdministratorLoginScreen(),
+    '/administrator/main/screen': (context) => LeagueAdministratorMainScreen(),
+  };
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'BogoBallers',
       theme: lightTheme(context),
+      routes: appRoutes,
       home: FutureBuilder<bool>(
         future: _loginFuture,
         builder: (context, snapshot) {

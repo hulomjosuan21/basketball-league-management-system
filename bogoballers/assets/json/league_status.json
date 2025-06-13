@@ -1,0 +1,22 @@
+[
+    {
+        "value": "Scheduled",
+        "label": "Scheduled"
+    },
+    {
+        "value": "Ongoing",
+        "label": "Ongoing"
+    },
+    {
+        "value": "Completed",
+        "label": "Completed"
+    },
+    {
+        "value": "Postponed",
+        "label": "Postponed"
+    },
+    {
+        "value": "Cancelled",
+        "label": "Cancelled"
+    }
+]

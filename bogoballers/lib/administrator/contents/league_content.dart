@@ -1,12 +1,16 @@
 import 'package:bogoballers/core/components/app_button.dart';
 import 'package:bogoballers/core/components/image_picker.dart';
 import 'package:bogoballers/core/components/text_field.dart';
+import 'package:bogoballers/core/theme/datime_picker.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
+import 'package:bogoballers/core/utils/league_utils.dart';
 import 'package:bs_flutter_selectbox/bs_flutter_selectbox.dart';
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
 
 class LeagueContent extends StatefulWidget {
-  LeagueContent({super.key});
+  const LeagueContent({super.key});
 
   @override
   State<LeagueContent> createState() => _LeagueContentState();
@@ -30,13 +34,15 @@ class LeagueControl extends StatelessWidget {
 
   final imageController = AppImagePickerController();
 
-  final BsSelectBoxController categorySelectController = BsSelectBoxController(
-    multiple: true,
-    options: [
-      BsSelectBoxOption(value: 1, text: Text('Round Robin')),
-      BsSelectBoxOption(value: 2, text: Text('Knock Out')),
-    ],
+  final statusSelectController = BsSelectBoxController(
+    selected: [BsSelectBoxOption(value: "Scheduled", text: Text('Scheduled'))],
   );
+
+  final categorySelectController = BsSelectBoxController(multiple: true);
+
+  final registrationDeadlineController = TextEditingController();
+  final openingDateController = TextEditingController();
+  final startDateController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -56,42 +62,36 @@ class LeagueControl extends StatelessWidget {
                     decoration: InputDecoration(label: Text("League title")),
                   ),
                   SizedBox(height: 16),
-                  SizedBox(
-                    width: 200,
-                    child: TextField(
-                      decoration: InputDecoration(label: Text("Budget")),
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  TextField(
-                    decoration: InputDecoration(
-                      label: Text("Registration deadline"),
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  TextField(
-                    decoration: InputDecoration(label: Text("Start date")),
-                  ),
-                  SizedBox(height: 16),
                   Wrap(
-                    direction: Axis.horizontal,
-                    spacing: 16,
+                    spacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
+                      Text("₱"),
                       SizedBox(
-                        width: 180,
-                        child: BsSelectBox(
-                          hintText: 'Select Category',
-                          controller: categorySelectController,
-                        ),
-                      ),
-                      SizedBox(
-                        width: 180,
-                        child: BsSelectBox(
-                          hintText: 'Select Category',
-                          controller: categorySelectController,
+                        width: 200,
+                        child: TextField(
+                          decoration: InputDecoration(label: Text("Budget")),
                         ),
                       ),
                     ],
+                  ),
+                  SizedBox(height: 16),
+                  DateTimePickerField(
+                    controller: registrationDeadlineController,
+                    labelText: 'Team Registration Deadline',
+                    includeTime: true,
+                  ),
+                  SizedBox(height: 16),
+                  DateTimePickerField(
+                    controller: openingDateController,
+                    labelText: 'Opening Date',
+                    includeTime: true,
+                  ),
+                  SizedBox(height: 16),
+                  DateTimePickerField(
+                    controller: startDateController,
+                    labelText: 'Start Date',
+                    includeTime: true,
                   ),
                 ],
               ),
@@ -151,6 +151,32 @@ class LeagueControl extends StatelessWidget {
       );
     }
 
+    Widget buildSelects() {
+      return Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: BsSelectBox(
+              hintText: 'Select Category',
+              controller: categorySelectController,
+              serverSide: selectLeagueCategoriesFromJson,
+              searchable: true,
+            ),
+          ),
+          SizedBox(width: 16),
+          Expanded(
+            flex: 1,
+            child: BsSelectBox(
+              disabled: true,
+              hintText: 'Status',
+              controller: statusSelectController,
+              serverSide: selectLeagueCategoriesStatus,
+            ),
+          ),
+        ],
+      );
+    }
+
     Widget buildControllerDescriptionRules() {
       return Column(
         children: [
@@ -168,9 +194,7 @@ class LeagueControl extends StatelessWidget {
                 child: TextField(
                   decoration: InputDecoration(
                     label: Text("League Rules"),
-                    hint: Text(
-                      "Explain By lorem epsom dolor it asdaj asdasdhsajdgjh",
-                    ),
+                    hint: Text(""),
                     alignLabelWithHint: true,
                   ),
                   maxLines: 2,
@@ -181,15 +205,17 @@ class LeagueControl extends StatelessWidget {
                 child: TextField(
                   decoration: InputDecoration(
                     label: Text("League Format"),
-                    hint: Text(
-                      "Explain By lorem epsom dolor it asdaj asdasdhsajdgjh",
-                    ),
+                    hint: Text(""),
                     alignLabelWithHint: true,
                   ),
                   maxLines: 2,
                 ),
               ),
             ],
+          ),
+          SizedBox(height: 16),
+          TextField(
+            decoration: InputDecoration(label: Text("Sponsors (Optional)")),
           ),
         ],
       );
@@ -206,6 +232,8 @@ class LeagueControl extends StatelessWidget {
         child: Column(
           children: [
             buildControllerInfoAndImage(),
+            SizedBox(height: 16),
+            buildSelects(),
             SizedBox(height: 16),
             buildControllerDescriptionRules(),
           ],

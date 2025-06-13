@@ -1,9 +1,15 @@
 class ApiResponse<T> {
   final bool status;
   final String message;
+  final String? redirect;
   final T? payload;
 
-  ApiResponse({required this.status, required this.message, this.payload});
+  ApiResponse({
+    required this.status,
+    required this.message,
+    this.redirect,
+    this.payload,
+  });
 
   factory ApiResponse.fromJson(
     Map<String, dynamic> json,
@@ -12,6 +18,7 @@ class ApiResponse<T> {
     return ApiResponse<T>(
       status: json['status'] ?? false,
       message: json['message'] ?? '',
+      redirect: json['redirect'],
       payload: json['payload'] != null ? fromJsonT(json['payload']) : null,
     );
   }
@@ -20,6 +27,7 @@ class ApiResponse<T> {
     return ApiResponse<T>(
       status: json['status'] ?? false,
       message: json['message'] ?? '',
+      redirect: json['redirect'],
       payload: null,
     );
   }
