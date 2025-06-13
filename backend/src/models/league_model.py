@@ -9,7 +9,7 @@ class LeagueModel(db.Model):
     league_administrator_id = db.Column(db.String, db.ForeignKey('league_administrator_table.league_administrator_id'))
 
     league_title = db.Column(db.String(100), nullable=False)
-    league_budget = db.Column(db.Float, nullable=True, default=0.0)
+    league_budget = db.Column(db.Float, nullable=False, default=0.0)
 
     registration_deadline = db.Column(db.DateTime, nullable=False)
     opening_date = db.Column(db.DateTime, nullable=False)
@@ -23,7 +23,6 @@ class LeagueModel(db.Model):
     season_year = db.Column(db.Integer, nullable=False, default=datetime.now().year)
     rules = db.Column(db.Text, nullable=False)
     
-    league_format = db.Column(db.Text, nullable=False)
     sponsors = db.Column(db.Text, nullable=True)
 
     # many to one
@@ -133,6 +132,7 @@ class LeagueCategoryModel(db.Model):
 
     category_teams = db.relationship('LeagueTeamModel', back_populates='category')
 
+    category_format = db.Column(db.Text, nullable=False)
     stage = db.Column(db.String(100), nullable=False, default="Group Stage")
     max_team = db.Column(db.Integer, nullable=False, default=4)
 
@@ -140,6 +140,7 @@ class LeagueCategoryModel(db.Model):
     updated_at = UpdatedAt(db)
 
     league = db.relationship('LeagueModel', back_populates='categories')
+    
 
     def to_json(self) -> dict:
         return {
