@@ -1,12 +1,20 @@
+import 'dart:async';
+
 import 'package:bogoballers/core/components/app_button.dart';
 import 'package:bogoballers/core/components/image_picker.dart';
+import 'package:bogoballers/core/components/labeled_text.dart';
+import 'package:bogoballers/core/components/snackbars.dart';
 import 'package:bogoballers/core/components/text_field.dart';
+import 'package:bogoballers/core/theme/datime_picker.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
-import 'package:bs_flutter_selectbox/bs_flutter_selectbox.dart';
+import 'package:bogoballers/core/utils/error_handling.dart';
+import 'package:bogoballers/core/utils/league_utils.dart';
+import 'package:bogoballers/core/validations/auth_validations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class LeagueContent extends StatefulWidget {
-  LeagueContent({super.key});
+  const LeagueContent({super.key});
 
   @override
   State<LeagueContent> createState() => _LeagueContentState();
@@ -17,30 +25,236 @@ class _LeagueContentState extends State<LeagueContent> {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [LeagueControl()],
-      ),
+      child: Column(mainAxisSize: MainAxisSize.min, children: [CreateLeague()]),
     );
   }
 }
 
-class LeagueControl extends StatelessWidget {
-  LeagueControl({super.key});
+class CreateLeague extends StatefulWidget {
+  const CreateLeague({super.key});
 
-  final imageController = AppImagePickerController();
+  @override
+  State<CreateLeague> createState() => _CreateLeagueState();
+}
 
-  final BsSelectBoxController categorySelectController = BsSelectBoxController(
-    multiple: true,
-    options: [
-      BsSelectBoxOption(value: 1, text: Text('Round Robin')),
-      BsSelectBoxOption(value: 2, text: Text('Knock Out')),
-    ],
+class _CreateLeagueState extends State<CreateLeague> {
+  final titleController = TextEditingController();
+  final budgetController = TextEditingController();
+  final registrationDeadlineController = TextEditingController();
+  final openingDateController = TextEditingController();
+  final startDateController = TextEditingController();
+
+  final bannerController = AppImagePickerController();
+  final tropyController = AppImagePickerController();
+
+  final descriptionController = TextEditingController();
+  final rulesController = TextEditingController();
+  final sponsorsController = TextEditingController();
+
+  List<DropdownMenuEntry<String>> allDropdownOptions = [];
+  String? selectedCategory;
+  Map<String, String> valueToLabelMap = {};
+  List<String> allCategoryOptions = [];
+
+  List<CategoryInputData> addedCategories = [];
+  // for cat in addedCategories = Category {cat.category}, Format: ${cat.format}, Max Team: ${cat.maxTeam}
+
+  String? selectedStatus = "Scheduled";
+  List<String> statuses = [];
+
+  Future<void> loadStatuses() async {
+    final statusList = await selectLeagueCategoriesStatus();
+    setState(() {
+      statuses = statusList;
+    });
+  }
+
+  Future<void> loadLeagueCategories() async {
+    final result = await getLeagueCategoryDropdownData(addedCategories);
+    setState(() {
+      allDropdownOptions = result['allDropdownOptions'];
+      allCategoryOptions = result['allCategoryOptions'];
+      valueToLabelMap = result['valueToLabelMap'];
+    });
+  }
+
+  Widget removeCategory(CategoryInputData data) {
+    return IconButton(
+      onPressed: isLoading
+          ? null
+          : () async {
+              final shouldRemove = await showDialog<bool>(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text(
+                      'Remove Category',
+                      style: dialogTitleStyle(context),
+                    ),
+                    content: Text(
+                      'Are you sure you want to remove this category?',
+                    ),
+                    actions: [
+                      AppButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        label: 'Cancel',
+                        variant: ButtonVariant.ghost,
+                        size: ButtonSize.sm,
+                      ),
+                      AppButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        label: 'Remove',
+                        size: ButtonSize.sm,
+                      ),
+                    ],
+                  );
+                },
+              );
+
+              if (shouldRemove == true) {
+                setState(() {
+                  addedCategories.removeWhere(
+                    (e) => e.category == data.category,
+                  );
+                  loadLeagueCategories();
+                });
+              }
+            },
+      icon: Icon(Icons.close, size: 14),
+    );
+  }
+
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    loadLeagueCategories();
+    loadStatuses();
+  }
+
+  Future<bool?> confirmDialog() => showDialog<bool>(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => AlertDialog(
+      title: Text(
+        "Review New League Details",
+        style: dialogTitleStyle(context),
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            LabeledText(label: "Title", value: titleController.text),
+            LabeledText(
+              label: "Registration Deadline",
+              value: registrationDeadlineController.text,
+            ),
+            LabeledText(
+              label: "Opening Date",
+              value: openingDateController.text,
+            ),
+            LabeledText(label: "Start Date", value: startDateController.text),
+            LabeledText(
+              label: "Description",
+              value: descriptionController.text,
+            ),
+            LabeledText(label: "Rules", value: rulesController.text),
+            budgetController.text.isNotEmpty
+                ? LabeledText(
+                    label: "Budget",
+                    value: "₱ ${budgetController.text}",
+                  )
+                : LabeledText(label: "Budget", value: "Free"),
+            if (sponsorsController.text.isNotEmpty)
+              LabeledText(label: "Sponsors", value: sponsorsController.text),
+            if (addedCategories.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              const Text("Added Categories:"),
+              ...addedCategories.map(
+                (cat) => Text(
+                  "- ${cat.category} | Format: ${cat.format} | Max Teams: ${cat.maxTeam}",
+                  overflow: TextOverflow.fade,
+                  maxLines: 1,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+      actions: [
+        AppButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          label: 'Cancel',
+          variant: ButtonVariant.ghost,
+          size: ButtonSize.sm,
+        ),
+        AppButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          label: 'Confirm',
+          size: ButtonSize.sm,
+        ),
+      ],
+    ),
   );
+
+  Future<void> handleCreateNewLeague() async {
+    setState(() => isLoading = true);
+    try {
+      // validateNewLeagueFields(
+      //   titleController: titleController,
+      //   registrationDeadlineController: registrationDeadlineController,
+      //   openingDateController: openingDateController,
+      //   startDateController: startDateController,
+      //   descriptionController: descriptionController,
+      //   rulesController: rulesController,
+      //   selectedCategory: selectedCategory,
+      //   addedCategories: addedCategories,
+      // );
+
+      final confirm = await confirmDialog();
+
+      if (confirm != true) return;
+
+      await Future.delayed(Duration(seconds: 5));
+
+      if (mounted) {
+        showAppSnackbar(
+          context,
+          message: "League created successfully!",
+          title: "Success",
+          variant: SnackbarVariant.success,
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        handleErrorCallBack(e, (message) {
+          showAppSnackbar(
+            context,
+            message: message,
+            title: "Error",
+            variant: SnackbarVariant.error,
+          );
+        });
+      }
+    } finally {
+      if (context.mounted) {
+        scheduleMicrotask(() => setState(() => isLoading = false));
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final appColors = context.appColors;
+
+    Widget buildControllerTitle() {
+      return TextField(
+        enabled: !isLoading,
+        controller: titleController,
+        decoration: InputDecoration(label: Text("League title")),
+      );
+    }
 
     Widget buildControllerInfoAndImage() {
       return SingleChildScrollView(
@@ -52,46 +266,45 @@ class LeagueControl extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TextField(
-                    decoration: InputDecoration(label: Text("League title")),
-                  ),
-                  SizedBox(height: 16),
-                  SizedBox(
-                    width: 200,
-                    child: TextField(
-                      decoration: InputDecoration(label: Text("Budget")),
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  TextField(
-                    decoration: InputDecoration(
-                      label: Text("Registration deadline"),
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  TextField(
-                    decoration: InputDecoration(label: Text("Start date")),
-                  ),
-                  SizedBox(height: 16),
                   Wrap(
-                    direction: Axis.horizontal,
-                    spacing: 16,
+                    spacing: 8,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
+                      Text("₱"),
                       SizedBox(
-                        width: 180,
-                        child: BsSelectBox(
-                          hintText: 'Select Category',
-                          controller: categorySelectController,
-                        ),
-                      ),
-                      SizedBox(
-                        width: 180,
-                        child: BsSelectBox(
-                          hintText: 'Select Category',
-                          controller: categorySelectController,
+                        width: 200,
+                        child: TextField(
+                          enabled: !isLoading,
+                          controller: budgetController,
+                          decoration: InputDecoration(label: Text("Budget")),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                         ),
                       ),
                     ],
+                  ),
+                  SizedBox(height: 16),
+                  DateTimePickerField(
+                    enabled: !isLoading,
+                    controller: registrationDeadlineController,
+                    labelText: 'Team Registration Deadline',
+                    includeTime: true,
+                  ),
+                  SizedBox(height: 16),
+                  DateTimePickerField(
+                    enabled: !isLoading,
+                    controller: openingDateController,
+                    labelText: 'Opening Date',
+                    includeTime: true,
+                  ),
+                  SizedBox(height: 16),
+                  DateTimePickerField(
+                    enabled: !isLoading,
+                    controller: startDateController,
+                    labelText: 'Start Date',
+                    includeTime: true,
                   ),
                 ],
               ),
@@ -111,7 +324,7 @@ class LeagueControl extends StatelessWidget {
                         ),
                         SizedBox(height: 8),
                         AppImagePicker(
-                          controller: imageController,
+                          controller: bannerController,
                           aspectRatio: 16 / 9,
                           width: 320,
                         ),
@@ -132,7 +345,7 @@ class LeagueControl extends StatelessWidget {
                           style: headerLabelStyleMd(context),
                         ),
                         SizedBox(height: 8),
-                        AppImagePicker(controller: imageController),
+                        AppImagePicker(controller: tropyController),
                         SizedBox(height: 8),
                         AppButton(
                           label: "Select Image",
@@ -154,63 +367,230 @@ class LeagueControl extends StatelessWidget {
     Widget buildControllerDescriptionRules() {
       return Column(
         children: [
-          TextField(
-            decoration: InputDecoration(
-              label: Text("League Description"),
-              alignLabelWithHint: true,
-            ),
-            maxLines: 5,
-          ),
-          SizedBox(height: 16),
           Row(
             children: [
               Expanded(
+                flex: 2,
                 child: TextField(
+                  enabled: !isLoading,
+                  controller: descriptionController,
                   decoration: InputDecoration(
-                    label: Text("League Rules"),
-                    hint: Text(
-                      "Explain By lorem epsom dolor it asdaj asdasdhsajdgjh",
-                    ),
+                    label: Text("League description"),
+                    hint: Text(""),
                     alignLabelWithHint: true,
                   ),
-                  maxLines: 2,
+                  maxLines: 3,
                 ),
               ),
               SizedBox(width: 16),
               Expanded(
                 child: TextField(
+                  enabled: !isLoading,
+                  controller: rulesController,
                   decoration: InputDecoration(
-                    label: Text("League Format"),
-                    hint: Text(
-                      "Explain By lorem epsom dolor it asdaj asdasdhsajdgjh",
-                    ),
+                    label: Text("League rules"),
+                    hint: Text(""),
                     alignLabelWithHint: true,
                   ),
-                  maxLines: 2,
+                  maxLines: 3,
                 ),
               ),
             ],
+          ),
+          SizedBox(height: 16),
+          TextField(
+            enabled: !isLoading,
+            controller: sponsorsController,
+            decoration: InputDecoration(label: Text("Sponsors (Optional)")),
           ),
         ],
       );
     }
 
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: appColors.gray100,
-        border: BoxBorder.all(width: 0.5, color: appColors.gray600),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: SingleChildScrollView(
+    Widget buildCategoryCard(CategoryInputData data) {
+      return Container(
+        margin: EdgeInsets.only(bottom: 16),
+        padding: EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: appColors.gray200,
+          border: Border.all(width: 0.5, color: appColors.gray600),
+          borderRadius: BorderRadius.circular(8),
+        ),
         child: Column(
           children: [
-            buildControllerInfoAndImage(),
-            SizedBox(height: 16),
-            buildControllerDescriptionRules(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                LabeledText(label: "Category", value: data.category),
+                SizedBox(width: 8),
+                removeCategory(data),
+              ],
+            ),
+            SizedBox(height: 8),
+            Container(
+              color: appColors.gray100,
+              child: TextField(
+                enabled: !isLoading,
+                controller: data.formatController,
+                decoration: InputDecoration(
+                  labelText: "Format",
+                  alignLabelWithHint: true,
+                ),
+                maxLines: 2,
+              ),
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Container(
+                  width: 200,
+                  color: appColors.gray100,
+                  child: TextField(
+                    enabled: !isLoading,
+                    controller: data.maxTeamController,
+                    decoration: InputDecoration(labelText: "Max Team"),
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
-      ),
+      );
+    }
+
+    Widget buildSelectCategory() {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              DropdownMenu<String>(
+                width: 300,
+                enableSearch: true,
+                hintText: 'Select Category',
+                initialSelection: selectedCategory,
+                onSelected: (value) {
+                  setState(() {
+                    selectedCategory = value;
+                  });
+                },
+                dropdownMenuEntries: allDropdownOptions,
+                textStyle: TextStyle(fontSize: 12),
+              ),
+              const SizedBox(width: 16),
+              AppButton(
+                isDisabled: isLoading,
+                onPressed: () {
+                  if (selectedCategory != null &&
+                      !addedCategories.any(
+                        (e) => e.category == selectedCategory,
+                      )) {
+                    setState(() {
+                      addedCategories.add(
+                        CategoryInputData(category: selectedCategory!),
+                      );
+                      selectedCategory = null;
+                      loadLeagueCategories();
+                    });
+                  }
+                },
+                label: "Add Category",
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Column(children: addedCategories.map(buildCategoryCard).toList()),
+        ],
+      );
+    }
+
+    return Stack(
+      children: [
+        Container(
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: appColors.gray100,
+            border: Border.all(width: 0.5, color: appColors.gray600),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Center(
+                  child: Text(
+                    "New League",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: appColors.accent900,
+                    ),
+                  ),
+                ),
+                Divider(thickness: 0.5, color: appColors.gray600),
+                SizedBox(height: 16),
+                buildControllerTitle(),
+                SizedBox(height: 16),
+                buildControllerInfoAndImage(),
+                SizedBox(height: 16),
+                buildControllerDescriptionRules(),
+                SizedBox(height: 16),
+                buildSelectCategory(),
+                SizedBox(height: 16),
+                Divider(thickness: 0.5, color: appColors.gray600),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    DropdownButton<String>(
+                      hint: Text(
+                        "Select Status",
+                        style: TextStyle(fontSize: 12),
+                      ),
+                      value: selectedStatus,
+                      items: statuses.map((status) {
+                        return DropdownMenuItem(
+                          value: status,
+                          child: Text(status, style: TextStyle(fontSize: 12)),
+                        );
+                      }).toList(),
+                      onChanged: null, // Disabled
+                    ),
+                    SizedBox(width: 16),
+                    AppButton(
+                      isDisabled: !addedCategories.isNotEmpty || isLoading,
+                      label: isLoading ? "Creating League..." : "Create League",
+                      onPressed: handleCreateNewLeague,
+                      size: ButtonSize.lg,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        if (isLoading)
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                color: appColors.gray1000.withAlpha((0.2 * 255).toInt()),
+                border: Border.all(width: 0.5, color: appColors.gray600),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: appColors.accent900),
+                  SizedBox(height: 8),
+                  Text("Creating League..."),
+                ],
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

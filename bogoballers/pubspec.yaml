@@ -85,6 +85,8 @@ flutter:
       - assets/images/basketball_sport.png
       - assets/logos/hawks_logo.png
       - assets/logos/celtics_logo.png
+      - assets/json/league_categories.json
+      - assets/json/league_status.json
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

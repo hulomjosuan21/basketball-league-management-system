@@ -6,13 +6,16 @@ from src.errors.errors import AuthException
 
 class ApiResponse:
     @staticmethod
-    def success(message="Success", payload=None, status_code=200):
+    def success(redirect=None,message="Success", payload=None, status_code=200):
         response = {
             "status": True,
             "message": message,
         }
         if payload is not None:
             response["payload"] = payload
+        if redirect is not None:
+            response["redirect"] = redirect
+            
         return make_response(jsonify(response), status_code)
     
     @staticmethod

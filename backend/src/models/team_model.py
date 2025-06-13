@@ -10,7 +10,7 @@ class TeamModel(db.Model):
     team_name = db.Column(db.String(100), nullable=False)
     team_address = db.Column(db.String(100), nullable=False)
     championships_won = db.Column(db.Integer, default=0)
-    coach_name = db.Column(db.String(100))
+    coach_name = db.Column(db.String(100), nullable=True)
 
     # Many-to-One
     user = db.relationship('UserModel', back_populates='teams', single_parent=True)

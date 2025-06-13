@@ -1,6 +1,8 @@
+import 'package:bogoballers/core/components/image_picker.dart';
 import 'package:bogoballers/core/enums/gender_enum.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
-import 'package:bogoballers/core/utils/validators.dart';
+import 'package:bogoballers/core/utils/league_utils.dart';
+import 'package:bogoballers/core/validations/validators.dart';
 import 'package:flutter/material.dart';
 
 void validateOrganizationFields({
@@ -146,5 +148,68 @@ void validateLoginFields({
 
   if (password.isEmpty) {
     throw ValidationException("Password cannot be empty");
+  }
+}
+
+void validateNewLeagueFields({
+  required TextEditingController titleController,
+  required TextEditingController registrationDeadlineController,
+  required TextEditingController openingDateController,
+  required TextEditingController startDateController,
+  required TextEditingController descriptionController,
+  required TextEditingController rulesController,
+  required String? selectedCategory,
+  required List<CategoryInputData> addedCategories,
+}) {
+  final title = titleController.text.trim();
+  final regDeadline = registrationDeadlineController.text.trim();
+  final openingDate = openingDateController.text.trim();
+  final startDate = startDateController.text.trim();
+  final description = descriptionController.text.trim();
+  final rules = rulesController.text.trim();
+
+  if (title.isEmpty) {
+    throw ValidationException("Title cannot be empty");
+  }
+
+  if (regDeadline.isEmpty) {
+    throw ValidationException("Registration deadline cannot be empty");
+  }
+
+  if (openingDate.isEmpty) {
+    throw ValidationException("Opening date cannot be empty");
+  }
+
+  if (startDate.isEmpty) {
+    throw ValidationException("Start date cannot be empty");
+  }
+
+  if (description.isEmpty) {
+    throw ValidationException("Description cannot be empty");
+  }
+
+  if (rules.isEmpty) {
+    throw ValidationException("Rules cannot be empty");
+  }
+
+  if (selectedCategory == null || selectedCategory.isEmpty) {
+    throw ValidationException("You must select a category");
+  }
+
+  if (addedCategories.isEmpty) {
+    throw ValidationException("At least one category must be added");
+  }
+
+  for (var cat in addedCategories) {
+    if (cat.format.trim().isEmpty) {
+      throw ValidationException(
+        "Category '${cat.category}' must have a format",
+      );
+    }
+    if (int.parse(cat.maxTeam) < 4) {
+      throw ValidationException(
+        "Category '${cat.category}' must have at least 4 teams",
+      );
+    }
   }
 }

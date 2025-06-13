@@ -9,21 +9,21 @@ class LeagueModel(db.Model):
     league_administrator_id = db.Column(db.String, db.ForeignKey('league_administrator_table.league_administrator_id'))
 
     league_title = db.Column(db.String(100), nullable=False)
-    league_picture_url = db.Column(db.String, nullable=False)
-    league_budget = db.Column(db.Float, nullable=True, default=0.0)
+    league_budget = db.Column(db.Float, nullable=False, default=0.0)
 
     registration_deadline = db.Column(db.DateTime, nullable=False)
+    opening_date = db.Column(db.DateTime, nullable=False)
+    start_date = db.Column(db.DateTime, nullable=False)
 
     championship_trophy_url = db.Column(db.String, nullable=True)
     banner_url = db.Column(db.String, nullable=True)
-    season_year = db.Column(db.Integer, nullable=False, default=datetime.now().year)
 
-    status = db.Column(db.String(100), nullable=False, default="Scheduled")
-    # Scheduled, Ongoing, Completed, Postponed, Cancelled
-    format = db.Column(db.Text, nullable=False)
+    status = db.Column(db.String(100), nullable=False, default="Scheduled") # Scheduled, Ongoing, Completed, Postponed, Cancelled
+
+    season_year = db.Column(db.Integer, nullable=False, default=datetime.now().year)
     rules = db.Column(db.Text, nullable=False)
+    
     sponsors = db.Column(db.Text, nullable=True)
-    start_date = db.Column(db.DateTime, nullable=False)
 
     # many to one
     league_administrator = db.relationship(
@@ -32,6 +32,30 @@ class LeagueModel(db.Model):
         cascade='all, delete-orphan',
         single_parent=True
     )
+
+    def to_json(self) -> dict:
+        return {
+            "league_id": self.league_id,
+            "league_administrator_id": self.league_administrator_id,
+            "league_title": self.league_title,
+            "league_budget": float(self.league_budget),
+            "league_picture_url": self.league_picture_url,
+            "league_budget": self.league_budget,
+            "registration_deadline": self.registration_deadline.isoformat() if self.registration_deadline else None,
+            "opening_date": self.opening_date.isoformat() if self.opening_date else None,
+            "start_date": self.start_date.isoformat() if self.start_date else None,
+            "championship_trophy_url": self.championship_trophy_url if self.championship_trophy_url else None,
+            "banner_url": self.banner_url if self.banner_url else None,
+            "season_year": self.season_year,
+            "categories": [assoc.category.to_json() for assoc in self.categories] if self.leagcategoriesue_teams else [],
+            "rules": self.rules,
+            "league_format": self.league_format,
+            "sponsors": self.sponsors,
+            "league_administrator": self.league_administrator.to_json() if self.league_administrator else None,
+            "league_teams": [assoc.team.to_json() for assoc in self.league_teams] if self.league_teams else [],
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
 
     categories = db.relationship(
         'LeagueCategoryModel',
@@ -49,20 +73,6 @@ class LeagueModel(db.Model):
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)
 
-    def to_json(self) -> dict:
-        return {
-            "league_id": self.league_id,
-            "league_administrator_id": self.league_administrator_id,
-            "league_name": self.league_name,
-            "league_description": self.league_description,
-            "league_picture_url": self.league_picture_url,
-            "league_budget": self.league_budget,
-            "registration_deadline": self.registration_deadline.isoformat() if self.registration_deadline else None,
-            "championship_trophy_url": self.championship_trophy_url,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
-            "teams": [assoc.team.to_json() for assoc in self.league_teams] if self.league_teams else []
-        }
     
 class LeagueTeamModel(db.Model):
     __tablename__ = 'league_teams_table'
@@ -122,18 +132,24 @@ class LeagueCategoryModel(db.Model):
 
     category_teams = db.relationship('LeagueTeamModel', back_populates='category')
 
-    league = db.relationship('LeagueModel', back_populates='categories')
+    category_format = db.Column(db.Text, nullable=False)
     stage = db.Column(db.String(100), nullable=False, default="Group Stage")
+    max_team = db.Column(db.Integer, nullable=False, default=4)
 
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)
+
+    league = db.relationship('LeagueModel', back_populates='categories')
+    
 
     def to_json(self) -> dict:
         return {
             "category_id": self.category_id,
             "league_id": self.league_id,
             "category_name": self.category_name,
+            "category_teams": [assoc.team.to_json() for assoc in self.category_teams] if self.category_teams else [],
+            "max_team": self.max_team,
+            "stage": self.stage,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
-            "teams": [assoc.team.to_json() for assoc in self.category_teams] if self.category_teams else [],
         }

@@ -56,7 +56,7 @@ class AdministratorAuthControllers:
 
             await send_verification_email(email, verify_link, request)
 
-            return ApiResponse.success(message="Verification link sent to email.",status_code=201)
+            return ApiResponse.success(redirect="/administrator/login", message="Verification link sent to email.",status_code=201)
         except Exception as e:
             db.session.rollback()
             return ApiResponse.error(e)
@@ -90,13 +90,21 @@ class AdministratorAuthControllers:
 
             if not user.is_verified:
                 raise AuthException("Your account is not verified.", 403)
-
-            access_token = create_access_token(identity=user.user_id,expires_delta=timedelta(weeks=1))
+            
+            additional_claims = {
+                "account_type": user.account_type.value
+            }
+ 
+            access_token = create_access_token(
+                identity=user.user_id,
+                additional_claims=additional_claims,
+                expires_delta=timedelta(weeks=1)
+            )
 
             payload = {
                 'access_token': access_token
             }
 
-            return ApiResponse.success(message="Login successful.",payload=payload)
+            return ApiResponse.success(redirect="/administrator/main/screen",message="Login successful.",payload=payload)
         except Exception as e:
             return ApiResponse.error(e)
