@@ -77,13 +77,6 @@ class _AdministratorMaterialScreenState
     });
   }
 
-  // final Map<String, WidgetBuilder> appRoutes = {
-  //   '/': (context) => HomePage(),
-  //   '/login': (context) => LoginPage(),
-  //   '/dashboard': (context) => DashboardPage(),
-  //   '/settings': (context) => SettingsPage(),
-  // };
-
   final Map<String, WidgetBuilder> appRoutes = {
     '/administrator/login': (context) => AdministratorLoginScreen(),
     '/administrator/main/screen': (context) => LeagueAdministratorMainScreen(),

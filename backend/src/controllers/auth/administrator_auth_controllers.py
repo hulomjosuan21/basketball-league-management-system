@@ -90,8 +90,16 @@ class AdministratorAuthControllers:
 
             if not user.is_verified:
                 raise AuthException("Your account is not verified.", 403)
-
-            access_token = create_access_token(identity=user.user_id,expires_delta=timedelta(weeks=1))
+            
+            additional_claims = {
+                "account_type": user.account_type.value
+            }
+ 
+            access_token = create_access_token(
+                identity=user.user_id,
+                additional_claims=additional_claims,
+                expires_delta=timedelta(weeks=1)
+            )
 
             payload = {
                 'access_token': access_token

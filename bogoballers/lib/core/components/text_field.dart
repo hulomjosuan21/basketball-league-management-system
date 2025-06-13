@@ -6,3 +6,9 @@ TextStyle headerLabelStyleMd(BuildContext context) => TextStyle(
   fontSize: 12,
   color: context.appColors.gray1000,
 );
+
+TextStyle dialogTitleStyle(BuildContext context) => TextStyle(
+  fontWeight: FontWeight.w600,
+  fontSize: 16,
+  color: context.appColors.gray1000,
+);

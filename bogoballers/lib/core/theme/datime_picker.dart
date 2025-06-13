@@ -27,17 +27,20 @@ class DateTimePickerField extends StatelessWidget {
   final TextEditingController controller;
   final String labelText;
   final bool includeTime;
+  final bool enabled;
 
   const DateTimePickerField({
     super.key,
     required this.controller,
     this.labelText = 'Select date',
     this.includeTime = false,
+    this.enabled = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
+      enabled: enabled,
       controller: controller,
       readOnly: true,
       decoration: InputDecoration(

@@ -19,6 +19,13 @@ InputDecorationTheme appInputDecorationTheme(BuildContext context) {
         width: borderWidth,
       ),
     ),
+    disabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(6),
+      borderSide: BorderSide(
+        color: context.appColors.gray400,
+        width: borderWidth,
+      ),
+    ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(6),
       borderSide: BorderSide(
