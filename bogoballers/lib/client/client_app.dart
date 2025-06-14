@@ -1,3 +1,4 @@
+import 'package:bogoballers/client/player/player_main_screen.dart';
 import 'package:bogoballers/client/screens/client_login_screen.dart';
 import 'package:bogoballers/client/screens/client_register_screen.dart';
 import 'package:bogoballers/core/theme/theme.dart';
@@ -8,7 +9,6 @@ class ClientMaterialScreen extends StatelessWidget {
   const ClientMaterialScreen({super.key});
 
   Future<bool> checkIfUserIsLoggedInAsync() async {
-    await Future.delayed(const Duration(seconds: 1));
     return false;
   }
 
@@ -35,7 +35,7 @@ class ClientMaterialScreen extends StatelessWidget {
         return MaterialApp(
           title: 'BogoBallers',
           theme: lightTheme(context),
-          home: ClientLoginScreen(),
+          home: PlayerMainScreen(),
           debugShowCheckedModeBanner: false,
         );
       },

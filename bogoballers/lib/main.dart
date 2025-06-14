@@ -1,5 +1,6 @@
 import 'package:bogoballers/administrator/administrator_app.dart';
 import 'package:bogoballers/client/client_app.dart';
+import 'package:bogoballers/core/helpers/supabase_helpers.dart';
 import 'package:bogoballers/core/hive/app_box.dart';
 import 'package:bogoballers/core/providers/league_adminstrator_provider.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,7 @@ Future<void> main() async {
   );
   checkSupabaseStatus();
   if (kIsWeb || Platform.isIOS || Platform.isAndroid) {
-    runApp(ClientMaterialScreen());
+    runApp(MultiProvider(providers: [], child: ClientMaterialScreen()));
   } else if (Platform.isWindows || Platform.isMacOS) {
     runApp(
       MultiProvider(
@@ -30,13 +31,5 @@ Future<void> main() async {
         child: AdministratorMaterialScreen(),
       ),
     );
-  }
-}
-
-void checkSupabaseStatus() {
-  if (Supabase.instance.client != null) {
-    debugPrint("✅ Supabase initialized successfully!");
-  } else {
-    debugPrint("❌ Supabase failed to initialize.");
   }
 }
