@@ -4,6 +4,8 @@ from src.utils.api_response import ApiResponse
 from src.extensions import db
 from datetime import datetime
 
+from src.utils.file_utils import save_file
+
 class LeagueControllers:
     async def create_league(self):
         try:
@@ -53,52 +55,27 @@ class LeagueControllers:
         except Exception as e:
             db.session.rollback()
             return ApiResponse.error(e)
+        
+    async def upload_league_images(self, league_id: str):
+        try:
+            league = LeagueModel.query.get(league_id)
 
-    # async def create_league(self):
-    #     try:
-    #         data = request.get_json()
-    #         league_administrator_id = data.get('league_administrator_id')
-    #         league_title = data.get('league_title')
-    #         league_description = data.get('league_description')
-    #         league_budget = data.get('league_budget')
-    #         registration_deadline = data.get('registration_deadline')
-    #         opening_date = data.get('opening_date')
-    #         start_date = data.get('start_date')
-    #         league_rules = data.get('league_rules')
-    #         status = data.get('status')
-    #         categories = data.get('categories')
-    #         sponsors = data.get('sponsors')
+            if not league:
+                raise ValueError("League not found")
 
-    #         print(league_administrator_id)
-    #         print(league_title)
-    #         print(league_description)
-    #         print(league_budget)
-    #         print(registration_deadline)
-    #         print(opening_date)
-    #         print(start_date)
-    #         print(league_rules)
-    #         print(status)
-    #         print(categories)
+            banner_image = request.files.get('banner_image')
+            if banner_image:
+                banner_url = await save_file(banner_image, 'banners', request, 'supabase')
+                league.banner_url = banner_url
 
-    #         categoriesModel = []
-    #         this is the LeagueCategoryModel 
+            championship_trophy_image = request.files.get('championship_trophy_image')
+            if championship_trophy_image:
+                trophy_url = await save_file(championship_trophy_image, 'trophies', request, 'supabase')
+                league.championship_trophy_url = trophy_url
 
+            db.session.commit()
+            return ApiResponse.success()
 
-    #         league = LeagueModel(
-    #             league_administrator_id=league_administrator_id,
-    #             league_title=league_title,
-    #             league_description=league_description,
-    #             league_budget=league_budget,
-    #             registration_deadline=datetime.fromisoformat(registration_deadline),
-    #             opening_date=datetime.fromisoformat(opening_date),
-    #             start_date=datetime.fromisoformat(start_date),
-    #             league_rules=league_rules,
-    #             status=status,
-    #             sponsors=sponsors if sponsors else None,
-    #             categories= 
-    #         );
-
-    #         return ApiResponse.success()
-    #     except Exception as e:
-    #         db.session.rollback()
-    #         return ApiResponse.error(e)
+        except Exception as e:
+            db.session.rollback()
+            return ApiResponse.error(str(e))
