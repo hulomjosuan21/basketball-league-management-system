@@ -61,7 +61,7 @@ class AdministratorAuthControllers:
             db.session.rollback()
             return ApiResponse.error(e)
         
-    async def fetch_administrator(self, user_id):
+    def fetch_administrator(self, user_id):
         try:
             user = UserModel.query.get(user_id)
             if not user:
@@ -74,7 +74,7 @@ class AdministratorAuthControllers:
         except Exception as e:
             return ApiResponse.error(e)
         
-    async def login_administrator(self):
+    def login_administrator(self):
         try:
             data = request.get_json()
             email = data.get('email')

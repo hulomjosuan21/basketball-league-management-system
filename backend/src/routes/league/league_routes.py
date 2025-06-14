@@ -7,5 +7,11 @@ league_bp = Blueprint('league', __name__,url_prefix='/league')
 
 leagueControllers = LeagueControllers()
 
+league_bp.get('/fetch')(leagueControllers.filter_leagues_by_organization_details)
+
 league_bp.post('/create-new')(leagueControllers.create_league)
-league_bp.put('/upload/banner/trophy/<string:league_id>')(lambda league_id: leagueControllers.upload_league_images(league_id))
+
+league_bp.put('/upload/image')(leagueControllers.upload_league_images)
+league_bp.put('/modify/<string:league_id>')(leagueControllers.update_league)
+
+league_bp.delete('/delete/<string:league_id>')(leagueControllers.delete_league)
