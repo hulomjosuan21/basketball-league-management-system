@@ -1,4 +1,3 @@
-import 'package:bogoballers/core/components/image_picker.dart';
 import 'package:bogoballers/core/enums/gender_enum.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:bogoballers/core/utils/league_utils.dart';
@@ -158,7 +157,6 @@ void validateNewLeagueFields({
   required TextEditingController startDateController,
   required TextEditingController descriptionController,
   required TextEditingController rulesController,
-  required String? selectedCategory,
   required List<CategoryInputData> addedCategories,
 }) {
   final title = titleController.text.trim();
@@ -190,10 +188,6 @@ void validateNewLeagueFields({
 
   if (rules.isEmpty) {
     throw ValidationException("Rules cannot be empty");
-  }
-
-  if (selectedCategory == null || selectedCategory.isEmpty) {
-    throw ValidationException("You must select a category");
   }
 
   if (addedCategories.isEmpty) {
