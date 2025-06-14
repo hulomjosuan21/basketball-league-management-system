@@ -4,7 +4,7 @@ import 'package:bogoballers/core/models/league_administrator.dart';
 import 'package:dio/dio.dart';
 
 class LeagueModel {
-  String? league_id;
+  late String league_id;
   String league_administrator_id;
   String league_title;
   double league_budget;
@@ -14,11 +14,12 @@ class LeagueModel {
   String? championship_trophy_url;
   String? banner_url;
   String status;
-  int season_year;
-  String rules;
+  late int season_year;
+  String league_rules;
   String? sponsors;
+  String league_description;
 
-  LeagueAdministratorModel league_administrator;
+  late LeagueAdministratorModel league_administrator;
   late List<LeagueTeamModel> league_teams;
   late List<LeagueCategoryModel> categories;
 
@@ -29,16 +30,17 @@ class LeagueModel {
   MultipartFile? banner_file;
 
   LeagueModel({
-    this.league_id,
+    required this.league_id,
     required this.league_administrator_id,
     required this.league_title,
+    required this.league_description,
     required this.league_budget,
     required this.registration_deadline,
     required this.opening_date,
     required this.start_date,
     required this.status,
     required this.season_year,
-    required this.rules,
+    required this.league_rules,
     required this.league_administrator,
     required this.league_teams,
     required this.categories,
@@ -50,33 +52,53 @@ class LeagueModel {
   });
 
   LeagueModel.create({
+    required this.league_administrator_id,
     required this.league_title,
     required this.league_budget,
     required this.registration_deadline,
     required this.opening_date,
     required this.start_date,
-    required this.status,
-    required this.season_year,
-    required this.rules,
-    required this.league_administrator,
-    required this.league_administrator_id,
-    this.championship_trophy_url,
+    required this.league_description,
+    required this.league_rules,
     this.sponsors,
-    this.championship_trophy_final,
+    required this.status,
+    required this.categories,
   });
+
+  Map<String, dynamic> toJsonForCreation() {
+    final data = {
+      'league_administrator_id': league_administrator_id,
+      'league_title': league_title,
+      'league_description': league_description,
+      'league_budget': league_budget,
+      'registration_deadline': registration_deadline.toIso8601String(),
+      'opening_date': opening_date.toIso8601String(),
+      'start_date': start_date.toIso8601String(),
+      'league_rules': league_rules,
+      'status': status,
+      'categories': categories.map((cat) => cat.toJsonForCreation()).toList(),
+    };
+
+    if (sponsors != null) {
+      data['sponsors'] = sponsors!;
+    }
+
+    return data;
+  }
 
   factory LeagueModel.fromJson(Map<String, dynamic> json) {
     return LeagueModel(
       league_id: json['league_id'],
       league_administrator_id: json['league_administrator_id'],
       league_title: json['league_title'],
+      league_description: json['league_description'],
       league_budget: json['league_budget'],
       registration_deadline: DateTime.parse(json['registration_deadline']),
       opening_date: DateTime.parse(json['opening_date']),
       start_date: DateTime.parse(json['start_date']),
       status: json['status'],
       season_year: json['season_year'],
-      rules: json['rules'],
+      league_rules: json['league_rules'],
       league_administrator: LeagueAdministratorModel.fromJson(
         json['league_administrator'],
       ),
@@ -94,33 +116,11 @@ class LeagueModel {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'league_id': league_id,
-      'league_administrator_id': league_administrator_id,
-      'league_title': league_title,
-      'league_budget': league_budget,
-      'registration_deadline': registration_deadline.toIso8601String(),
-      'opening_date': opening_date.toIso8601String(),
-      'start_date': start_date.toIso8601String(),
-      'status': status,
-      'season_year': season_year,
-      'rules': rules,
-      'league_administrator': league_administrator.toJson(),
-      'league_teams': league_teams?.map((e) => e.toJson()).toList(),
-      'categories': categories?.map((e) => e.toJson()).toList(),
-      'championship_trophy_url': championship_trophy_url,
-      'banner_url': banner_url,
-      'sponsors': sponsors,
-      'created_at': created_at?.toIso8601String(),
-      'updated_at': updated_at?.toIso8601String(),
-    };
-  }
-
   LeagueModel copyWith({
     String? league_id,
     String? league_administrator_id,
     String? league_title,
+    String? league_description,
     double? league_budget,
     DateTime? registration_deadline,
     DateTime? opening_date,
@@ -129,7 +129,7 @@ class LeagueModel {
     String? banner_url,
     String? status,
     int? season_year,
-    String? rules,
+    String? league_rules,
     String? league_format,
     String? sponsors,
     LeagueAdministratorModel? league_administrator,
@@ -143,6 +143,7 @@ class LeagueModel {
       league_administrator_id:
           league_administrator_id ?? this.league_administrator_id,
       league_title: league_title ?? this.league_title,
+      league_description: league_description ?? this.league_description,
       league_budget: league_budget ?? this.league_budget,
       registration_deadline:
           registration_deadline ?? this.registration_deadline,
@@ -153,7 +154,7 @@ class LeagueModel {
       banner_url: banner_url ?? this.banner_url,
       status: status ?? this.status,
       season_year: season_year ?? this.season_year,
-      rules: rules ?? this.rules,
+      league_rules: league_rules ?? this.league_rules,
       sponsors: sponsors ?? this.sponsors,
       league_administrator: league_administrator ?? this.league_administrator,
       league_teams: league_teams ?? this.league_teams,
@@ -166,7 +167,7 @@ class LeagueModel {
 
 class LeagueCategoryModel {
   String? category_id;
-  String league_id;
+  late String league_id;
 
   String category_name;
 
@@ -177,7 +178,7 @@ class LeagueCategoryModel {
   late DateTime created_at;
   late DateTime updated_at;
 
-  LeagueModel? league;
+  late LeagueModel league;
   List<LeagueTeamModel>? category_teams;
 
   LeagueCategoryModel({
@@ -187,19 +188,27 @@ class LeagueCategoryModel {
     required this.category_format,
     required this.stage,
     required this.max_team,
-    this.league,
+    required this.league,
     this.category_teams,
     required this.created_at,
     required this.updated_at,
   });
 
   LeagueCategoryModel.create({
-    required this.league_id,
     required this.category_name,
     required this.category_format,
-    required this.stage,
+    this.stage = "Group Stage",
     required this.max_team,
   });
+
+  Map<String, dynamic> toJsonForCreation() {
+    return {
+      'category_name': category_name,
+      'category_format': category_format,
+      'stage': stage,
+      'max_team': max_team,
+    };
+  }
 
   factory LeagueCategoryModel.fromJson(Map<String, dynamic> json) {
     return LeagueCategoryModel(
@@ -209,9 +218,7 @@ class LeagueCategoryModel {
       category_format: json['category_format'],
       stage: json['stage'],
       max_team: json['max_team'],
-      league: json['league'] != null
-          ? LeagueModel.fromJson(json['league'])
-          : null,
+      league: json['league'],
       category_teams: json['category_teams'] != null
           ? (json['category_teams'] as List)
                 .map((e) => LeagueTeamModel.fromJson(e))
@@ -220,20 +227,6 @@ class LeagueCategoryModel {
       created_at: DateTime.parse(json['created_at']),
       updated_at: DateTime.parse(json['updated_at']),
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'category_id': category_id,
-      'league_id': league_id,
-      'category_name': category_name,
-      'stage': stage,
-      'max_team': max_team,
-      'league': league?.toJson(),
-      'category_teams': category_teams?.map((e) => e.toJson()).toList(),
-      'created_at': created_at?.toIso8601String(),
-      'updated_at': updated_at?.toIso8601String(),
-    };
   }
 
   LeagueCategoryModel copyWith({

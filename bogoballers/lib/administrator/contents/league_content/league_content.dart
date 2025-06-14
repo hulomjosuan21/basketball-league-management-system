@@ -5,6 +5,9 @@ import 'package:bogoballers/core/components/image_picker.dart';
 import 'package:bogoballers/core/components/labeled_text.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
 import 'package:bogoballers/core/components/text_field.dart';
+import 'package:bogoballers/core/models/league_model.dart';
+import 'package:bogoballers/core/providers/league_adminstrator_provider.dart';
+import 'package:bogoballers/core/services/league_services.dart';
 import 'package:bogoballers/core/theme/datime_picker.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
@@ -12,6 +15,7 @@ import 'package:bogoballers/core/utils/league_utils.dart';
 import 'package:bogoballers/core/validations/auth_validations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 class LeagueContent extends StatefulWidget {
   const LeagueContent({super.key});
@@ -201,27 +205,65 @@ class _CreateLeagueState extends State<CreateLeague> {
   Future<void> handleCreateNewLeague() async {
     setState(() => isLoading = true);
     try {
-      // validateNewLeagueFields(
-      //   titleController: titleController,
-      //   registrationDeadlineController: registrationDeadlineController,
-      //   openingDateController: openingDateController,
-      //   startDateController: startDateController,
-      //   descriptionController: descriptionController,
-      //   rulesController: rulesController,
-      //   selectedCategory: selectedCategory,
-      //   addedCategories: addedCategories,
-      // );
+      validateNewLeagueFields(
+        titleController: titleController,
+        registrationDeadlineController: registrationDeadlineController,
+        openingDateController: openingDateController,
+        startDateController: startDateController,
+        descriptionController: descriptionController,
+        rulesController: rulesController,
+        addedCategories: addedCategories,
+      );
 
       final confirm = await confirmDialog();
 
       if (confirm != true) return;
+      if (!mounted) return;
 
-      await Future.delayed(Duration(seconds: 5));
+      final adminProvider = Provider.of<LeagueAdministratorProvider>(
+        context,
+        listen: false,
+      );
+      final currentAdmin = adminProvider.getCurrentLeagueAdministrator;
+
+      if (currentAdmin == null) return;
+
+      List<LeagueCategoryModel> categories = [];
+
+      for (CategoryInputData cat in addedCategories) {
+        categories.add(
+          LeagueCategoryModel.create(
+            category_name: cat.category,
+            category_format: cat.format,
+            max_team: int.parse(cat.maxTeam),
+          ),
+        );
+      }
+
+      final leagueModel = LeagueModel.create(
+        league_administrator_id: currentAdmin.league_administrator_id,
+        league_title: titleController.text,
+        league_budget: double.parse(budgetController.text),
+        registration_deadline: DateTime.parse(
+          registrationDeadlineController.text,
+        ),
+        opening_date: DateTime.parse(openingDateController.text),
+        start_date: DateTime.parse(startDateController.text),
+        league_description: descriptionController.text,
+        league_rules: rulesController.text,
+        sponsors: sponsorsController.text,
+        status: selectedStatus!,
+        categories: categories,
+      );
+
+      final service = LeagueServices();
+
+      final response = await service.createNewLeague(leagueModel);
 
       if (mounted) {
         showAppSnackbar(
           context,
-          message: "League created successfully!",
+          message: response.message,
           title: "Success",
           variant: SnackbarVariant.success,
         );

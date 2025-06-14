@@ -6,9 +6,14 @@ class LeagueModel(db.Model):
     __tablename__ = 'leagues_table'
 
     league_id = UUIDGenerator(db, 'league')
-    league_administrator_id = db.Column(db.String, db.ForeignKey('league_administrator_table.league_administrator_id'))
+    league_administrator_id = db.Column(
+        db.String, 
+        db.ForeignKey('league_administrator_table.league_administrator_id', ondelete="CASCADE"),
+        nullable=False
+    )
 
     league_title = db.Column(db.String(100), nullable=False)
+    league_description = db.Column(db.String(100), nullable=False)
     league_budget = db.Column(db.Float, nullable=False, default=0.0)
 
     registration_deadline = db.Column(db.DateTime, nullable=False)
@@ -21,7 +26,7 @@ class LeagueModel(db.Model):
     status = db.Column(db.String(100), nullable=False, default="Scheduled") # Scheduled, Ongoing, Completed, Postponed, Cancelled
 
     season_year = db.Column(db.Integer, nullable=False, default=datetime.now().year)
-    rules = db.Column(db.Text, nullable=False)
+    league_rules = db.Column(db.Text, nullable=False)
     
     sponsors = db.Column(db.Text, nullable=True)
 
@@ -29,8 +34,7 @@ class LeagueModel(db.Model):
     league_administrator = db.relationship(
         'LeagueAdministratorModel',
         back_populates='created_leagues',
-        cascade='all, delete-orphan',
-        single_parent=True
+        passive_deletes=True
     )
 
     def to_json(self) -> dict:
@@ -126,7 +130,10 @@ class LeagueCategoryModel(db.Model):
     __tablename__ = 'league_categories_table'
 
     category_id = UUIDGenerator(db, 'category')
-    league_id = db.Column(db.String, db.ForeignKey('leagues_table.league_id'))
+    league_id = db.Column(
+        db.String,
+        db.ForeignKey('leagues_table.league_id', ondelete="CASCADE")
+    )
 
     category_name = db.Column(db.String(100), nullable=False)
 
@@ -139,8 +146,11 @@ class LeagueCategoryModel(db.Model):
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)
 
-    league = db.relationship('LeagueModel', back_populates='categories')
-    
+    league = db.relationship(
+        'LeagueModel',
+        back_populates='categories',
+        passive_deletes=True
+    )
 
     def to_json(self) -> dict:
         return {

@@ -56,10 +56,11 @@ class LeagueAdministratorModel(db.Model):
     )
 
     created_leagues = db.relationship(
-        'LeagueModel',
-        back_populates='league_administrator',
-        cascade='all, delete-orphan'
-    )
+            'LeagueModel',
+            back_populates='league_administrator',
+            cascade='all, delete-orphan',
+            passive_deletes=True
+        )
 
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)

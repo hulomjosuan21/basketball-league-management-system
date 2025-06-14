@@ -78,7 +78,6 @@ class TeamModel {
       'coach_name': coach_name,
       'user': user?.toJson(),
       'players': players?.map((e) => e.toJson()).toList(),
-      'league': league?.map((e) => e.toJson()).toList(),
       'created_at': created_at?.toIso8601String(),
       'updated_at': updated_at?.toIso8601String(),
     };
