@@ -27,9 +27,14 @@ class LeagueContent extends StatefulWidget {
 class _LeagueContentState extends State<LeagueContent> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      child: Column(mainAxisSize: MainAxisSize.min, children: [CreateLeague()]),
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [CreateLeague()],
+        ),
+      ),
     );
   }
 }
