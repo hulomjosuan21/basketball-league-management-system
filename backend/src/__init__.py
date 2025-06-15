@@ -17,6 +17,7 @@ from src.routes.client.client_route import client_bp
 from src.routes.player.player_route import player_bp
 from src.routes.team_creator.team_creator_route import team_creator_bp 
 from src.routes.league.league_routes import league_bp
+from src.routes.team.team_routes import team_bp
 
 from src.models.player_model import *
 from src.models.user_model import *
@@ -72,7 +73,7 @@ class FlaskServer:
         self.server.register_blueprint(team_creator_bp)
 
         self.server.register_blueprint(league_bp)
-
+        self.server.register_blueprint(team_bp)
         self.server.register_blueprint(user_bp)
         self.server.register_blueprint(administrator_bp)
         self.server.register_blueprint(test_bp)

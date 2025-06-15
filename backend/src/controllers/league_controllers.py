@@ -72,6 +72,9 @@ class LeagueControllers:
             categories = data.get('categories')
             sponsors = data.get('sponsors')
 
+            if not all([league_administrator_id, league_title, league_description, league_budget, registration_deadline, opening_date, start_date, league_rules, status, categories]):
+                raise ValueError("All fields must be provided and not empty.")
+
             # Create League instance
             league = LeagueModel(
                 league_administrator_id=league_administrator_id,
