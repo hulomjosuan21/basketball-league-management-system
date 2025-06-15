@@ -17,12 +17,14 @@ from src.routes.client.client_route import client_bp
 from src.routes.player.player_route import player_bp
 from src.routes.team_creator.team_creator_route import team_creator_bp 
 from src.routes.league.league_routes import league_bp
+from src.routes.team.team_routes import team_bp
 
 from src.models.player_model import *
 from src.models.user_model import *
 from src.models.league_administrator_model import *
 from src.models.league_model import *
 from src.models.team_model import *
+from src.models.audit_log_model import *
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -68,11 +70,14 @@ class FlaskServer:
         self.server.get("/places")(getCityAndBarangays)
         self.server.get("/organization-types")(getOrganizationTypes)
 
+        self.server.get('/log/<string:audit_id>')(AuditLogModel.fetch_log)
+        self.server.get('/logs/<string:audit_to_id>')(AuditLogModel.fetch_logs_for)
+
         self.server.register_blueprint(player_bp)
         self.server.register_blueprint(team_creator_bp)
 
         self.server.register_blueprint(league_bp)
-
+        self.server.register_blueprint(team_bp)
         self.server.register_blueprint(user_bp)
         self.server.register_blueprint(administrator_bp)
         self.server.register_blueprint(test_bp)

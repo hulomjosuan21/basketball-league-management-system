@@ -3,15 +3,9 @@ from sqlalchemy import Enum as SqlEnum
 from enum import Enum
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
-from src.utils.db_utils import CreatedAt, UUIDGenerator, UpdatedAt
+from src.utils.db_utils import AccountTypeEnum, CreatedAt, UUIDGenerator, UpdatedAt, create_account_type_enum
 from argon2.exceptions import HashingError
 import re
-
-class AccountTypeEnum(Enum):
-    PLAYER = "Player"
-    TEAM_CREATOR = "Team_Creator"
-    LEAGUE_ADMINISTRATOR = "League_Administrator"
-    CITY_ADMINISTRATOR = "City_Administrator"
 
 class UserModel(db.Model):
     __tablename__ = 'users_table'
@@ -28,21 +22,7 @@ class UserModel(db.Model):
     password_hash = db.Column(db.String, nullable=False)
     is_verified = db.Column(db.Boolean, default=False)
 
-    account_type = db.Column(
-        SqlEnum(
-            AccountTypeEnum,
-            values_callable=lambda x: [e.value for e in x],
-            name="account_type_enum"
-        ), nullable=False
-    )
-
-    def set_account_type(self, account_type_str: str) -> None:
-        for account_type in AccountTypeEnum:
-            if account_type.value == account_type_str:
-                self.account_type = account_type
-                return
-        raise ValueError(f"Invalid account type string: {account_type_str}")
-
+    account_type = db.Column(create_account_type_enum(db), nullable=False)
 
     def set_password(self, password_str: str) -> None:
         # if len(password_str) < 8:
@@ -72,7 +52,7 @@ class UserModel(db.Model):
             "email": self.email,
             "contact_number": self.contact_number,
             "is_verified": self.is_verified,
-            "account_type": self.account_type.value,
+            "account_type": self.account_type,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }

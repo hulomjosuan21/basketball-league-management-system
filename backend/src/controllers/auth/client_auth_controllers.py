@@ -10,7 +10,7 @@ from flask import request, jsonify, render_template_string
 from src.models.user_model import AccountTypeEnum, UserModel
 
 class ClientAuthControllers:    
-    async def login_client(self):
+    def login_client(self):
         try:
             data = request.get_json()
             email = data.get('email')
