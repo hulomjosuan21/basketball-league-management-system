@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
+from enum import Enum
 
 def CreatedAt(db):
     return db.Column(
@@ -24,4 +25,17 @@ def UUIDGenerator(db, prefix):
         db.String,
         primary_key=True,
         default=generate_uid
+    )
+
+class AccountTypeEnum(Enum):
+    PLAYER = "Player"
+    TEAM_CREATOR = "Team_Creator"
+    LEAGUE_ADMINISTRATOR = "League_Administrator"
+    CITY_ADMINISTRATOR = "City_Administrator",
+    SYSTEM = "System"
+
+def create_account_type_enum(db):
+    return db.Enum(
+        *(member.value for member in AccountTypeEnum),
+        name="account_type_enum"
     )

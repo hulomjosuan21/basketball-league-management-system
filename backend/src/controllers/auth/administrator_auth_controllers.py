@@ -32,9 +32,9 @@ class AdministratorAuthControllers:
             
             user = UserModel(
                 email=email,
-                contact_number=contact_number
+                contact_number=contact_number,
+                account_type=account_type
             )
-            user.set_account_type(account_type)
             user.set_password(password_str)
 
             league_administrator = LeagueAdministratorModel(

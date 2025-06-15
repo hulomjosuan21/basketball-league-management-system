@@ -5,8 +5,9 @@ class PlayerTeamModel(db.Model):
     __tablename__ = 'player_team_table'
 
     player_team_id = UUIDGenerator(db, 'player-team')
-    player_id = db.Column(db.String, db.ForeignKey('players_table.player_id'))
-    team_id = db.Column(db.String, db.ForeignKey('teams_table.team_id'))
+    player_id = db.Column(db.String, db.ForeignKey('players_table.player_id'), nullable=False)
+    team_id = db.Column(db.String, db.ForeignKey('teams_table.team_id', ondelete="CASCADE"), nullable=False)
+    isBan = db.Column(db.Boolean, nullable=False, default=False)
 
     __table_args__ = (
         db.UniqueConstraint('player_id', 'team_id', name='unique_player_team'),
@@ -44,6 +45,7 @@ class PlayerTeamModel(db.Model):
             "jersey_number": self.player.jersey_number,
             "position": self.player.position,
             "profile_image_url": self.player.profile_image_url,
+            "isBan": self.isBan
         }
 
     def to_json(self) -> dict:
@@ -103,9 +105,11 @@ class TeamModel(db.Model):
         primaryjoin="TeamModel.team_captain_id == PlayerTeamModel.player_team_id"
     )
     
+    def players_to_json_list(self):
+        return [player.player_json_for_team() for player in self.players] if self.players else []
 
     def to_json(self):
-        players = [player.player_json_for_team() for player in self.players] if self.players else [];
+        players = [player.player_json_for_team() for player in self.players] if self.players else []
         team_captain = self.team_captain.player_json_for_team() if self.team_captain else None
         return {
             "team_id": self.team_id,
@@ -124,15 +128,17 @@ class TeamModel(db.Model):
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
         }
+    
     # Many-to-Many
     players = db.relationship(
         'PlayerTeamModel',
         back_populates='team',
         cascade='all, delete-orphan',
-        foreign_keys=[PlayerTeamModel.team_id]
+        foreign_keys=[PlayerTeamModel.team_id],
+        passive_deletes=True
     )
 
-    league_registrations = db.relationship(
+    league_team = db.relationship(
         'LeagueTeamModel',
         back_populates='team',
         cascade='all, delete-orphan'

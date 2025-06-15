@@ -22,9 +22,9 @@ class TeamCreatorAuthController:
                 raise ValueError("All fields must be provided and not empty.")
             user = UserModel(
                 email=email,
-                contact_number=contact_number
+                contact_number=contact_number,
+                account_type=account_type
             )
-            user.set_account_type(account_type)
             user.set_password(password_str)
 
             db.session.add(user)

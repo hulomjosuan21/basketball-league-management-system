@@ -1,12 +1,14 @@
 from flask import request
+from src.models.audit_log_model import AuditLogModel
 from src.models.league_administrator_model import LeagueAdministratorModel
-from src.models.league_model import LeagueModel, LeagueCategoryModel
+from src.models.league_model import LeagueModel, LeagueCategoryModel, LeagueTeamModel
 from src.utils.api_response import ApiResponse
 from src.extensions import db
 from datetime import datetime
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func
 import difflib
+from src.utils.db_utils import AccountTypeEnum
 from src.utils.file_utils import save_file
 
 class LeagueControllers:
@@ -177,6 +179,67 @@ class LeagueControllers:
             db.session.commit()
             return ApiResponse.success(message="League deleted successfully")
 
+        except Exception as e:
+            db.session.rollback()
+            return ApiResponse.error(str(e))
+
+    def accept_team(self):
+        try:
+            data = request.get_json()
+            league_id = data.get('league_id')
+            team_id = data.get('team_id')
+            category_id = data.get('category_id')
+
+            league = LeagueTeamModel(
+                league_id=league_id,
+                team_id=team_id,
+                category_id=category_id
+            )
+
+            db.session.add(league)
+            db.session.commit()
+            return ApiResponse.success(message="Wait for the administrator to accept your team")
+        except Exception as e:
+            db.session.rollback()
+            return ApiResponse.error(str(e))
+        
+    def get_league_team(self, league_team_id):
+        try:
+            league_team = LeagueTeamModel.query.get(league_team_id)
+            payload = league_team.team_to_json()
+            return ApiResponse.success(payload=payload)
+        except Exception as e:
+            db.session.rollback()
+            return ApiResponse.error(str(e))
+        
+    def set_league_team_status(self, league_team_id):
+        try:
+            data = request.get_json()
+            status = data.get('status')
+            if not status:
+                raise ValueError("All fields must be provided and not empty.")
+
+            league_team = LeagueTeamModel.query.get(league_team_id)
+
+            if not league_team:
+                raise ValueError("Team not found")
+            
+            league_team.status = status
+
+            db.session.commit()
+
+            details = f"Your Team {league_team.team.team_name} has been {status}"
+
+            AuditLogModel.log_action(
+                # audit_by_id=league_team.league.league_administrator_id,
+                # audit_by_type=AccountTypeEnum.LEAGUE_ADMINISTRATOR.value,
+                audit_to_id=league_team.team.user_id,
+                audit_to_type=AccountTypeEnum.TEAM_CREATOR.value,
+                action=status,
+                details=details
+            )
+
+            return ApiResponse.success(payload=details)
         except Exception as e:
             db.session.rollback()
             return ApiResponse.error(str(e))

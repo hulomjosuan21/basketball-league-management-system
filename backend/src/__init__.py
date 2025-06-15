@@ -24,6 +24,7 @@ from src.models.user_model import *
 from src.models.league_administrator_model import *
 from src.models.league_model import *
 from src.models.team_model import *
+from src.models.audit_log_model import *
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -68,6 +69,9 @@ class FlaskServer:
         
         self.server.get("/places")(getCityAndBarangays)
         self.server.get("/organization-types")(getOrganizationTypes)
+
+        self.server.get('/log/<string:audit_id>')(AuditLogModel.fetch_log)
+        self.server.get('/logs/<string:audit_to_id>')(AuditLogModel.fetch_logs_for)
 
         self.server.register_blueprint(player_bp)
         self.server.register_blueprint(team_creator_bp)

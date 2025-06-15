@@ -23,7 +23,7 @@ class LeagueModel(db.Model):
     championship_trophy_url = db.Column(db.String, nullable=True)
     banner_url = db.Column(db.String, nullable=True)
 
-    status = db.Column(db.String(100), nullable=False, default="Scheduled") # Scheduled, Ongoing, Completed, Postponed, Cancelled
+    status = db.Column(db.Enum('Scheduled', 'Ongoing', 'Completed', 'Postponed', 'Cancelled', name="league_status"), nullable=False, default="Scheduled") # Scheduled, Ongoing, Completed, Postponed, Cancelled
 
     season_year = db.Column(db.Integer, nullable=False, default=datetime.now().year)
     league_rules = db.Column(db.Text, nullable=False)
@@ -89,6 +89,8 @@ class LeagueTeamModel(db.Model):
     league_id = db.Column(db.String, db.ForeignKey('leagues_table.league_id'))
     category_id = db.Column(db.String, db.ForeignKey('league_categories_table.category_id'))
 
+    status = db.Column(db.Enum('Pending', 'Accepted', 'Rejected', name="league_team_status"), default='Pending')
+
     wins = db.Column(db.Integer, default=0, nullable=False)
     losses = db.Column(db.Integer, default=0, nullable=False)
     draws = db.Column(db.Integer, default=0, nullable=False)
@@ -103,7 +105,7 @@ class LeagueTeamModel(db.Model):
 
     team = db.relationship(
         'TeamModel',
-        back_populates='league_registrations'
+        back_populates='league_team'
     )
     league = db.relationship('LeagueModel', back_populates='league_teams')
     category = db.relationship('LeagueCategoryModel', back_populates='category_teams')
@@ -111,21 +113,24 @@ class LeagueTeamModel(db.Model):
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)
 
-    def to_json(self) -> dict:
+    def team_to_json(self) -> dict:
         return {
             "league_team_id": self.league_team_id,
             "team_id": self.team_id,
-            "league_id": self.league_id,
-            "category_id": self.category_id,
-            "team": self.team.to_json() if self.team else None,
-            "league": self.league.to_json() if self.league else None,
-            "category": self.category.to_json() if self.category else None,
+            "status": self.status,
             "wins": self.wins,
             "losses": self.losses,
             "draws": self.draws,
             "points": self.points,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "team_name": self.team.team_name,
+            "barangay_name": self.team.barangay_name,
+            "municipality_name": self.team.municipality_name,
+            "team_motto": self.team.team_motto,
+            "team_logo_url": self.team.team_logo_url,
+            "coach_name": self.team.coach_name,
+            "assistant_coach_name": self.team.assistant_coach_name if self.team.assistant_coach_name else None,
+            "team_captain": self.team.team_captain.player_json_for_team() if self.team.team_captain else None,
+            "players": self.team.players_to_json_list()
         }
 
 
@@ -145,6 +150,7 @@ class LeagueCategoryModel(db.Model):
     category_format = db.Column(db.Text, nullable=False)
     stage = db.Column(db.String(100), nullable=False, default="Group Stage")
     max_team = db.Column(db.Integer, nullable=False, default=4)
+    accept_teams = db.Column(db.Boolean, nullable=False, default=True)
 
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)

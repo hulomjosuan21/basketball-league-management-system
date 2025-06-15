@@ -65,6 +65,17 @@ class LeagueAdministratorModel(db.Model):
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)
 
+    def to_json_for_log(self) -> dict:
+        return {
+            "league_administrator_id": self.league_administrator_id,
+            "user_id": self.user_id,
+            "organization_type": self.organization_type,
+            "organization_name": self.organization_name,
+            "barangay_name": self.barangay_name,
+            "municipality_name": self.municipality_name,
+            "organization_logo_url": self.organization_logo_url,
+        }
+
     def to_json(self) -> dict:
         return {
             "league_administrator_id": self.league_administrator_id,
