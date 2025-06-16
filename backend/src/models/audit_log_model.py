@@ -36,13 +36,13 @@ class AuditLogModel(db.Model):
         }
 
     def get_auditor_json(self) -> Optional[dict]:
-        if self.audit_by_type == "Player":
+        if self.audit_by_type == AccountTypeEnum.PLAYER.value:
             a = PlayerModel.query.get(self.audit_by_id)
             return a.to_json()
-        elif self.audit_by_type == "Team_Creator":
+        elif self.audit_by_type == AccountTypeEnum.TEAM_CREATOR.value:
             a = UserModel.query.get(self.audit_by_id)
             return a.to_json()
-        elif self.audit_by_type == "League_Administrator":
+        elif self.audit_by_type == AccountTypeEnum.LOCAL_ADMINISTRATOR.value or self.audit_by_type == AccountTypeEnum.LGU_ADMINISTRATOR.value:
             a = LeagueAdministratorModel.query.get(self.audit_by_id)
             return a.to_json_for_log()
         return None

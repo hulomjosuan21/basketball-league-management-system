@@ -11,7 +11,7 @@ enum AccountTypeEnum {
   PLAYER("Player"),
   TEAM_CREATOR("Team_Creator"),
   LOCAL_ADMINISTRATOR("League_Administrator:Local"),
-  LOCALITY_ADMINISTRATOR("League_Administrator:Locality"),
+  LGU_ADMINISTRATOR("League_Administrator:LGU"),
   SYSTEM("System");
 
   final String value;

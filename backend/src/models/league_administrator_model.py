@@ -6,6 +6,8 @@ class LeagueAdministratorModel(db.Model):
 
     league_administrator_id = UUIDGenerator(db,'league_administrator')
 
+    is_allowed = db.Column(db.Boolean, nullable=False, default=False)
+
     user_id = db.Column(
         db.String,
         db.ForeignKey('users_table.user_id', ondelete='CASCADE'),
@@ -79,6 +81,7 @@ class LeagueAdministratorModel(db.Model):
     def to_json(self) -> dict:
         return {
             "league_administrator_id": self.league_administrator_id,
+            "is_allowed": self.is_allowed,
             "user_id": self.user_id,
             "organization_type": self.organization_type,
             "organization_name": self.organization_name,
