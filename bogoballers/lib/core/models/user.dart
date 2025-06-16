@@ -2,26 +2,18 @@
 
 import 'package:bogoballers/core/enums/user_enum.dart';
 
-AccountTypeEnum? accountTypeFromString(String? type) {
-  if (type == null) return null;
-  return AccountTypeEnum.values.firstWhere(
-    (e) => e.name == type,
-    orElse: () => AccountTypeEnum.Player,
-  );
-}
-
 class UserModel {
-  String? user_id;
+  late String user_id;
   String email;
   late String contact_number;
   String? password_str;
-  AccountTypeEnum? account_type;
+  late AccountTypeEnum account_type;
   bool? is_verified;
   late DateTime created_at;
   late DateTime updated_at;
 
-  UserModel.set({
-    this.user_id,
+  UserModel({
+    required this.user_id,
     required this.email,
     required this.contact_number,
     required this.account_type,
@@ -34,7 +26,7 @@ class UserModel {
     required this.email,
     required this.contact_number,
     required this.password_str,
-    this.account_type = AccountTypeEnum.League_Administrator,
+    required this.account_type,
   });
 
   UserModel.login({required this.email, required this.password_str});
@@ -48,16 +40,16 @@ class UserModel {
       'email': email,
       'password_str': password_str,
       'contact_number': contact_number,
-      'account_type': account_type?.name,
+      'account_type': account_type.value,
     };
   }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel.set(
+    return UserModel(
       user_id: json['user_id'],
       email: json['email'],
       contact_number: json['contact_number'],
-      account_type: accountTypeFromString(json['account_type']),
+      account_type: AccountTypeEnumHelper.fromName(json['account_type'])!,
       is_verified: json['is_verified'],
       created_at: DateTime.parse(json['created_at']),
       updated_at: DateTime.parse(json['updated_at']),
@@ -68,8 +60,8 @@ class UserModel {
     return {
       'user_id': user_id,
       'email': email,
-      'contact_number': account_type!.name,
-      'account_type': account_type?.name,
+      'contact_number': account_type.name,
+      'account_type': account_type.value,
       'created_at': created_at.toIso8601String(),
       'updated_at': updated_at.toIso8601String(),
     };
