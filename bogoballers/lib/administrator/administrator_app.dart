@@ -30,6 +30,7 @@ class _AdministratorMaterialScreenState
   }
 
   Future<bool> checkIfUserIsLoggedInAsync() async {
+    // await AppBox.clearAll();
     final token = AppBox.accessTokenBox.get('access_token');
 
     if (token == null || token.isExpired) {

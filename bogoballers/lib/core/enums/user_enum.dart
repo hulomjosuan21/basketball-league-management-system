@@ -10,16 +10,12 @@
 enum AccountTypeEnum {
   PLAYER("Player"),
   TEAM_CREATOR("Team_Creator"),
-  LOCAL_ADMINISTRATOR("League_Administrator:Local"),
-  LGU_ADMINISTRATOR("League_Administrator:LGU"),
+  LOCAL_ADMINISTRATOR("League_Administrator_Local"),
+  LGU_ADMINISTRATOR("League_Administrator_LGU"),
   SYSTEM("System");
 
   final String value;
   const AccountTypeEnum(this.value);
-}
-
-extension AccountTypeEnumHelper on AccountTypeEnum {
-  /// Convert string (e.g., from backend) to enum using .value
   static AccountTypeEnum? fromValue(String? value) {
     if (value == null) return null;
     return AccountTypeEnum.values.firstWhere(
@@ -27,8 +23,9 @@ extension AccountTypeEnumHelper on AccountTypeEnum {
       orElse: () => throw ArgumentError('Invalid account type value: $value'),
     );
   }
+}
 
-  /// Convert string (e.g., enum name) to enum
+extension AccountTypeEnumHelper on AccountTypeEnum {
   static AccountTypeEnum? fromName(String? name) {
     if (name == null) return null;
     return AccountTypeEnum.values.firstWhere(

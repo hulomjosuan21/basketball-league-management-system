@@ -709,7 +709,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
     Widget buildTabTwoContent() {
       return SingleChildScrollView(
         child: Center(
-          child: selectedAccountType == "Player"
+          child: selectedAccountType == AccountTypeEnum.PLAYER
               ? buildPlayerRegisterInputs()
               : buildTeamCreatorRegisterInputs(),
         ),

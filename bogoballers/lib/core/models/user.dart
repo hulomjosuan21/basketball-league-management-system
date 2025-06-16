@@ -49,7 +49,7 @@ class UserModel {
       user_id: json['user_id'],
       email: json['email'],
       contact_number: json['contact_number'],
-      account_type: AccountTypeEnumHelper.fromName(json['account_type'])!,
+      account_type: AccountTypeEnum.fromValue(json['account_type'])!,
       is_verified: json['is_verified'],
       created_at: DateTime.parse(json['created_at']),
       updated_at: DateTime.parse(json['updated_at']),

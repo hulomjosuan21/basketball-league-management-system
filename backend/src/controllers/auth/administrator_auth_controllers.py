@@ -92,7 +92,7 @@ class AdministratorAuthControllers:
                 raise AuthException("Your account is not verified.", 403)
             
             additional_claims = {
-                "account_type": user.account_type.value
+                "account_type": str(user.account_type)
             }
  
             access_token = create_access_token(
@@ -106,5 +106,6 @@ class AdministratorAuthControllers:
             }
 
             return ApiResponse.success(redirect="/administrator/main/screen",message="Login successful.",payload=payload)
+            # return ApiResponse.success()
         except Exception as e:
             return ApiResponse.error(e)
