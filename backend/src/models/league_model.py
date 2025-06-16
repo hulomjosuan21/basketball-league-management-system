@@ -72,8 +72,8 @@ class LeagueModel(db.Model):
             "sponsors": self.sponsors,
             "league_administrator": self.league_administrator.to_json() if self.league_administrator else None,
             "league_teams": [assoc.to_json() for assoc in self.league_teams] if self.league_teams else [],
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat()
         }
 
     # use for founded_at
@@ -110,10 +110,18 @@ class LeagueTeamModel(db.Model):
     league = db.relationship('LeagueModel', back_populates='league_teams')
     category = db.relationship('LeagueCategoryModel', back_populates='category_teams')
 
+    players = db.relationship(
+        'LeaguePlayerModel',
+        back_populates='league_team',
+        cascade='all, delete-orphan'
+    )
+    
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)
 
     def team_to_json(self) -> dict:
+        players = [player.to_json() for player in self.players]
+
         return {
             "league_team_id": self.league_team_id,
             "team_id": self.team_id,
@@ -129,10 +137,61 @@ class LeagueTeamModel(db.Model):
             "team_logo_url": self.team.team_logo_url,
             "coach_name": self.team.coach_name,
             "assistant_coach_name": self.team.assistant_coach_name if self.team.assistant_coach_name else None,
-            "team_captain": self.team.team_captain.player_json_for_team() if self.team.team_captain else None,
-            "players": self.team.players_to_json_list()
+            "team_captain": self.team.team_captain.to_json_for_team() if self.team.team_captain else None,
+            "players": players,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat()
         }
+    
+class LeaguePlayerModel(db.Model):
+    __tablename__ = 'league_players_table'
 
+    league_player_id = UUIDGenerator(db, 'league-player-id')
+
+    player_team_id = db.Column(
+        db.String,
+        db.ForeignKey('player_team_table.player_team_id', ondelete='CASCADE'),
+        nullable=False
+    )
+
+    league_team_id = db.Column(
+        db.String,
+        db.ForeignKey('league_teams_table.league_team_id', ondelete='CASCADE'),
+        nullable=False
+    )
+
+    league_id = db.Column(
+        db.String,
+        db.ForeignKey('leagues_table.league_id'),
+        nullable=False
+    )
+
+    league_team = db.relationship('LeagueTeamModel', back_populates='players')
+
+    total_points = db.Column(db.Float, nullable=False, default=0.0)
+
+    player_team = db.relationship(
+        'PlayerTeamModel',
+        backref=db.backref('league_players', cascade='all, delete-orphan')
+    )
+
+    is_ban = db.Column(db.Boolean, nullable=False, default=False)
+    is_allowed = db.Column(db.Boolean, nullable=False, default=True)
+
+    created_at = CreatedAt(db)
+    updated_at = UpdatedAt(db)
+
+    def to_json(self) -> dict:
+        return {
+            "league_player_id": self.league_player_id,
+            "player_team_id": self.player_team_id,
+            "league_team_id": self.league_team_id,
+            "total_points": self.total_points,
+            "league_id": self.league_id,
+            "player_team": self.player_team.to_json_for_team() if self.player_team else None,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat()
+        }
 
 class LeagueCategoryModel(db.Model):
     __tablename__ = 'league_categories_table'
@@ -169,6 +228,7 @@ class LeagueCategoryModel(db.Model):
             "category_teams": [assoc.team.to_json() for assoc in self.category_teams] if self.category_teams else [],
             "max_team": self.max_team,
             "stage": self.stage,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat()
         }
+
