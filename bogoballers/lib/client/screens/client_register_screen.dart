@@ -64,7 +64,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
   bool hasAcceptedTerms = false;
   late Future<String> _termsFuture;
   late Future<void> _networkDataFuture;
-  String? selectedAccountType;
+  AccountTypeEnum? selectedAccountType;
 
   bool isRegistering = false;
 
@@ -136,6 +136,8 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
   }
 
   Future<void> handleRegisterPlayer() async {
+    if (selectedAccountType == null) return;
+
     setState(() {
       isRegistering = true;
     });
@@ -161,7 +163,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
         email: emailController.text,
         contact_number: fullPhoneNumber!,
         password_str: passwordController.text,
-        account_type: AccountTypeEnum.values.byName(selectedAccountType!),
+        account_type: selectedAccountType!,
       );
 
       if (multipartFile == null) {
@@ -213,6 +215,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
   }
 
   Future<void> handleRegisterTeamCreator() async {
+    if (selectedAccountType == null) return;
     setState(() {
       isRegistering = true;
     });
@@ -228,6 +231,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
         email: emailController.text,
         contact_number: fullPhoneNumber!,
         password_str: passwordController.text,
+        account_type: selectedAccountType!,
       );
 
       final service = TeamCreatorServices();
@@ -318,12 +322,12 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                 ),
                 SizedBox(height: 16),
                 buildAccountTypeItemCard("Player", Icons.sports_basketball, () {
-                  selectedAccountType = "Player";
+                  selectedAccountType = AccountTypeEnum.PLAYER;
                 }),
                 SizedBox(height: 16),
                 buildAccountTypeItemCard("Team Creator", Icons.groups, () {
                   setState(() {
-                    selectedAccountType = "Team_Creator";
+                    selectedAccountType = AccountTypeEnum.TEAM_CREATOR;
                   });
                 }),
               ],

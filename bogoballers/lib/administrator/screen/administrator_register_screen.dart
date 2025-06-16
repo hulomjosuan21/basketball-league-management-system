@@ -7,6 +7,7 @@ import 'package:bogoballers/core/components/error.dart';
 import 'package:bogoballers/core/components/image_picker.dart';
 import 'package:bogoballers/core/components/password_field.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
+import 'package:bogoballers/core/enums/user_enum.dart';
 import 'package:bogoballers/core/models/league_administrator.dart';
 import 'package:bogoballers/core/utils/terms.dart';
 import 'package:bogoballers/core/validations/auth_validations.dart';
@@ -143,6 +144,7 @@ class _AdministratorRegisterScreenState
         email: emailController.text,
         password_str: passwordController.text,
         contact_number: fullPhoneNumber!,
+        account_type: AccountTypeEnum.LOCAL_ADMINISTRATOR,
       );
 
       final multipartFile = logoController.multipartFile;
