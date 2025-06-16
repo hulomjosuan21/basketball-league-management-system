@@ -7,7 +7,7 @@ class PlayerTeamModel(db.Model):
     player_team_id = UUIDGenerator(db, 'player-team')
     player_id = db.Column(db.String, db.ForeignKey('players_table.player_id'), nullable=False)
     team_id = db.Column(db.String, db.ForeignKey('teams_table.team_id', ondelete="CASCADE"), nullable=False)
-    isBan = db.Column(db.Boolean, nullable=False, default=False)
+    is_ban = db.Column(db.Boolean, nullable=False, default=False)
 
     __table_args__ = (
         db.UniqueConstraint('player_id', 'team_id', name='unique_player_team'),
@@ -31,9 +31,10 @@ class PlayerTeamModel(db.Model):
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)
 
-    def player_json_for_team(self) -> dict:
+    def to_json_for_team(self) -> dict:
         return {
             "player_team_id": self.player_team_id,
+            "user_id": self.player.user_id,
             "player_id": self.player_id,
             "first_name": self.player.first_name,
             "last_name": self.player.last_name,
@@ -45,7 +46,7 @@ class PlayerTeamModel(db.Model):
             "jersey_number": self.player.jersey_number,
             "position": self.player.position,
             "profile_image_url": self.player.profile_image_url,
-            "isBan": self.isBan
+            "is_ban": self.is_ban
         }
 
     def to_json(self) -> dict:
@@ -55,8 +56,8 @@ class PlayerTeamModel(db.Model):
             "team_id": self.team_id,
             "player": self.player.to_json() if self.player else None,
             "team": self.team.to_json() if self.team else None,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat()
         }
 
 
@@ -97,8 +98,12 @@ class TeamModel(db.Model):
     total_wins = db.Column(db.Integer, default=0, nullable=False)
     total_losses = db.Column(db.Integer, default=0, nullable=False)
 
-    # Roster Details
-    team_captain_id = db.Column(db.String, db.ForeignKey('player_team_table.player_team_id'), nullable=True)
+    team_captain_id = db.Column(
+        db.String,
+        db.ForeignKey('player_team_table.player_team_id', use_alter=True, name='fk_team_captain_id', deferrable=True),
+        nullable=True
+    )
+
     team_captain = db.relationship(
         'PlayerTeamModel',
         uselist=False,
@@ -106,11 +111,11 @@ class TeamModel(db.Model):
     )
     
     def players_to_json_list(self):
-        return [player.player_json_for_team() for player in self.players] if self.players else []
+        return [player.to_json_for_team() for player in self.players] if self.players else []
 
     def to_json(self):
-        players = [player.player_json_for_team() for player in self.players] if self.players else []
-        team_captain = self.team_captain.player_json_for_team() if self.team_captain else None
+        players = [player.to_json_for_team() for player in self.players] if self.players else []
+        team_captain = self.team_captain.to_json_for_team() if self.team_captain else None
         return {
             "team_id": self.team_id,
             "user_id": self.user_id,

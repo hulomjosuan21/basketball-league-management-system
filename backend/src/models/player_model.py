@@ -44,6 +44,9 @@ class PlayerModel(db.Model):
     document_url_1 = db.Column(db.String(1000), nullable=True)
     document_url_2 = db.Column(db.String(1000), nullable=True)
 
+    is_ban = db.Column(db.Boolean, nullable=False, default=False)
+    is_allowed = db.Column(db.Boolean, nullable=False, default=True)
+
     user = db.relationship(
         'UserModel',
         back_populates='player',

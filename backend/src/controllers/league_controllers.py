@@ -1,7 +1,8 @@
 from flask import request
 from src.models.audit_log_model import AuditLogModel
 from src.models.league_administrator_model import LeagueAdministratorModel
-from src.models.league_model import LeagueModel, LeagueCategoryModel, LeagueTeamModel
+from src.models.league_model import LeagueModel, LeagueCategoryModel, LeaguePlayerModel, LeagueTeamModel
+from src.models.team_model import PlayerTeamModel, TeamModel
 from src.utils.api_response import ApiResponse
 from src.extensions import db
 from datetime import datetime
@@ -92,9 +93,8 @@ class LeagueControllers:
             )
 
             db.session.add(league)
-            db.session.flush()  # This generates league.league_id
+            db.session.flush()
 
-            # Add categories
             for cat in categories:
                 category = LeagueCategoryModel(
                     league_id=league.league_id,
@@ -183,20 +183,94 @@ class LeagueControllers:
             db.session.rollback()
             return ApiResponse.error(str(e))
 
-    def accept_team(self):
+    def add_player_to_league(self, player_team_id) -> LeaguePlayerModel:
+        player_team = PlayerTeamModel.query.get(player_team_id)
+        if not player_team:
+            raise ValueError("PlayerTeam not found.")
+
+        player_id = player_team.player_id
+
+        existing = (
+            db.session.query(LeaguePlayerModel)
+            .join(PlayerTeamModel, LeaguePlayerModel.player_team_id == PlayerTeamModel.player_team_id)
+            .filter(
+                LeaguePlayerModel.league_id == self.league_id,
+                PlayerTeamModel.player_id == player_id
+            )
+            .first()
+        )
+
+        if existing:
+            raise ValueError("This player is already registered in this league through another team.")
+
+        league_player = LeaguePlayerModel(
+            player_team_id=player_team_id,
+            league_id=self.league_id,
+            league_team_id=self.league_team_id
+        )
+        return league_player
+
+
+    async def check_players_is_allowed_or_not(self, team_id) -> list[LeaguePlayerModel]:
+        try:
+            team = TeamModel.query.get(team_id)
+
+            league_players = []
+            for player in team.players:
+                player_team_id = player.player_team_id
+                if player.is_ban or player.player.is_ban or not player.player.is_allowed:
+                    raise ValueError(f"Player {player_team_id} is Banned or not Allowed to play in every league")
+                else:
+                    league_player = self.add_player_to_league(player_team_id)
+                    league_players.append(league_player)
+                    AuditLogModel.log_action(
+                        audit_by_id=self.league_administrator_id,
+                        audit_by_type=AccountTypeEnum.LOCAL_ADMINISTRATOR.value,
+                        audit_to_id=player.player.player_id,
+                        audit_to_type=AccountTypeEnum.PLAYER.value,
+                        action="Accepted",
+                        details=f"Accepted to participate to League {self.league_title}"
+                    )
+
+            return league_players
+        except Exception as e:
+            raise
+
+    async def accept_team(self):
         try:
             data = request.get_json()
+
             league_id = data.get('league_id')
+            self.league_id = league_id
+
             team_id = data.get('team_id')
             category_id = data.get('category_id')
 
-            league = LeagueTeamModel(
+            league = LeagueModel.query.get(league_id)
+            self.league_administrator_id = league.league_administrator_id
+            self.league_title = league.league_title
+
+            existing_league_team = LeagueTeamModel.query.filter_by(
+                league_id=league_id,
+                team_id=team_id
+            ).first()
+
+            if existing_league_team:
+                raise ValueError("This team is already registered in the league.")
+
+            league_team = LeagueTeamModel(
                 league_id=league_id,
                 team_id=team_id,
                 category_id=category_id
             )
 
-            db.session.add(league)
+            db.session.add(league_team)
+            db.session.flush()
+
+            self.league_team_id = league_team.league_team_id
+
+            league_players = await self.check_players_is_allowed_or_not(team_id)
+            db.session.add_all(league_players)
             db.session.commit()
             return ApiResponse.success(message="Wait for the administrator to accept your team")
         except Exception as e:
@@ -206,6 +280,9 @@ class LeagueControllers:
     def get_league_team(self, league_team_id):
         try:
             league_team = LeagueTeamModel.query.get(league_team_id)
+            if not league_team:
+                raise ValueError("No Team Found!")
+            
             payload = league_team.team_to_json()
             return ApiResponse.success(payload=payload)
         except Exception as e:
@@ -231,8 +308,8 @@ class LeagueControllers:
             details = f"Your Team {league_team.team.team_name} has been {status}"
 
             AuditLogModel.log_action(
-                # audit_by_id=league_team.league.league_administrator_id,
-                # audit_by_type=AccountTypeEnum.LEAGUE_ADMINISTRATOR.value,
+                audit_by_id=league_team.league.league_administrator_id,
+                audit_by_type=AccountTypeEnum.LOCAL_ADMINISTRATOR.value,
                 audit_to_id=league_team.team.user_id,
                 audit_to_type=AccountTypeEnum.TEAM_CREATOR.value,
                 action=status,
