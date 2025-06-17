@@ -1,5 +1,6 @@
 import 'package:bogoballers/client/player/screens/player_home_screen.dart';
 import 'package:bogoballers/client/player/screens/player_profile_screen.dart';
+import 'package:bogoballers/client/player/widgets/bottomNavigation_item.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -17,6 +18,7 @@ class PlayerMainScreen extends StatelessWidget {
       body: Obx(() => controller.screens[controller.selectedIndex.value]),
       bottomNavigationBar: Obx(
         () => NavigationBar(
+          height: 68,
           backgroundColor: appColors.gray100,
           indicatorColor: appColors.accent600,
           elevation: 0,
@@ -24,41 +26,29 @@ class PlayerMainScreen extends StatelessWidget {
           onDestinationSelected: (index) =>
               controller.selectedIndex.value = index,
           destinations: [
-            NavigationDestination(
-              icon: Icon(
-                Iconsax.home,
-                color: controller.selectedIndex.value == 0
-                    ? appColors.gray100
-                    : null,
-              ),
+            NavigationDestinationItem(
+              icon: Iconsax.home,
               label: "Home",
+              index: 0,
+              selectedIndex: controller.selectedIndex,
             ),
-            NavigationDestination(
-              icon: Icon(
-                Iconsax.people,
-                color: controller.selectedIndex.value == 1
-                    ? appColors.gray100
-                    : null,
-              ),
+            NavigationDestinationItem(
+              icon: Iconsax.people,
               label: "Team",
+              index: 1,
+              selectedIndex: controller.selectedIndex,
             ),
-            NavigationDestination(
-              icon: Icon(
-                Iconsax.setting,
-                color: controller.selectedIndex.value == 2
-                    ? appColors.gray100
-                    : null,
-              ),
+            NavigationDestinationItem(
+              icon: Iconsax.setting,
               label: "Settings",
+              index: 2,
+              selectedIndex: controller.selectedIndex,
             ),
-            NavigationDestination(
-              icon: Icon(
-                Iconsax.user,
-                color: controller.selectedIndex.value == 3
-                    ? appColors.gray100
-                    : null,
-              ),
+            NavigationDestinationItem(
+              icon: Iconsax.user,
               label: "Profile",
+              index: 3,
+              selectedIndex: controller.selectedIndex,
             ),
           ],
         ),
