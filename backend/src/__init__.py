@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+from src.services.notification_serices import NotificationService
 from src.workers.test import job_wrapper
 from src.config import Config
 from src.controllers.organization_type import getOrganizationTypes
@@ -72,7 +73,8 @@ class FlaskServer:
 
         self.server.get('/log/<string:audit_id>')(AuditLogModel.fetch_log)
         self.server.get('/logs/<string:audit_to_id>')(AuditLogModel.fetch_logs_for)
-
+        self.server.post('/test/send-fcm')(NotificationService.send_fcm_notification_test)
+        
         self.server.register_blueprint(player_bp)
         self.server.register_blueprint(team_creator_bp)
 

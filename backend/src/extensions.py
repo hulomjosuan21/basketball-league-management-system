@@ -1,3 +1,5 @@
+from firebase_admin import credentials
+import firebase_admin
 from flask_jwt_extended import JWTManager
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -14,6 +16,7 @@ from supabase import create_client, Client
 from apscheduler.schedulers.background import BackgroundScheduler
 
 load_dotenv()
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 limiter = Limiter(
     key_func=get_remote_address,
@@ -27,6 +30,12 @@ jwt = JWTManager()
 socketio = SocketIO(cors_allowed_origins="*")
 
 ph = PasswordHasher()
+
+firebase_credentials_path = os.path.join(BASE_DIR, 'firebase_credentials.json')
+if not firebase_admin._apps:
+    cred = credentials.Certificate(firebase_credentials_path)
+    firebase_admin.initialize_app(cred)
+        
 
 def supabase_client() -> Client:
     supabase_url = current_app.config.get('SUPABASE_URL')
