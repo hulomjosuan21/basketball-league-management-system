@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "933102826503",
+    "project_id": "capstone-project-ed20e",
+    "storage_bucket": "capstone-project-ed20e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:933102826503:android:42510998d245b33c2e66a2",
+        "android_client_info": {
+          "package_name": "com.example.bogoballers"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMDqYRo645Z_WXypoCHvN-vmbETHgx1GY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

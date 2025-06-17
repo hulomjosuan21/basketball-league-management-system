@@ -30,8 +30,8 @@ def UUIDGenerator(db, prefix):
 class AccountTypeEnum(Enum):
     PLAYER = "Player"
     TEAM_CREATOR = "Team_Creator"
-    LOCAL_ADMINISTRATOR = "League_Administrator:Local",
-    LGU_ADMINISTRATOR = "League_Administrator:LGU",
+    LOCAL_ADMINISTRATOR = "League_Administrator_Local"
+    LGU_ADMINISTRATOR = "League_Administrator_LGU"
     SYSTEM = "System"
 
 def create_account_type_enum(db):
