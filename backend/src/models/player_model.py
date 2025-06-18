@@ -18,13 +18,8 @@ class PlayerModel(db.Model):
     gender = db.Column(db.String(10), nullable=False)
     birth_date = db.Column(db.Date, nullable=False)
 
-    barangay_name = db.Column(
-        db.String(100),
-        nullable=False
-    )
-
-    municipality_name = db.Column(
-        db.String(100),
+    player_address = db.Column(
+        db.String(250),
         nullable=False
     )
 
@@ -67,8 +62,7 @@ class PlayerModel(db.Model):
             "last_name": self.last_name,
             "gender": self.gender,
             "birth_date": self.birth_date.isoformat(),
-            "barangay_name": self.barangay_name,
-            "municipality_name": self.municipality_name,
+            "player_address": self.player_address,
             "jersey_name": self.jersey_name,
             "jersey_number": self.jersey_number,
             "position": self.position,

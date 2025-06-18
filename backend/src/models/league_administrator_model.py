@@ -7,6 +7,7 @@ class LeagueAdministratorModel(db.Model):
     league_administrator_id = UUIDGenerator(db,'league_administrator')
 
     is_allowed = db.Column(db.Boolean, nullable=False, default=False)
+    is_operational = db.Column(db.Boolean, nullable=False, default=True)
 
     user_id = db.Column(
         db.String,
@@ -30,13 +31,8 @@ class LeagueAdministratorModel(db.Model):
         nullable=True
     )
 
-    barangay_name = db.Column(
-        db.String(100),
-        nullable=False
-    )
-
-    municipality_name = db.Column(
-        db.String(100),
+    organization_address = db.Column(
+        db.String(250),
         nullable=False
     )
 
@@ -73,8 +69,7 @@ class LeagueAdministratorModel(db.Model):
             "user_id": self.user_id,
             "organization_type": self.organization_type,
             "organization_name": self.organization_name,
-            "barangay_name": self.barangay_name,
-            "municipality_name": self.municipality_name,
+            "organization_address": self.organization_address,
             "organization_logo_url": self.organization_logo_url,
         }
 
@@ -82,11 +77,11 @@ class LeagueAdministratorModel(db.Model):
         return {
             "league_administrator_id": self.league_administrator_id,
             "is_allowed": self.is_allowed,
+            "is_operational": self.is_operational,
             "user_id": self.user_id,
             "organization_type": self.organization_type,
             "organization_name": self.organization_name,
-            "barangay_name": self.barangay_name,
-            "municipality_name": self.municipality_name,
+            "organization_address": self.organization_address,
             "organization_photo_url": self.organization_photo_url,
             "organization_logo_url": self.organization_logo_url,
             "user": self.user.to_json() if self.user else None,

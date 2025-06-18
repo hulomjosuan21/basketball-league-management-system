@@ -3,8 +3,9 @@ from flask_cors import CORS
 from src.services.notification_serices import NotificationService
 from src.workers.test import job_wrapper
 from src.config import Config
-from src.controllers.organization_type import getOrganizationTypes
+from src.controllers.organization_type import organization_type_list
 from src.controllers.places import getCityAndBarangays
+from src.controllers.barangay_list import barangay_list
 from src.extensions import db, migrate, jwt, limiter, socketio, scheduler
 import os
 import atexit
@@ -69,7 +70,8 @@ class FlaskServer:
         self.server.get("/")(lambda: "Programmer: Josuan Leonardo Hulom")
         
         self.server.get("/places")(getCityAndBarangays)
-        self.server.get("/organization-types")(getOrganizationTypes)
+        self.server.get("/organization-types")(organization_type_list)
+        self.server.get("/barangay-list")(barangay_list)
 
         self.server.get('/log/<string:audit_id>')(AuditLogModel.fetch_log)
         self.server.get('/logs/<string:audit_to_id>')(AuditLogModel.fetch_logs_for)

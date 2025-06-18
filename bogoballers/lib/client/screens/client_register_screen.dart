@@ -1,15 +1,13 @@
-import 'dart:convert';
 import 'package:bogoballers/client/screens/client_login_screen.dart';
+import 'package:bogoballers/client/screens/phone_number_input.dart';
 import 'package:bogoballers/core/components/app_button.dart';
 import 'package:bogoballers/core/components/auth_navigator.dart';
-import 'package:bogoballers/core/components/error.dart';
 import 'package:bogoballers/core/components/image_picker.dart';
 import 'package:bogoballers/core/components/password_field.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
 import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/enums/gender_enum.dart';
 import 'package:bogoballers/core/enums/user_enum.dart';
-import 'package:bogoballers/core/models/location_data.dart';
 import 'package:bogoballers/core/models/player_model.dart';
 import 'package:bogoballers/core/models/user.dart';
 import 'package:bogoballers/core/services/player_services.dart';
@@ -19,10 +17,8 @@ import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:bogoballers/core/utils/terms.dart';
 import 'package:bogoballers/core/validations/auth_validations.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 class ClientRegisterScreen extends StatefulWidget {
   const ClientRegisterScreen({super.key});
@@ -41,71 +37,27 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
   final ValueNotifier<Set<String>> selectedPositions = ValueNotifier({});
   AppImagePickerController profileImageController = AppImagePickerController();
 
-  List<String> _municipalities = [];
-  Map<String, List<String>> _barangaysMap = {};
-  List<String> _filteredBarangays = [];
-
-  String? _selectedMunicipality;
-  String? _selectedBarangay;
-
   final firstNameController = TextEditingController();
   final lastNameController = TextEditingController();
   final bdayController = TextEditingController();
   final jerseyNameController = TextEditingController();
+  final addressController = TextEditingController();
   final jerseyNumberController = TextEditingController();
 
-  String initialCountry = 'PH';
-  bool isValidPhoneNumber = false;
-  String? fullPhoneNumber;
-  PhoneNumber number = PhoneNumber(isoCode: 'PH');
+  String? phoneNumber;
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPassController = TextEditingController();
   bool hasAcceptedTerms = false;
-  late Future<String> _termsFuture;
-  late Future<void> _networkDataFuture;
   AccountTypeEnum? selectedAccountType;
 
   bool isRegistering = false;
 
-  Future<String> _loadTermsAndConditions() async {
-    try {
-      String jsonString = await rootBundle.loadString(
-        'assets/data/terms_and_conditions.json',
-      );
-      Map<String, dynamic> data = jsonDecode(jsonString);
-      return data['terms_and_conditions'] ??
-          'Error: Terms and conditions not found.';
-    } catch (e) {
-      return 'Failed to load terms and conditions.';
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    _networkDataFuture = loadNetworkData();
     _tabController = TabController(length: 2, vsync: this);
-  }
-
-  Future<void> loadNetworkData() async {
-    try {
-      final results = await Future.wait([
-        getLocationData(),
-        _loadTermsAndConditions(),
-      ]);
-      LocationData? locations = results[0] as LocationData?;
-      _termsFuture = Future.value(results[1] as String);
-      if (locations != null) {
-        _municipalities = locations.municipalities;
-        _barangaysMap = locations.barangays;
-      }
-    } on DioException catch (_) {
-      throw AppException("Network error!");
-    } catch (e) {
-      rethrow;
-    }
   }
 
   @override
@@ -122,20 +74,6 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
     }
   }
 
-  void _onMunicipalityChanged(String? muni) {
-    setState(() {
-      _selectedMunicipality = muni;
-      _filteredBarangays = muni != null ? (_barangaysMap[muni] ?? []) : [];
-      _selectedBarangay = null;
-    });
-  }
-
-  void _onBarangayChanged(String? barangay) {
-    setState(() {
-      _selectedBarangay = barangay;
-    });
-  }
-
   Future<void> handleRegisterPlayer() async {
     if (selectedAccountType == null) return;
 
@@ -150,19 +88,18 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
         selectedGender: selectedGender,
         birthdateController: birthdateController,
         jerseyNameController: jerseyNameController,
+        addressController: addressController,
         jerseyNumberController: jerseyNumberController,
         selectedPositions: selectedPositions,
         emailController: emailController,
         passwordController: passwordController,
         confirmPassController: confirmPassController,
-        fullPhoneNumber: fullPhoneNumber,
-        selectedMunicipality: _selectedMunicipality,
-        selectedBarangay: _selectedBarangay,
+        fullPhoneNumber: phoneNumber,
       );
       final multipartFile = profileImageController.multipartFile;
       final user = UserModel.create(
         email: emailController.text,
-        contact_number: fullPhoneNumber!,
+        contact_number: phoneNumber!,
         password_str: passwordController.text,
         account_type: selectedAccountType!,
       );
@@ -175,13 +112,12 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
         last_name: lastNameController.text,
         gender: selectedGender.value!.name,
         birth_date: DateTime.parse(birthdateController.text),
-        barangay_name: _selectedBarangay!,
-        municipality_name: _selectedMunicipality!,
         jersey_name: jerseyNameController.text,
         jersey_number: double.parse(jerseyNumberController.text),
         position: selectedPositions.value.join(', '),
         user: user,
         profile_image_file: multipartFile,
+        player_address: addressController.text,
       );
 
       final service = PlayerServices();
@@ -225,12 +161,12 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
         emailController: emailController,
         passwordController: passwordController,
         confirmPassController: confirmPassController,
-        fullPhoneNumber: fullPhoneNumber,
+        fullPhoneNumber: phoneNumber,
       );
 
       final user = UserModel.create(
         email: emailController.text,
-        contact_number: fullPhoneNumber!,
+        contact_number: phoneNumber!,
         password_str: passwordController.text,
         account_type: selectedAccountType!,
       );
@@ -453,52 +389,11 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
               labelText: 'Birthdate',
             ),
             const SizedBox(height: Sizes.spaceMd),
-            Center(
-              child: SizedBox(
-                width: double.infinity,
-                child: DropdownMenu<String>(
-                  key: const ValueKey('muni_dropdown'),
-                  initialSelection: _selectedMunicipality,
-                  onSelected: _onMunicipalityChanged,
-                  enableFilter: true,
-                  enableSearch: true,
-                  dropdownMenuEntries: _municipalities
-                      .map((m) => DropdownMenuEntry(value: m, label: m))
-                      .toList(),
-                  label: const Text('Select Municipality'),
-                ),
-              ),
+            TextField(
+              controller: addressController,
+              decoration: InputDecoration(label: Text("Address")),
             ),
-            const SizedBox(height: Sizes.spaceMd),
-            GestureDetector(
-              onTap: () {
-                if (_selectedMunicipality == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please select municipality first'),
-                    ),
-                  );
-                }
-              },
-              child: AbsorbPointer(
-                absorbing: _selectedMunicipality == null,
-                child: SizedBox(
-                  width: double.infinity,
-                  child: DropdownMenu<String>(
-                    key: const ValueKey('brgy_dropdown'),
-                    enabled: _selectedMunicipality != null,
-                    initialSelection: _selectedBarangay,
-                    onSelected: _onBarangayChanged,
-                    enableFilter: true,
-                    enableSearch: true,
-                    dropdownMenuEntries: _filteredBarangays
-                        .map((b) => DropdownMenuEntry(value: b, label: b))
-                        .toList(),
-                    label: const Text('Select Barangay'),
-                  ),
-                ),
-              ),
-            ),
+
             const SizedBox(height: Sizes.spaceMd),
             TextField(
               controller: jerseyNameController,
@@ -554,36 +449,10 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
               },
             ),
             const SizedBox(height: Sizes.spaceMd),
-            InternationalPhoneNumberInput(
-              countries: ['PH'],
-              onInputChanged: (PhoneNumber number) {
-                setState(() {
-                  fullPhoneNumber = number.phoneNumber ?? '';
-                });
+            PHPhoneInput(
+              onChanged: (phone) {
+                phoneNumber = phone;
               },
-              onInputValidated: (_) {
-                setState(() {
-                  isValidPhoneNumber = true;
-                });
-              },
-              ignoreBlank: false,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Phone number\nis required';
-                }
-
-                final digitsOnly = value.replaceAll(RegExp(r'\D'), '');
-
-                if (digitsOnly.length != 10) {
-                  return 'Phone number must\nbe exactly 10 digits';
-                }
-                if (!digitsOnly.startsWith('9')) {
-                  return 'Phone number must\nstart with 9';
-                }
-                return null;
-              },
-              autoValidateMode: AutovalidateMode.onUserInteraction,
-              initialValue: number,
             ),
             const SizedBox(height: Sizes.spaceMd),
             TextField(
@@ -598,11 +467,16 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
               hintText: 'Confirm Passowrd',
             ),
             const SizedBox(height: Sizes.spaceMd),
-            termAndCondition(context, hasAcceptedTerms, _termsFuture, (value) {
-              setState(() {
-                hasAcceptedTerms = value ?? false;
-              });
-            }),
+            termAndCondition(
+              context: context,
+              hasAcceptedTerms: hasAcceptedTerms,
+              onChanged: (value) {
+                setState(() {
+                  hasAcceptedTerms = value ?? false;
+                });
+              },
+              key: 'auth_terms_and_conditions',
+            ),
             SizedBox(height: Sizes.spaceLg),
             AppButton(
               label: "Register",
@@ -657,36 +531,10 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                   ),
                 ),
                 const SizedBox(height: Sizes.spaceMd),
-                InternationalPhoneNumberInput(
-                  countries: ['PH'],
-                  onInputChanged: (PhoneNumber number) {
-                    setState(() {
-                      fullPhoneNumber = number.phoneNumber ?? '';
-                    });
+                PHPhoneInput(
+                  onChanged: (phone) {
+                    phoneNumber = phone;
                   },
-                  onInputValidated: (_) {
-                    setState(() {
-                      isValidPhoneNumber = true;
-                    });
-                  },
-                  ignoreBlank: false,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Phone number\nis required';
-                    }
-
-                    final digitsOnly = value.replaceAll(RegExp(r'\D'), '');
-
-                    if (digitsOnly.length != 10) {
-                      return 'Phone number must\nbe exactly 10 digits';
-                    }
-                    if (!digitsOnly.startsWith('9')) {
-                      return 'Phone number must\nstart with 9';
-                    }
-                    return null;
-                  },
-                  autoValidateMode: AutovalidateMode.onUserInteraction,
-                  initialValue: number,
                 ),
                 const SizedBox(height: Sizes.spaceMd),
                 TextField(
@@ -704,13 +552,16 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                   hintText: 'Confirm Passowrd',
                 ),
                 SizedBox(height: Sizes.spaceMd),
-                termAndCondition(context, hasAcceptedTerms, _termsFuture, (
-                  value,
-                ) {
-                  setState(() {
-                    hasAcceptedTerms = value ?? false;
-                  });
-                }),
+                termAndCondition(
+                  context: context,
+                  hasAcceptedTerms: hasAcceptedTerms,
+                  onChanged: (value) {
+                    setState(() {
+                      hasAcceptedTerms = value ?? false;
+                    });
+                  },
+                  key: 'auth_terms_and_conditions',
+                ),
                 SizedBox(height: Sizes.spaceLg),
                 AppButton(
                   label: "Register",
@@ -741,97 +592,76 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
           decoration: BoxDecoration(
             gradient: context.appColors.secondaryGradient,
           ),
-          child: FutureBuilder(
-            future: _networkDataFuture,
-            builder: (context, asyncSnapshot) {
-              if (asyncSnapshot.connectionState == ConnectionState.waiting) {
-                return Center(
+          child: isRegistering
+              ? Center(
                   child: CircularProgressIndicator(
                     color: context.appColors.accent900,
                   ),
-                );
-              } else if (asyncSnapshot.hasError) {
-                return Center(
-                  child: retryError(context, asyncSnapshot.error, () {
-                    setState(() {
-                      _networkDataFuture = loadNetworkData();
-                    });
-                  }),
-                );
-              }
-
-              return isRegistering
-                  ? Center(
-                      child: CircularProgressIndicator(
-                        color: context.appColors.accent900,
+                )
+              : Column(
+                  children: [
+                    Container(
+                      height: 12,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            context.appColors.gray100.withAlpha(255),
+                            context.appColors.gray100.withAlpha(0),
+                          ],
+                        ),
                       ),
-                    )
-                  : Column(
-                      children: [
-                        Container(
-                          height: 12,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                context.appColors.gray100.withAlpha(255),
-                                context.appColors.gray100.withAlpha(0),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: TabBarView(
-                            controller: _tabController,
-                            physics: const NeverScrollableScrollPhysics(),
-                            children: [
-                              buildSelectAccountType(),
-                              buildTabTwoContent(),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: Sizes.spaceSm,
-                          ),
-                          child: Column(
-                            children: [
-                              if (_tabController.index > 0)
-                                GestureDetector(
-                                  onTap: _goToPreviousTab,
-                                  child: Text(
-                                    'Back',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: context.appColors.gray1100,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                                  ),
+                    ),
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabController,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: [
+                          buildSelectAccountType(),
+                          buildTabTwoContent(),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: Sizes.spaceSm,
+                      ),
+                      child: Column(
+                        children: [
+                          if (_tabController.index > 0)
+                            GestureDetector(
+                              onTap: _goToPreviousTab,
+                              child: Text(
+                                'Back',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: context.appColors.gray1100,
+                                  decoration: TextDecoration.underline,
                                 ),
-                              SizedBox(height: Sizes.spaceSm),
-                              authNavigator(
-                                context,
-                                "Already have an account?",
-                                " Login",
-                                () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          const ClientLoginScreen(),
-                                    ),
-                                  );
-                                },
                               ),
-                            ],
+                            ),
+                          SizedBox(height: Sizes.spaceSm),
+                          authNavigator(
+                            context,
+                            "Already have an account?",
+                            " Login",
+                            () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const ClientLoginScreen(),
+                                ),
+                              );
+                            },
                           ),
-                        ),
-                        SizedBox(height: 12),
-                      ],
-                    );
-            },
-          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                  ],
+                ),
         ),
       ),
     );

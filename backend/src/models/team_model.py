@@ -40,8 +40,7 @@ class PlayerTeamModel(db.Model):
             "last_name": self.player.last_name,
             "gender": self.player.gender,
             "birth_date": self.player.birth_date,
-            "barangay_name": self.player.barangay_name,
-            "municipality_name": self.player.municipality_name,
+            "player_address": self.player.player_address,
             "jersey_name": self.player.jersey_name,
             "jersey_number": self.player.jersey_number,
             "position": self.player.position,
@@ -76,7 +75,7 @@ class TeamModel(db.Model):
     team_name = db.Column(db.String(100), nullable=False)
 
     team_address = db.Column(
-        db.String(100),
+        db.String(250),
         nullable=False
     )
 

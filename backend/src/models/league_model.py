@@ -23,7 +23,7 @@ class LeagueModel(db.Model):
     championship_trophy_url = db.Column(db.String, nullable=True)
     banner_url = db.Column(db.String, nullable=True)
 
-    status = db.Column(db.Enum('Scheduled', 'Ongoing', 'Completed', 'Postponed', 'Cancelled', name="league_status"), nullable=False, default="Scheduled") # Scheduled, Ongoing, Completed, Postponed, Cancelled
+    status = db.Column(db.Enum('Scheduled', 'Ongoing', 'Completed', 'Postponed', 'Cancelled', name="league_status"), nullable=False, default="Scheduled")
 
     season_year = db.Column(db.Integer, nullable=False, default=datetime.now().year)
     league_rules = db.Column(db.Text, nullable=False)
@@ -131,8 +131,7 @@ class LeagueTeamModel(db.Model):
             "draws": self.draws,
             "points": self.points,
             "team_name": self.team.team_name,
-            "barangay_name": self.team.barangay_name,
-            "municipality_name": self.team.municipality_name,
+            "team_address": self.team.team_address,
             "team_motto": self.team.team_motto,
             "team_logo_url": self.team.team_logo_url,
             "coach_name": self.team.coach_name,

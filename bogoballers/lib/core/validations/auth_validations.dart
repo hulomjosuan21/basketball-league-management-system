@@ -7,10 +7,9 @@ import 'package:flutter/material.dart';
 void validateOrganizationFields({
   required TextEditingController orgNameController,
   required String? selectedOrgType,
-  required String? selectedMunicipality,
-  required String? selectedBarangay,
   required TextEditingController emailController,
   required TextEditingController passwordController,
+  required TextEditingController addressController,
   required String? fullPhoneNumber,
 }) {
   if (orgNameController.text.trim().isEmpty) {
@@ -19,11 +18,8 @@ void validateOrganizationFields({
   if (selectedOrgType == null || selectedOrgType.trim().isEmpty) {
     throw ValidationException("Organization type must be selected");
   }
-  if (selectedMunicipality == null || selectedMunicipality.trim().isEmpty) {
-    throw ValidationException("Municipality must be selected");
-  }
-  if (selectedBarangay == null || selectedBarangay.trim().isEmpty) {
-    throw ValidationException("Barangay must be selected");
+  if (addressController.text.trim().isEmpty) {
+    throw ValidationException("Address cannot be empty");
   }
   if (emailController.text.trim().isEmpty) {
     throw ValidationException("Email cannot be empty");
@@ -50,9 +46,8 @@ void validatePlayerFields({
   required TextEditingController emailController,
   required TextEditingController passwordController,
   required TextEditingController confirmPassController,
+  required TextEditingController addressController,
   required String? fullPhoneNumber,
-  required String? selectedMunicipality,
-  required String? selectedBarangay,
 }) {
   if (firstNameController.text.trim().isEmpty) {
     throw ValidationException("First name cannot be empty");
@@ -65,6 +60,9 @@ void validatePlayerFields({
   }
   if (birthdateController.text.trim().isEmpty) {
     throw ValidationException("Birthdate must be selected");
+  }
+  if (addressController.text.trim().isEmpty) {
+    throw ValidationException("Addres name cannot be empty");
   }
   if (jerseyNameController.text.trim().isEmpty) {
     throw ValidationException("Jersey name cannot be empty");
@@ -96,13 +94,6 @@ void validatePlayerFields({
   }
   if (!isValidateContactNumber(fullPhoneNumber)) {
     throw ValidationException("Invalid Phone number");
-  }
-
-  if (selectedMunicipality == null || selectedMunicipality.trim().isEmpty) {
-    throw ValidationException("Municipality must be selected");
-  }
-  if (selectedBarangay == null || selectedBarangay.trim().isEmpty) {
-    throw ValidationException("Barangay must be selected");
   }
 }
 

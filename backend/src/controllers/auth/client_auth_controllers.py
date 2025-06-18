@@ -12,9 +12,8 @@ from src.models.user_model import AccountTypeEnum, UserModel
 class ClientAuthControllers:    
     def login_client(self):
         try:
-            data = request.get_json()
-            email = data.get('email')
-            password_str = data.get('password_str')
+            email = request.form.get('email')
+            password_str = request.form.get('password_str')
 
             if not email or not password_str:
                 raise ValueError("Missing required fields: email, password")
@@ -28,7 +27,7 @@ class ClientAuthControllers:
                 raise AuthException("Your account is not verified.", 403)
             
             additional_claims = {
-                "account_type": user.account_type.value
+                "account_type": str(user.account_type)
             }
  
             access_token = create_access_token(

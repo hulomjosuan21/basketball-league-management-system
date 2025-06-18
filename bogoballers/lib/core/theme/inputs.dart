@@ -38,6 +38,7 @@ InputDecorationTheme appInputDecorationTheme(BuildContext context) {
     focusColor: context.appColors.accent900,
     contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
     hintStyle: TextStyle(color: context.appColors.gray600, fontSize: 12),
+    errorStyle: TextStyle(fontSize: 8),
     helperStyle: TextStyle(fontSize: 8),
     isDense: true,
   );

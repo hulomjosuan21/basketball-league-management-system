@@ -22,12 +22,11 @@ class AdministratorAuthControllers:
 
             organization_type = request.form.get('organization_type')
             organization_name = request.form.get('organization_name')
-            barangay_name = request.form.get('barangay_name')
-            municipality_name = request.form.get('municipality_name')
+            organization_address = request.form.get('organization_address')
 
             organization_logo_file = request.files.get('organization_logo_file')
 
-            if not all([email, password_str, account_type, organization_name, contact_number, barangay_name, municipality_name]):
+            if not all([email, password_str, account_type, organization_name, contact_number, organization_address]):
                 raise ValueError("All fields must be provided and not empty.")
             
             user = UserModel(
@@ -41,8 +40,7 @@ class AdministratorAuthControllers:
                 user=user,
                 organization_type=organization_type,
                 organization_name=organization_name,
-                barangay_name=barangay_name,
-                municipality_name=municipality_name
+                organization_address=organization_address,
             )
             
             full_url = await save_file(organization_logo_file, 'images', request, 'supabase')

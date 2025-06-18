@@ -10,8 +10,7 @@ class PlayerModel {
   String last_name;
   String gender;
   DateTime birth_date;
-  String barangay_name;
-  String municipality_name;
+  String player_address;
   String jersey_name;
   double jersey_number;
   String position;
@@ -40,8 +39,7 @@ class PlayerModel {
     required this.last_name,
     required this.gender,
     required this.birth_date,
-    required this.barangay_name,
-    required this.municipality_name,
+    required this.player_address,
     required this.jersey_name,
     required this.jersey_number,
     required this.position,
@@ -60,8 +58,7 @@ class PlayerModel {
     required this.last_name,
     required this.gender,
     required this.birth_date,
-    required this.barangay_name,
-    required this.municipality_name,
+    required this.player_address,
     required this.jersey_name,
     required this.jersey_number,
     required this.position,
@@ -76,8 +73,7 @@ class PlayerModel {
       'last_name': last_name,
       'gender': gender,
       'birth_date': birth_date,
-      'barangay_name': barangay_name,
-      'municipality_name': municipality_name,
+      'player_address': player_address,
       'jersey_name': jersey_name,
       'jersey_number': jersey_number,
       'position': position,
@@ -99,8 +95,7 @@ class PlayerModel {
       last_name: json['last_name'],
       gender: json['gender'],
       birth_date: DateTime.parse(json['birth_date']),
-      barangay_name: json['barangay_name'],
-      municipality_name: json['municipality_name'],
+      player_address: json['player_address'],
       jersey_name: json['jersey_name'],
       jersey_number: json['jersey_number'],
       position: json['position'],
@@ -122,8 +117,7 @@ class PlayerModel {
       'last_name': last_name,
       'gender': gender,
       'birth_date': birth_date,
-      'barangay_name': barangay_name,
-      'municipality_name': municipality_name,
+      'player_address': player_address,
       'jersey_name': jersey_name,
       'jersey_number': jersey_number,
       'position': position,

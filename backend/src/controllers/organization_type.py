@@ -1,18 +1,8 @@
-import json
-import os
-
+from src.constants import organization_type_list as ls
 from src.utils.api_response import ApiResponse
 
-def getOrganizationTypes():
+def organization_type_list():
     try:
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        json_path = os.path.join(current_dir, '..', '..', 'assets', 'organization_types.json')
-
-        with open(json_path, 'r') as file:
-            organization_types = json.load(file)
-
-        payload = organization_types
-
-        return ApiResponse.success(payload=payload)
+        return ApiResponse.success(message="Organization Types | Developer: Josuan Leonardo Hulom",payload=ls)
     except Exception as e:
         return ApiResponse.error(e)
