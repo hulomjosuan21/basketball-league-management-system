@@ -398,7 +398,10 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
               children: [
                 Text(
                   "Select Gender",
-                  style: TextStyle(fontSize: Sizes.fontSizeMd, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: Sizes.fontSizeMd,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 SizedBox(height: Sizes.spaceSm),
                 ValueListenableBuilder<Gender?>(
@@ -416,7 +419,10 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                                 selectedGender.value = value;
                               },
                             ),
-                            Text("Male", style: TextStyle(fontSize: Sizes.fontSizeSm)),
+                            Text(
+                              "Male",
+                              style: TextStyle(fontSize: Sizes.fontSizeSm),
+                            ),
                           ],
                         ),
                         SizedBox(width: 16),
@@ -429,7 +435,10 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                                 selectedGender.value = value;
                               },
                             ),
-                            Text("Female", style: TextStyle(fontSize: Sizes.fontSizeSm)),
+                            Text(
+                              "Female",
+                              style: TextStyle(fontSize: Sizes.fontSizeSm),
+                            ),
                           ],
                         ),
                       ],
@@ -506,7 +515,10 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
             Center(
               child: Text(
                 "Choose up to two positions",
-                style: TextStyle(fontSize: Sizes.fontSizeSm, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: Sizes.fontSizeSm,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
             SizedBox(height: Sizes.spaceSm),
@@ -517,7 +529,10 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                   children: positions.map((position) {
                     return CheckboxListTile(
                       visualDensity: VisualDensity.compact,
-                      title: Text(position, style: TextStyle(fontSize: Sizes.fontSizeSm)),
+                      title: Text(
+                        position,
+                        style: TextStyle(fontSize: Sizes.fontSizeSm),
+                      ),
                       value: selected.contains(position),
                       onChanged: (bool? checked) {
                         if (checked == true && selected.length >= 2) {
@@ -610,7 +625,10 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               color: appColors.gray100,
-              border: Border.all(width: Sizes.borderWidthSm, color: appColors.gray600),
+              border: Border.all(
+                width: Sizes.borderWidthSm,
+                color: appColors.gray600,
+              ),
               borderRadius: BorderRadius.circular(Sizes.radiusMd),
             ),
             child: Column(
@@ -774,7 +792,9 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: Sizes.spaceSm),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: Sizes.spaceSm,
+                          ),
                           child: Column(
                             children: [
                               if (_tabController.index > 0)

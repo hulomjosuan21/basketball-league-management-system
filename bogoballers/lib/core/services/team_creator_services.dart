@@ -1,3 +1,4 @@
+import 'package:bogoballers/core/models/team_model.dart';
 import 'package:bogoballers/core/models/user.dart';
 import 'package:bogoballers/core/network/api_response.dart';
 import 'package:bogoballers/core/network/dio_client.dart';
@@ -15,5 +16,15 @@ class TeamCreatorServices {
     );
     final apiResponse = ApiResponse.fromJsonNoPayload(response.data);
     return apiResponse.message;
+  }
+
+  Future<ApiResponse> createNewTeam(TeamModel team) async {
+    final api = DioClient().client;
+    Response response = await api.post(
+      '/team/create-new',
+      data: team.toFormDataForCreation(),
+    );
+    final apiResponse = ApiResponse.fromJsonNoPayload(response.data);
+    return apiResponse;
   }
 }

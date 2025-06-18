@@ -241,7 +241,7 @@ class _AdministratorRegisterScreenState
             label: const Text('Select Municipality'),
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: Sizes.spaceMd),
         Expanded(
           child: GestureDetector(
             onTap: () {
