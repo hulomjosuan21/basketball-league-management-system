@@ -31,12 +31,10 @@ Future<void> main() async {
 
     checkSupabaseStatus();
     if (kIsWeb || Platform.isIOS || Platform.isAndroid) {
-      final results = await Future.wait([
-        Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
-        NotificationService.instance.initialize(),
-      ]);
-
-      final fcmToken = results[1] as String?;
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+      final fcmToken = await NotificationService.instance.initialize();
       debugPrint("FCM Token: $fcmToken");
 
       runApp(

@@ -1,3 +1,4 @@
+import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +12,7 @@ class LabeledText extends StatelessWidget {
     super.key,
     required this.label,
     required this.value,
-    this.fontSize = 14,
+    this.fontSize = Sizes.fontSizeMd,
     this.color,
   });
 

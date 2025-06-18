@@ -7,6 +7,7 @@ import 'package:bogoballers/core/components/error.dart';
 import 'package:bogoballers/core/components/image_picker.dart';
 import 'package:bogoballers/core/components/password_field.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
+import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/enums/user_enum.dart';
 import 'package:bogoballers/core/models/league_administrator.dart';
 import 'package:bogoballers/core/utils/terms.dart';
@@ -209,7 +210,7 @@ class _AdministratorRegisterScreenState
             decoration: const InputDecoration(labelText: 'Organization Name'),
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: Sizes.spaceMd),
         Expanded(
           child: DropdownMenu<String>(
             key: const ValueKey('org_dropdown'),
@@ -276,7 +277,7 @@ class _AdministratorRegisterScreenState
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         AppImagePicker(controller: logoController, aspectRatio: 1),
-        const SizedBox(height: 8),
+        const SizedBox(height: Sizes.spaceSm),
         AppButton(
           label: 'Select Organization Logo/Image',
           onPressed: logoController.pickImage,
@@ -289,14 +290,14 @@ class _AdministratorRegisterScreenState
     final contactControlls = <Widget>[
       Row(
         children: [
-          const SizedBox(width: 16),
+          const SizedBox(width: Sizes.spaceMd),
           Expanded(
             child: PasswordField(
               controller: passwordController,
               hintText: 'Password',
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: Sizes.spaceMd),
           Expanded(
             child: PasswordField(
               controller: confirmPassController,
@@ -305,7 +306,7 @@ class _AdministratorRegisterScreenState
           ),
         ],
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: Sizes.spaceMd),
       InternationalPhoneNumberInput(
         countries: ['PH', 'US'],
         onInputChanged: (PhoneNumber number) {
@@ -337,7 +338,7 @@ class _AdministratorRegisterScreenState
         autoValidateMode: AutovalidateMode.onUserInteraction,
         initialValue: number,
       ),
-      const SizedBox(width: 24),
+      const SizedBox(width: Sizes.spaceLg),
     ];
 
     return Scaffold(
@@ -376,7 +377,7 @@ class _AdministratorRegisterScreenState
                   }
 
                   return SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(Sizes.spaceLg),
                     child: isLoading
                         ? CircularProgressIndicator(
                             color: context.appColors.accent900,
@@ -384,10 +385,12 @@ class _AdministratorRegisterScreenState
                         : ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 550),
                             child: Container(
-                              padding: const EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(Sizes.spaceMd),
                               decoration: BoxDecoration(
                                 color: context.appColors.gray100,
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(
+                                  Sizes.radiusMd,
+                                ),
                                 border: Border.all(
                                   width: 0.5,
                                   color: context.appColors.gray600,
@@ -400,27 +403,27 @@ class _AdministratorRegisterScreenState
                                     child: Text(
                                       "Register Organization",
                                       style: TextStyle(
-                                        fontSize: 18,
+                                        fontSize: Sizes.fontSizeXl,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 16),
+                                  const SizedBox(height: Sizes.spaceMd),
                                   infoControls,
-                                  const SizedBox(height: 16),
+                                  const SizedBox(height: Sizes.spaceMd),
                                   logoWidget,
-                                  const SizedBox(height: 16),
+                                  const SizedBox(height: Sizes.spaceMd),
                                   placeControls,
-                                  const SizedBox(height: 16),
+                                  const SizedBox(height: Sizes.spaceMd),
                                   TextField(
                                     decoration: const InputDecoration(
                                       labelText: "Email",
                                     ),
                                     controller: emailController,
                                   ),
-                                  const SizedBox(height: 16),
+                                  const SizedBox(height: Sizes.spaceMd),
                                   ...contactControlls,
-                                  const SizedBox(height: 16),
+                                  const SizedBox(height: Sizes.spaceMd),
                                   termAndCondition(
                                     context,
                                     hasAcceptedTerms,
@@ -431,7 +434,7 @@ class _AdministratorRegisterScreenState
                                       });
                                     },
                                   ),
-                                  const SizedBox(height: 16),
+                                  const SizedBox(height: Sizes.spaceMd),
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,

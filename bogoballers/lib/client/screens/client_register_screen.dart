@@ -6,6 +6,7 @@ import 'package:bogoballers/core/components/error.dart';
 import 'package:bogoballers/core/components/image_picker.dart';
 import 'package:bogoballers/core/components/password_field.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
+import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/enums/gender_enum.dart';
 import 'package:bogoballers/core/enums/user_enum.dart';
 import 'package:bogoballers/core/models/location_data.dart';
@@ -284,7 +285,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
           });
           onSelect();
         },
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(Sizes.radiusMd),
         child: Container(
           padding: EdgeInsets.all(12),
           width: 200,
@@ -297,7 +298,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(icon, size: 48, color: appColors.accent600),
-              SizedBox(height: 8),
+              const SizedBox(height: Sizes.spaceSm),
               Text(
                 text,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
@@ -320,11 +321,11 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                   "Are you a?",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: Sizes.spaceMd),
                 buildAccountTypeItemCard("Player", Icons.sports_basketball, () {
                   selectedAccountType = AccountTypeEnum.PLAYER;
                 }),
-                SizedBox(height: 16),
+                const SizedBox(height: Sizes.spaceMd),
                 buildAccountTypeItemCard("Team Creator", Icons.groups, () {
                   setState(() {
                     selectedAccountType = AccountTypeEnum.TEAM_CREATOR;
@@ -345,7 +346,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
         decoration: BoxDecoration(
           color: appColors.gray100,
           border: Border.all(width: 0.5, color: appColors.gray600),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(Sizes.radiusSm),
         ),
         child: Column(
           children: [
@@ -357,7 +358,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                     "Register as a Player",
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: Sizes.spaceSm),
                   Text(
                     "Fill in the required details below to create your profile.",
                     style: TextStyle(fontSize: 11, color: appColors.gray800),
@@ -365,41 +366,41 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                 ],
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: Sizes.spaceMd),
             AppImagePicker(controller: profileImageController, aspectRatio: 1),
-            SizedBox(height: 8),
+            SizedBox(height: Sizes.spaceSm),
             AppButton(
               label: 'Select Image',
               onPressed: profileImageController.pickImage,
               variant: ButtonVariant.outline,
               size: ButtonSize.sm,
             ),
-            SizedBox(height: 4),
+            SizedBox(height: Sizes.spaceXs),
             Center(
               child: Text(
                 '* Please provide a valid and proper player profile image. This is required for league validation.',
                 style: TextStyle(fontSize: 10, color: appColors.gray800),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: Sizes.spaceMd),
             TextField(
               controller: firstNameController,
               decoration: InputDecoration(label: Text("First name")),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: Sizes.spaceMd),
             TextField(
               controller: lastNameController,
               decoration: InputDecoration(label: Text("Last name")),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: Sizes.spaceMd),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   "Select Gender",
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: Sizes.fontSizeMd, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 8),
+                SizedBox(height: Sizes.spaceSm),
                 ValueListenableBuilder<Gender?>(
                   valueListenable: selectedGender,
                   builder: (context, gender, _) {
@@ -415,7 +416,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                                 selectedGender.value = value;
                               },
                             ),
-                            Text("Male", style: TextStyle(fontSize: 12)),
+                            Text("Male", style: TextStyle(fontSize: Sizes.fontSizeSm)),
                           ],
                         ),
                         SizedBox(width: 16),
@@ -428,7 +429,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                                 selectedGender.value = value;
                               },
                             ),
-                            Text("Female", style: TextStyle(fontSize: 12)),
+                            Text("Female", style: TextStyle(fontSize: Sizes.fontSizeSm)),
                           ],
                         ),
                       ],
@@ -437,12 +438,12 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: Sizes.spaceMd),
             DateTimePickerField(
               controller: bdayController,
               labelText: 'Birthdate',
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: Sizes.spaceMd),
             Center(
               child: SizedBox(
                 width: double.infinity,
@@ -459,7 +460,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: Sizes.spaceMd),
             GestureDetector(
               onTap: () {
                 if (_selectedMunicipality == null) {
@@ -489,26 +490,26 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: Sizes.spaceMd),
             TextField(
               controller: jerseyNameController,
               decoration: InputDecoration(label: Text("Jersey name")),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: Sizes.spaceMd),
             TextField(
               controller: jerseyNumberController,
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               decoration: InputDecoration(label: Text("Jersey number")),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: Sizes.spaceMd),
             Center(
               child: Text(
                 "Choose up to two positions",
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: Sizes.fontSizeSm, fontWeight: FontWeight.w600),
               ),
             ),
-            SizedBox(height: 8),
+            SizedBox(height: Sizes.spaceSm),
             ValueListenableBuilder<Set<String>>(
               valueListenable: selectedPositions,
               builder: (context, selected, _) {
@@ -516,7 +517,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                   children: positions.map((position) {
                     return CheckboxListTile(
                       visualDensity: VisualDensity.compact,
-                      title: Text(position, style: TextStyle(fontSize: 12)),
+                      title: Text(position, style: TextStyle(fontSize: Sizes.fontSizeSm)),
                       value: selected.contains(position),
                       onChanged: (bool? checked) {
                         if (checked == true && selected.length >= 2) {
@@ -537,7 +538,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                 );
               },
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: Sizes.spaceMd),
             InternationalPhoneNumberInput(
               countries: ['PH'],
               onInputChanged: (PhoneNumber number) {
@@ -569,25 +570,25 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
               autoValidateMode: AutovalidateMode.onUserInteraction,
               initialValue: number,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: Sizes.spaceMd),
             TextField(
               controller: emailController,
               decoration: InputDecoration(label: Text("Email")),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: Sizes.spaceMd),
             PasswordField(controller: passwordController, hintText: 'Password'),
-            SizedBox(height: 16),
+            const SizedBox(height: Sizes.spaceMd),
             PasswordField(
               controller: confirmPassController,
               hintText: 'Confirm Passowrd',
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: Sizes.spaceMd),
             termAndCondition(context, hasAcceptedTerms, _termsFuture, (value) {
               setState(() {
                 hasAcceptedTerms = value ?? false;
               });
             }),
-            SizedBox(height: 24),
+            SizedBox(height: Sizes.spaceLg),
             AppButton(
               label: "Register",
               onPressed: handleRegisterPlayer,
@@ -609,8 +610,8 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               color: appColors.gray100,
-              border: Border.all(width: 0.5, color: appColors.gray600),
-              borderRadius: BorderRadius.circular(8),
+              border: Border.all(width: Sizes.borderWidthSm, color: appColors.gray600),
+              borderRadius: BorderRadius.circular(Sizes.radiusMd),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -622,11 +623,11 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                       Text(
                         "Register as a Team Creator",
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: Sizes.fontSizeMd,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: Sizes.spaceSm),
                       Text(
                         "Fill in the required details below to create your profile.",
                         style: TextStyle(
@@ -637,7 +638,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                     ],
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: Sizes.spaceMd),
                 InternationalPhoneNumberInput(
                   countries: ['PH'],
                   onInputChanged: (PhoneNumber number) {
@@ -669,22 +670,22 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                   autoValidateMode: AutovalidateMode.onUserInteraction,
                   initialValue: number,
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: Sizes.spaceMd),
                 TextField(
                   controller: emailController,
                   decoration: InputDecoration(label: Text("Email")),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: Sizes.spaceMd),
                 PasswordField(
                   controller: passwordController,
                   hintText: 'Password',
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: Sizes.spaceMd),
                 PasswordField(
                   controller: confirmPassController,
                   hintText: 'Confirm Passowrd',
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: Sizes.spaceMd),
                 termAndCondition(context, hasAcceptedTerms, _termsFuture, (
                   value,
                 ) {
@@ -692,7 +693,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                     hasAcceptedTerms = value ?? false;
                   });
                 }),
-                SizedBox(height: 24),
+                SizedBox(height: Sizes.spaceLg),
                 AppButton(
                   label: "Register",
                   onPressed: handleRegisterTeamCreator,
@@ -773,7 +774,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          padding: const EdgeInsets.symmetric(vertical: Sizes.spaceSm),
                           child: Column(
                             children: [
                               if (_tabController.index > 0)
@@ -788,7 +789,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
                                     ),
                                   ),
                                 ),
-                              SizedBox(height: 8),
+                              SizedBox(height: Sizes.spaceSm),
                               authNavigator(
                                 context,
                                 "Already have an account?",

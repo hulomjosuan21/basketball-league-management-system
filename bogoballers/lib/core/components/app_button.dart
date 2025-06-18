@@ -1,3 +1,4 @@
+import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
@@ -53,7 +54,10 @@ class AppButton extends MaterialButton {
       case ButtonVariant.outline:
         backgroundColor = Colors.transparent;
         textColor = colors.gray1100;
-        borderSide = BorderSide(color: colors.gray600, width: 0.5);
+        borderSide = BorderSide(
+          color: colors.gray600,
+          width: Sizes.borderWidthSm,
+        );
         break;
       case ButtonVariant.ghost:
         backgroundColor = Colors.transparent;
@@ -68,15 +72,15 @@ class AppButton extends MaterialButton {
     switch (size) {
       case ButtonSize.sm:
         padding = const EdgeInsets.symmetric(horizontal: 12, vertical: 8);
-        fontSize = 12;
+        fontSize = Sizes.fontSizeSm;
         break;
       case ButtonSize.md:
         padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 12);
-        fontSize = 14;
+        fontSize = Sizes.fontSizeMd;
         break;
       case ButtonSize.lg:
         padding = const EdgeInsets.symmetric(horizontal: 20, vertical: 16);
-        fontSize = 16;
+        fontSize = Sizes.fontSizeLg;
         break;
     }
 
@@ -100,7 +104,7 @@ class AppButton extends MaterialButton {
         disabledColor: colors.gray400,
         disabledTextColor: colors.gray500,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(Sizes.radiusSm),
           side: borderSide,
         ),
         padding: padding,

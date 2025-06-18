@@ -5,6 +5,7 @@ import 'package:bogoballers/core/components/app_button.dart';
 import 'package:bogoballers/core/components/auth_navigator.dart';
 import 'package:bogoballers/core/components/password_field.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
+import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/models/user.dart';
 import 'package:bogoballers/core/services/client_services.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
@@ -73,12 +74,12 @@ class _ClientLoginScreenState extends State<ClientLoginScreen> {
     final appColors = context.appColors;
 
     final loginControll = <Widget>[
-      const SizedBox(height: 16),
+      const SizedBox(height: Sizes.spaceMd),
       TextField(
         decoration: const InputDecoration(label: Text("Email")),
         controller: emailController,
       ),
-      const SizedBox(height: 16),
+      const SizedBox(height: Sizes.spaceMd),
       PasswordField(controller: passwordController, hintText: "Password"),
     ];
 
@@ -90,16 +91,16 @@ class _ClientLoginScreenState extends State<ClientLoginScreen> {
             child: isLoading
                 ? CircularProgressIndicator(color: context.appColors.accent900)
                 : SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(Sizes.spaceLg),
                     child: Container(
                       constraints: const BoxConstraints(maxWidth: 400),
                       child: Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(Sizes.spaceMd),
                         decoration: BoxDecoration(
                           color: context.appColors.gray100,
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(Sizes.radiusMd),
                           border: Border.all(
-                            width: 0.5,
+                            width: Sizes.borderWidthSm,
                             color: context.appColors.gray600,
                           ),
                         ),
@@ -110,13 +111,13 @@ class _ClientLoginScreenState extends State<ClientLoginScreen> {
                               child: Text(
                                 "Welcome",
                                 style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: Sizes.fontSizeXl,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
                             ...loginControll,
-                            const SizedBox(height: 24),
+                            const SizedBox(height: Sizes.spaceLg),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [

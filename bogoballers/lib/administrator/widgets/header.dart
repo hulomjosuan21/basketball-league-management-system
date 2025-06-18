@@ -1,3 +1,4 @@
+import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/models/league_administrator.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +23,7 @@ class AppHeader extends StatelessWidget {
       height: 34,
       width: double.infinity,
       color: appColors.accent900,
-      padding: EdgeInsets.all(4),
+      padding: EdgeInsets.all(Sizes.spaceXs),
       child: Row(
         children: [
           IconButton(
@@ -37,8 +38,11 @@ class AppHeader extends StatelessWidget {
                 constraints: BoxConstraints(minWidth: 200),
                 padding: EdgeInsets.symmetric(vertical: 2, horizontal: 12),
                 decoration: BoxDecoration(
-                  border: Border.all(width: 0.5, color: appColors.gray100),
-                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(
+                    width: Sizes.borderWidthSm,
+                    color: appColors.gray100,
+                  ),
+                  borderRadius: BorderRadius.circular(Sizes.radiusSm),
                 ),
                 child: Text(
                   leagueAdministrator.organization_name,

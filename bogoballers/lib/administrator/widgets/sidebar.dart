@@ -1,3 +1,4 @@
+import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 
@@ -31,7 +32,7 @@ class SidebarItem extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
               color: selected ? appColors.gray300 : Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(Sizes.radiusMd),
             ),
             child: Row(
               children: [
@@ -41,7 +42,7 @@ class SidebarItem extends StatelessWidget {
                     size: 20,
                     color: selected ? appColors.accent900 : appColors.gray700,
                   ),
-                if (icon != null) const SizedBox(width: 8),
+                if (icon != null) const SizedBox(width: Sizes.spaceSm),
                 Expanded(
                   child: Text(
                     label,
@@ -94,18 +95,18 @@ class SubMenuItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           color: selected ? appColors.gray300 : Colors.transparent,
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(Sizes.radiusSm),
         ),
         child: Row(
           children: [
-            const SizedBox(width: 4),
+            const SizedBox(width: Sizes.spaceXs),
             Icon(Icons.circle, size: 6, color: appColors.gray500),
-            const SizedBox(width: 8),
+            const SizedBox(width: Sizes.spaceSm),
             Text(
               label,
               style: TextStyle(
                 color: selected ? appColors.accent900 : appColors.gray600,
-                fontSize: 13,
+                fontSize: Sizes.fontSizeSm,
               ),
             ),
           ],
@@ -118,7 +119,11 @@ class SubMenuItem extends StatelessWidget {
 class AppSidebar extends StatelessWidget {
   final List<SidebarItem> sidebarItems;
   final List<SidebarItem> sidebarFooterItems;
-  const AppSidebar({super.key, required this.sidebarItems, required this.sidebarFooterItems});
+  const AppSidebar({
+    super.key,
+    required this.sidebarItems,
+    required this.sidebarFooterItems,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -128,46 +133,58 @@ class AppSidebar extends StatelessWidget {
       width: 220,
       decoration: BoxDecoration(
         color: appColors.gray100,
-        border: Border(right: BorderSide(width: 0.5, color: appColors.gray600)),
+        border: Border(
+          right: BorderSide(
+            width: Sizes.borderWidthSm,
+            color: appColors.gray600,
+          ),
+        ),
       ),
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(Sizes.spaceMd),
             width: double.infinity,
             height: 80,
             decoration: BoxDecoration(
               color: appColors.gray100,
               border: Border(
-                bottom: BorderSide(width: 0.5, color: appColors.gray600),
+                bottom: BorderSide(
+                  width: Sizes.borderWidthSm,
+                  color: appColors.gray600,
+                ),
               ),
             ),
           ),
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(Sizes.spaceSm),
                 child: Column(children: sidebarItems),
               ),
             ),
           ),
 
           // Sidebar footer
-          if (sidebarFooterItems.isNotEmpty) Container(
-            width: double.infinity,
-            height: 200,
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(color: appColors.gray600, width: 0.5),
+          if (sidebarFooterItems.isNotEmpty)
+            Container(
+              width: double.infinity,
+              height: 200,
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: appColors.gray600,
+                    width: Sizes.borderWidthSm,
+                  ),
+                ),
+              ),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(Sizes.spaceSm),
+                  child: Column(children: sidebarFooterItems),
+                ),
               ),
             ),
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Column(children: sidebarFooterItems),
-              ),
-            ),
-          ),
         ],
       ),
     );
