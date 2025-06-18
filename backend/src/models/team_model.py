@@ -75,14 +75,14 @@ class TeamModel(db.Model):
 
     team_name = db.Column(db.String(100), nullable=False)
 
-    barangay_name = db.Column(
+    team_address = db.Column(
         db.String(100),
         nullable=False
     )
 
-    municipality_name = db.Column(
-        db.String(100),
-        nullable=False
+    contact_number = db.Column(
+        db.String(15),
+        nullable=False,
     )
     
     team_motto = db.Column(
@@ -121,8 +121,8 @@ class TeamModel(db.Model):
             "user_id": self.user_id,
             "active_league": self.active_league.to_json() if self.active_league else None,
             "team_name": self.team_name,
-            "barangay_name": self.barangay_name,
-            "municipality_name": self.municipality_name,
+            "team_address": self.team_address,
+            "contact_number": self.contact_number,
             "team_motto": self.team_motto if self.team_motto else None,
             "team_logo_url": self.team_logo_url if self.team_logo_url else None,
             "championships_won": self.championships_won,

@@ -17,20 +17,20 @@ class TeamControllers:
         try:
             user_id = request.form.get('user_id')
             team_name = request.form.get('team_name')
-            barangay_name = request.form.get('barangay_name')
-            municipality_name = request.form.get('municipality_name')
+            team_address = request.form.get('team_address')
+            contact_number = request.form.get('contact_number')
             team_motto = request.form.get('team_motto')
             coach_name = request.form.get('coach_name')
             assistant_coach_name = request.form.get('assistant_coach_name')
             
-            if not all([user_id, team_name, barangay_name, municipality_name, coach_name]):
+            if not all([user_id, team_name, team_address, contact_number, coach_name]):
                 raise ValueError("All fields must be provided and not empty.")
 
             team = TeamModel(
                 user_id=user_id,
                 team_name=team_name,
-                barangay_name=barangay_name,
-                municipality_name=municipality_name,
+                team_address=team_address,
+                contact_number=contact_number,
                 team_motto=team_motto,
                 coach_name=coach_name,
                 assistant_coach_name=assistant_coach_name
