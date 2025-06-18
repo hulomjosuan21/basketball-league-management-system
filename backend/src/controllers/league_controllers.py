@@ -67,6 +67,7 @@ class LeagueControllers:
             league_title = data.get('league_title')
             league_description = data.get('league_description')
             league_budget = data.get('league_budget')
+            entrance_fee_amount = float(data.get('entrance_fee_amount', 0.0))
             registration_deadline = data.get('registration_deadline')
             opening_date = data.get('opening_date')
             start_date = data.get('start_date')
@@ -78,26 +79,28 @@ class LeagueControllers:
             if not all([league_administrator_id, league_title, league_description, league_budget, registration_deadline, opening_date, start_date, league_rules, status, categories]):
                 raise ValueError("All fields must be provided and not empty.")
 
-            # Create League instance
             league = LeagueModel(
                 league_administrator_id=league_administrator_id,
                 league_title=league_title,
                 league_description=league_description,
                 league_budget=league_budget,
+                entrance_fee_amount=entrance_fee_amount,
                 registration_deadline=datetime.fromisoformat(registration_deadline),
                 opening_date=datetime.fromisoformat(opening_date),
                 start_date=datetime.fromisoformat(start_date),
                 league_rules=league_rules,
                 status=status,
-                sponsors=sponsors if sponsors else None
+                sponsors=sponsors if sponsors else None,
             )
 
             db.session.add(league)
             db.session.flush()
 
+            league_id = league.league_id
+
             for cat in categories:
                 category = LeagueCategoryModel(
-                    league_id=league.league_id,
+                    league_id=league_id,
                     category_name=cat.get('category_name'),
                     category_format=cat.get('category_format'),
                     max_team=cat.get('max_team', 4)
@@ -105,7 +108,7 @@ class LeagueControllers:
                 db.session.add(category)
 
             db.session.commit()
-            return ApiResponse.success(message=f"New League Created {league_title}")
+            return ApiResponse.success(message=f"New League Created {league_title}",payload=league_id)
 
         except Exception as e:
             db.session.rollback()

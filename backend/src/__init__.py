@@ -4,7 +4,6 @@ from src.services.notification_serices import NotificationService
 from src.workers.test import job_wrapper
 from src.config import Config
 from src.controllers.organization_type import organization_type_list
-from src.controllers.places import getCityAndBarangays
 from src.controllers.barangay_list import barangay_list
 from src.extensions import db, migrate, jwt, limiter, socketio, scheduler
 import os
@@ -20,13 +19,14 @@ from src.routes.player.player_route import player_bp
 from src.routes.team_creator.team_creator_route import team_creator_bp 
 from src.routes.league.league_routes import league_bp
 from src.routes.team.team_routes import team_bp
-
+from src.routes.payment_routes import payment_bp
 from src.models.player_model import *
 from src.models.user_model import *
 from src.models.league_administrator_model import *
 from src.models.league_model import *
 from src.models.team_model import *
 from src.models.audit_log_model import *
+from src.models.payment_model import *
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -69,7 +69,6 @@ class FlaskServer:
     def init_blueprints(self):
         self.server.get("/")(lambda: "Programmer: Josuan Leonardo Hulom")
         
-        self.server.get("/places")(getCityAndBarangays)
         self.server.get("/organization-types")(organization_type_list)
         self.server.get("/barangay-list")(barangay_list)
 
@@ -79,6 +78,7 @@ class FlaskServer:
         
         self.server.register_blueprint(player_bp)
         self.server.register_blueprint(team_creator_bp)
+        self.server.register_blueprint(payment_bp)
 
         self.server.register_blueprint(league_bp)
         self.server.register_blueprint(team_bp)

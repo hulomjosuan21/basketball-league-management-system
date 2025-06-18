@@ -142,6 +142,8 @@ class TeamModel(db.Model):
         passive_deletes=True
     )
 
+    payments = db.relationship('PaymentModel', back_populates='team', cascade="all, delete-orphan")
+
     league_team = db.relationship(
         'LeagueTeamModel',
         back_populates='team',
