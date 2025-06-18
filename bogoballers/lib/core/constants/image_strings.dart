@@ -1,3 +1,4 @@
 class ImageStrings {
-  static const image = "assets/images/basketball_sport.png";
+  static const exampleTeamLogo = "assets/images/example-team-logo.png";
+  static const appLogo = "assets/images/app_logo.png";
 }

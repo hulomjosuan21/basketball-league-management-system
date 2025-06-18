@@ -1,3 +1,4 @@
+import 'package:bogoballers/core/constants/validation_patterns.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:flutter/material.dart';
 
@@ -32,29 +33,57 @@ void validateCreateTeamFields({
   required String? fullPhoneNumber,
   required TextEditingController teamMotoController,
   required TextEditingController coachNameController,
+  required TextEditingController assistantCoachNameController,
   required bool hasAcceptedTerms,
 }) {
-  if (teamNameController.text.trim().isEmpty) {
+  final teamName = teamNameController.text.trim();
+  final teamAddress = teamAddressController.text.trim();
+  final teamMoto = teamMotoController.text.trim();
+  final coachName = coachNameController.text.trim();
+  final assistantCoachName = assistantCoachNameController.text.trim();
+
+  if (teamName.isEmpty) {
     throw ValidationException("Team name cannot be empty");
   }
-  if (teamAddressController.text.trim().isEmpty) {
+  if (!RegExPatterns.teamName.hasMatch(teamName)) {
+    throw ValidationException("Invalid team name format");
+  }
+
+  if (teamAddress.isEmpty) {
     throw ValidationException("Team address cannot be empty");
   }
-  if (fullPhoneNumber == null || fullPhoneNumber.trim().isEmpty) {
-    throw ValidationException("Phone number cannot be empty");
+  if (!RegExPatterns.address.hasMatch(teamAddress)) {
+    throw ValidationException(
+      "Invalid address format\nExample: Brgy. Sample, Sample City, Sample Province",
+    );
   }
-  if (fullPhoneNumber.trim().isEmpty) {
+
+  if (fullPhoneNumber == null || fullPhoneNumber.trim().isEmpty) {
     throw ValidationException("Phone number cannot be empty");
   }
   if (!isValidateContactNumber(fullPhoneNumber)) {
     throw ValidationException("Invalid Phone number");
   }
-  if (teamMotoController.text.trim().isEmpty) {
+
+  if (teamMoto.isEmpty) {
     throw ValidationException("Team moto cannot be empty");
   }
-  if (coachNameController.text.trim().isEmpty) {
+
+  if (coachName.isEmpty) {
     throw ValidationException("Coach full name cannot be empty");
   }
+  if (!RegExPatterns.fullName.hasMatch(coachName)) {
+    throw ValidationException(
+      "Invalid coach name format\nUse: Firstname Lastname",
+    );
+  }
+
+  if (!RegExPatterns.fullName.hasMatch(assistantCoachName)) {
+    throw ValidationException(
+      "Invalid assistant coach name format\nUse: Firstname Lastname",
+    );
+  }
+
   if (!hasAcceptedTerms) {
     throw ValidationException("You must accept the terms and conditions");
   }

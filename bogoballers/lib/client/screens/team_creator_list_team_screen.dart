@@ -21,7 +21,7 @@ class TeamCreatorTeamListScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: appColors.gray100,
+        backgroundColor: appColors.accent900,
         elevation: 1,
         onPressed: () {
           Navigator.push(
@@ -33,7 +33,7 @@ class TeamCreatorTeamListScreen extends StatelessWidget {
             ),
           );
         },
-        child: Icon(Icons.add, color: appColors.accent1000),
+        child: Icon(Icons.add, color: appColors.gray100),
       ),
     );
   }

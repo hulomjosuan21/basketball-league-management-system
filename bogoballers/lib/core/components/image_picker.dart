@@ -8,6 +8,7 @@ import 'package:extended_image/extended_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart' as dio;
+import 'package:flutter/services.dart';
 
 Future<Uint8List?> cropImageDataWithDartLibrary({
   required ExtendedImageEditorState state,
@@ -159,12 +160,14 @@ class AppImagePicker extends StatefulWidget {
   final AppImagePickerController controller;
   final double aspectRatio;
   final double width;
+  final String? assetPath;
 
   const AppImagePicker({
     super.key,
     required this.controller,
     this.aspectRatio = 1.0,
     this.width = 180,
+    this.assetPath,
   });
 
   @override
@@ -180,12 +183,22 @@ class _AppImagePickerState extends State<AppImagePicker> {
   void initState() {
     super.initState();
     widget.controller._state = this;
+    _loadAssetImage();
   }
 
   @override
   void dispose() {
     widget.controller._state = null;
     super.dispose();
+  }
+
+  Future<void> _loadAssetImage() async {
+    if (widget.assetPath != null) {
+      final ByteData data = await rootBundle.load(widget.assetPath!);
+      setState(() {
+        _avatarBytes = data.buffer.asUint8List();
+      });
+    }
   }
 
   Future<void> _selectAndCropImage() async {
@@ -263,8 +276,8 @@ class _AppImagePickerState extends State<AppImagePicker> {
               : Container(
                   width: widget.width,
                   height: widget.width / widget.aspectRatio,
-                  color: appColors.gray400,
-                  child: Icon(Icons.image, size: 48, color: appColors.gray100),
+                  color: Colors.grey[400],
+                  child: const Icon(Icons.image, size: 48, color: Colors.white),
                 ),
         ),
         if (_fileName != null) ...[

@@ -4,6 +4,7 @@ import 'package:bogoballers/core/components/app_button.dart';
 import 'package:bogoballers/core/components/error.dart';
 import 'package:bogoballers/core/components/image_picker.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
+import 'package:bogoballers/core/constants/image_strings.dart';
 import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/models/team_model.dart';
 import 'package:bogoballers/core/services/team_creator_services.dart';
@@ -78,6 +79,7 @@ class _TeamCreatorCreateTeamScreenState
         hasAcceptedTerms: hasAcceptedTerms,
         fullPhoneNumber: fullPhoneNumber,
         coachNameController: teamCoachController,
+        assistantCoachNameController: teamAssistantCoachController,
       );
 
       String testUserId = "user-02f28a11-cd42-4e6c-b753-2f493d88cbb6";
@@ -167,7 +169,11 @@ class _TeamCreatorCreateTeamScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AppImagePicker(controller: logoController, aspectRatio: 1),
+            AppImagePicker(
+              controller: logoController,
+              aspectRatio: 1,
+              assetPath: ImageStrings.exampleTeamLogo,
+            ),
             AppButton(
               label: 'Select team logo',
               onPressed: logoController.pickImage,
@@ -177,12 +183,19 @@ class _TeamCreatorCreateTeamScreenState
             SizedBox(height: Sizes.spaceMd),
             TextField(
               controller: teamNameController,
-              decoration: InputDecoration(label: Text("Team name")),
+              decoration: InputDecoration(
+                label: Text("Team name"),
+                helperText: 'Format: [Team Name]',
+              ),
             ),
             SizedBox(height: Sizes.spaceMd),
             TextField(
               controller: teamAddressController,
-              decoration: InputDecoration(label: Text("Team address")),
+              decoration: InputDecoration(
+                label: Text("Team address"),
+                helperText:
+                    "Format: Brgy. [Barangay], [City/Municipality], [Province]",
+              ),
             ),
             SizedBox(height: Sizes.spaceMd),
             InternationalPhoneNumberInput(
@@ -222,18 +235,24 @@ class _TeamCreatorCreateTeamScreenState
               decoration: InputDecoration(
                 label: Text("Team moto"),
                 alignLabelWithHint: true,
+                helperText: "Example: One team, one dream",
               ),
               maxLines: 2,
             ),
             SizedBox(height: Sizes.spaceMd),
             TextField(
               controller: teamCoachController,
-              decoration: InputDecoration(label: Text("Coach full name")),
+              decoration: InputDecoration(
+                label: Text("Coach full name"),
+                helperText: 'Format: [First Name] [Last Name]',
+              ),
             ),
             SizedBox(height: Sizes.spaceMd),
             TextField(
               controller: teamAssistantCoachController,
               decoration: InputDecoration(
+                helperText:
+                    'Format: [First Name] [Last Name] (You can set this later)',
                 label: Text("Assistant Coach full name (optional)"),
               ),
             ),
