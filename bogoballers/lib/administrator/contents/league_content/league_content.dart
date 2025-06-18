@@ -5,6 +5,7 @@ import 'package:bogoballers/core/components/image_picker.dart';
 import 'package:bogoballers/core/components/labeled_text.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
 import 'package:bogoballers/core/components/text_field.dart';
+import 'package:bogoballers/core/enums/league_status_enum.dart';
 import 'package:bogoballers/core/models/league_model.dart';
 import 'package:bogoballers/core/providers/league_adminstrator_provider.dart';
 import 'package:bogoballers/core/services/league_services.dart';
@@ -68,15 +69,8 @@ class _CreateLeagueState extends State<CreateLeague> {
   List<CategoryInputData> addedCategories = [];
   // for cat in addedCategories = Category {cat.category}, Format: ${cat.format}, Max Team: ${cat.maxTeam}
 
-  String? selectedStatus = "Scheduled";
-  List<String> statuses = [];
-
-  Future<void> loadStatuses() async {
-    final statusList = await selectLeagueCategoriesStatus();
-    setState(() {
-      statuses = statusList;
-    });
-  }
+  String selectedStatus = MatchStatus.scheduled.value;
+  final List<String> statuses = MatchStatus.values.map((e) => e.value).toList();
 
   Future<void> loadLeagueCategories() async {
     final result = await getLeagueCategoryDropdownData(addedCategories);
@@ -139,7 +133,6 @@ class _CreateLeagueState extends State<CreateLeague> {
   void initState() {
     super.initState();
     loadLeagueCategories();
-    loadStatuses();
   }
 
   Future<bool?> confirmDialog() => showDialog<bool>(
@@ -257,7 +250,7 @@ class _CreateLeagueState extends State<CreateLeague> {
         league_description: descriptionController.text,
         league_rules: rulesController.text,
         sponsors: sponsorsController.text,
-        status: selectedStatus!,
+        status: selectedStatus,
         categories: categories,
       );
 

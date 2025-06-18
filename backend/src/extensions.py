@@ -35,7 +35,6 @@ firebase_credentials_path = os.path.join(BASE_DIR, 'firebase_credentials.json')
 if not firebase_admin._apps:
     cred = credentials.Certificate(firebase_credentials_path)
     firebase_admin.initialize_app(cred)
-        
 
 def supabase_client() -> Client:
     supabase_url = current_app.config.get('SUPABASE_URL')

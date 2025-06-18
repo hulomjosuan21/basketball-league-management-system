@@ -85,12 +85,10 @@ flutter:
   assets:
       - .env
       - assets/images/app_logo.png
-      - assets/data/terms_and_conditions.json
+      - assets/json/terms_and_conditions.json
       - assets/images/basketball_sport.png
       - assets/logos/hawks_logo.png
       - assets/logos/celtics_logo.png
-      - assets/json/league_categories.json
-      - assets/json/league_status.json
       - assets/images/example-team-logo.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

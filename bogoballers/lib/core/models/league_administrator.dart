@@ -7,8 +7,7 @@ class LeagueAdministratorModel {
   late String league_administrator_id;
   String organization_type;
   String organization_name;
-  String barangay_name;
-  String municipality_name;
+  String organization_address;
   String? organization_photo_url;
   String? organization_logo_url;
   UserModel user;
@@ -20,8 +19,7 @@ class LeagueAdministratorModel {
     required this.league_administrator_id,
     required this.organization_type,
     required this.organization_name,
-    required this.barangay_name,
-    required this.municipality_name,
+    required this.organization_address,
     this.organization_photo_url,
     this.organization_logo_url,
     required this.user,
@@ -32,8 +30,7 @@ class LeagueAdministratorModel {
   LeagueAdministratorModel.create({
     required this.organization_type,
     required this.organization_name,
-    required this.barangay_name,
-    required this.municipality_name,
+    required this.organization_address,
     required this.user,
     required this.organization_logo_file,
   });
@@ -43,8 +40,7 @@ class LeagueAdministratorModel {
       league_administrator_id: json['league_administrator_id'],
       organization_type: json['organization_type'],
       organization_name: json['organization_name'],
-      barangay_name: json['barangay_name'],
-      municipality_name: json['municipality_name'],
+      organization_address: json['organization_address'],
       organization_photo_url: json['organization_photo_url'],
       organization_logo_url: json['organization_logo_url'],
       user: UserModel.fromJson(json['user']),
@@ -58,8 +54,7 @@ class LeagueAdministratorModel {
     final formMap = {
       'organization_type': organization_type,
       'organization_name': organization_name,
-      'barangay_name': barangay_name,
-      'municipality_name': municipality_name,
+      'organization_address': organization_address,
       'organization_logo_file': organization_logo_file,
     };
 
@@ -74,8 +69,7 @@ class LeagueAdministratorModel {
     return {
       'organization_type': organization_type,
       'organization_name': organization_name,
-      'barangay_name': barangay_name,
-      'municipality_name': municipality_name,
+      'organization_address': organization_address,
       'organization_photo_url': organization_photo_url,
       'organization_logo_url': organization_logo_url,
       'user': user.toJson(),

@@ -1,13 +1,14 @@
+import 'package:bogoballers/core/helpers/helpers.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 
-Widget termAndCondition(
-  BuildContext context,
-  bool hasAcceptedTerms,
-  Future<String> termsFuture,
-  void Function(bool?) onChanged,
-) {
+Widget termAndCondition({
+  required BuildContext context,
+  required bool hasAcceptedTerms,
+  required void Function(bool?) onChanged,
+  required String key,
+}) {
   return Row(
     children: [
       Checkbox(value: hasAcceptedTerms, onChanged: onChanged),
@@ -30,13 +31,15 @@ Widget termAndCondition(
                       context: context,
                       builder: (context) {
                         return FutureBuilder<String>(
-                          future: termsFuture,
+                          future: termsAndConditionsContent(key: key),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
                               return AlertDialog(
                                 title: Text("Terms and Conditions"),
-                                content: CircularProgressIndicator(),
+                                content: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
                               );
                             } else if (snapshot.hasError) {
                               return AlertDialog(
@@ -65,7 +68,7 @@ Widget termAndCondition(
                                   child: Text(snapshot.data!),
                                 ),
                                 actions: [
-                                  MaterialButton(
+                                  TextButton(
                                     onPressed: () =>
                                         Navigator.of(context).pop(),
                                     child: Text("Close"),

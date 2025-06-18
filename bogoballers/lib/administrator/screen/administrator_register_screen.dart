@@ -1,6 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
 import 'dart:async';
 import 'package:bogoballers/administrator/screen/administrator_login_screen.dart';
+import 'package:bogoballers/client/screens/phone_number_input.dart';
 import 'package:bogoballers/core/components/app_button.dart';
 import 'package:bogoballers/core/components/auth_navigator.dart';
 import 'package:bogoballers/core/components/error.dart';
@@ -9,18 +10,16 @@ import 'package:bogoballers/core/components/password_field.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
 import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/enums/user_enum.dart';
+import 'package:bogoballers/core/helpers/helpers.dart';
 import 'package:bogoballers/core/models/league_administrator.dart';
 import 'package:bogoballers/core/utils/terms.dart';
 import 'package:bogoballers/core/validations/auth_validations.dart';
-import 'dart:convert';
 import 'package:bogoballers/core/models/user.dart';
 import 'package:bogoballers/core/services/league_administrator_services.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:bogoballers/core/models/location_data.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:flutter/services.dart';
 
 class AdministratorRegisterScreen extends StatefulWidget {
@@ -37,26 +36,17 @@ class _AdministratorRegisterScreenState
   final passwordController = TextEditingController();
   final confirmPassController = TextEditingController();
   final orgNameController = TextEditingController();
+  final orgAddressController = TextEditingController();
   bool isLoading = false;
   bool hasAcceptedTerms = false;
-  late Future<String> _termsFuture;
-  List<String> _organization_types = [];
-  List<String> _municipalities = [];
-  Map<String, List<String>> _barangaysMap = {};
-  List<String> _filteredBarangays = [];
 
   String? _selectedOrgType;
-  String? _selectedMunicipality;
-  String? _selectedBarangay;
-
-  String initialCountry = 'PH';
-  bool isValidPhoneNumber = false;
-  String? fullPhoneNumber;
-  PhoneNumber number = PhoneNumber(isoCode: 'PH');
+  String? phoneNumber;
   late Future<void> _networkDataFuture;
 
   AppImagePickerController logoController = AppImagePickerController();
 
+  List<String> _organization_types = [];
   @override
   void initState() {
     super.initState();
@@ -65,21 +55,10 @@ class _AdministratorRegisterScreenState
 
   Future<void> loadNetworkData() async {
     try {
-      final results = await Future.wait([
-        getOrganizationTypes(),
-        getLocationData(),
-        _loadTermsAndConditions(),
-      ]);
-
-      _organization_types = results[0] as List<String>;
-      LocationData? locations = results[1] as LocationData?;
-      _termsFuture = Future.value(results[2] as String);
-
-      if (locations != null) {
-        _municipalities = locations.municipalities;
-        _barangaysMap = locations.barangays;
-      }
-      setState(() {});
+      final types = await organizationTypeList();
+      setState(() {
+        _organization_types = types;
+      });
     } on DioException catch (_) {
       throw AppException("Network error!");
     } catch (e) {
@@ -87,36 +66,9 @@ class _AdministratorRegisterScreenState
     }
   }
 
-  Future<String> _loadTermsAndConditions() async {
-    try {
-      String jsonString = await rootBundle.loadString(
-        'assets/data/terms_and_conditions.json',
-      );
-      Map<String, dynamic> data = jsonDecode(jsonString);
-      return data['terms_and_conditions'] ??
-          'Error: Terms and conditions not found.';
-    } catch (e) {
-      return 'Failed to load terms and conditions.';
-    }
-  }
-
   void _onOrgTypeChanged(String? orgtype) {
     setState(() {
       _selectedOrgType = orgtype;
-    });
-  }
-
-  void _onMunicipalityChanged(String? muni) {
-    setState(() {
-      _selectedMunicipality = muni;
-      _filteredBarangays = muni != null ? (_barangaysMap[muni] ?? []) : [];
-      _selectedBarangay = null;
-    });
-  }
-
-  void _onBarangayChanged(String? barangay) {
-    setState(() {
-      _selectedBarangay = barangay;
     });
   }
 
@@ -130,11 +82,10 @@ class _AdministratorRegisterScreenState
       validateOrganizationFields(
         orgNameController: orgNameController,
         selectedOrgType: _selectedOrgType,
-        selectedMunicipality: _selectedMunicipality,
-        selectedBarangay: _selectedBarangay,
+        addressController: orgAddressController,
         emailController: emailController,
         passwordController: passwordController,
-        fullPhoneNumber: fullPhoneNumber,
+        fullPhoneNumber: phoneNumber,
       );
 
       if (passwordController.text != confirmPassController.text) {
@@ -144,7 +95,7 @@ class _AdministratorRegisterScreenState
       final user = UserModel.create(
         email: emailController.text,
         password_str: passwordController.text,
-        contact_number: fullPhoneNumber!,
+        contact_number: phoneNumber!,
         account_type: AccountTypeEnum.LOCAL_ADMINISTRATOR,
       );
 
@@ -156,8 +107,7 @@ class _AdministratorRegisterScreenState
       final leagueAdministrator = LeagueAdministratorModel.create(
         organization_name: orgNameController.text,
         organization_type: _selectedOrgType!,
-        municipality_name: _selectedMunicipality!,
-        barangay_name: _selectedBarangay!,
+        organization_address: orgAddressController.text,
         user: user,
         organization_logo_file: multipartFile,
       );
@@ -202,12 +152,12 @@ class _AdministratorRegisterScreenState
 
   @override
   Widget build(BuildContext context) {
-    final infoControls = Row(
+    final addressAndOrgType = Row(
       children: [
         Expanded(
           child: TextField(
-            controller: orgNameController,
-            decoration: const InputDecoration(labelText: 'Organization Name'),
+            controller: orgAddressController,
+            decoration: const InputDecoration(labelText: 'Address'),
           ),
         ),
         const SizedBox(width: Sizes.spaceMd),
@@ -221,53 +171,6 @@ class _AdministratorRegisterScreenState
                 .map((o) => DropdownMenuEntry(value: o, label: o))
                 .toList(),
             label: const Text('Organization Type'),
-          ),
-        ),
-      ],
-    );
-
-    final placeControls = Row(
-      children: [
-        Expanded(
-          child: DropdownMenu<String>(
-            key: const ValueKey('muni_dropdown'),
-            initialSelection: _selectedMunicipality,
-            onSelected: _onMunicipalityChanged,
-            enableFilter: true,
-            enableSearch: true,
-            dropdownMenuEntries: _municipalities
-                .map((m) => DropdownMenuEntry(value: m, label: m))
-                .toList(),
-            label: const Text('Select Municipality'),
-          ),
-        ),
-        const SizedBox(width: Sizes.spaceMd),
-        Expanded(
-          child: GestureDetector(
-            onTap: () {
-              if (_selectedMunicipality == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Please select municipality first'),
-                  ),
-                );
-              }
-            },
-            child: AbsorbPointer(
-              absorbing: _selectedMunicipality == null,
-              child: DropdownMenu<String>(
-                key: const ValueKey('brgy_dropdown'),
-                enabled: _selectedMunicipality != null,
-                initialSelection: _selectedBarangay,
-                onSelected: _onBarangayChanged,
-                enableFilter: true,
-                enableSearch: true,
-                dropdownMenuEntries: _filteredBarangays
-                    .map((b) => DropdownMenuEntry(value: b, label: b))
-                    .toList(),
-                label: const Text('Select Barangay'),
-              ),
-            ),
           ),
         ),
       ],
@@ -307,36 +210,10 @@ class _AdministratorRegisterScreenState
         ],
       ),
       const SizedBox(height: Sizes.spaceMd),
-      InternationalPhoneNumberInput(
-        countries: ['PH', 'US'],
-        onInputChanged: (PhoneNumber number) {
-          setState(() {
-            fullPhoneNumber = number.phoneNumber ?? '';
-          });
+      PHPhoneInput(
+        onChanged: (phone) {
+          phoneNumber = phone;
         },
-        onInputValidated: (_) {
-          setState(() {
-            isValidPhoneNumber = true;
-          });
-        },
-        ignoreBlank: false,
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Phone number is required';
-          }
-
-          final digitsOnly = value.replaceAll(RegExp(r'\D'), '');
-
-          if (digitsOnly.length != 10) {
-            return 'Phone number must be exactly 10 digits';
-          }
-          if (!digitsOnly.startsWith('9')) {
-            return 'Phone number must start with 9';
-          }
-          return null;
-        },
-        autoValidateMode: AutovalidateMode.onUserInteraction,
-        initialValue: number,
       ),
       const SizedBox(width: Sizes.spaceLg),
     ];
@@ -409,11 +286,16 @@ class _AdministratorRegisterScreenState
                                     ),
                                   ),
                                   const SizedBox(height: Sizes.spaceMd),
-                                  infoControls,
+                                  TextField(
+                                    decoration: const InputDecoration(
+                                      labelText: "Organization Name",
+                                    ),
+                                    controller: orgNameController,
+                                  ),
                                   const SizedBox(height: Sizes.spaceMd),
                                   logoWidget,
                                   const SizedBox(height: Sizes.spaceMd),
-                                  placeControls,
+                                  addressAndOrgType,
                                   const SizedBox(height: Sizes.spaceMd),
                                   TextField(
                                     decoration: const InputDecoration(
@@ -425,14 +307,14 @@ class _AdministratorRegisterScreenState
                                   ...contactControlls,
                                   const SizedBox(height: Sizes.spaceMd),
                                   termAndCondition(
-                                    context,
-                                    hasAcceptedTerms,
-                                    _termsFuture,
-                                    (value) {
+                                    context: context,
+                                    hasAcceptedTerms: hasAcceptedTerms,
+                                    onChanged: (value) {
                                       setState(() {
                                         hasAcceptedTerms = value ?? false;
                                       });
                                     },
+                                    key: 'auth_terms_and_conditions',
                                   ),
                                   const SizedBox(height: Sizes.spaceMd),
                                   Row(

@@ -1,7 +1,5 @@
-import 'dart:convert';
-
+import 'package:bogoballers/client/screens/phone_number_input.dart';
 import 'package:bogoballers/core/components/app_button.dart';
-import 'package:bogoballers/core/components/error.dart';
 import 'package:bogoballers/core/components/image_picker.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
 import 'package:bogoballers/core/constants/image_strings.dart';
@@ -13,8 +11,6 @@ import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:bogoballers/core/utils/terms.dart';
 import 'package:bogoballers/core/validations/validators.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 class TeamCreatorCreateTeamScreen extends StatefulWidget {
   const TeamCreatorCreateTeamScreen({super.key});
@@ -28,13 +24,9 @@ class _TeamCreatorCreateTeamScreenState
     extends State<TeamCreatorCreateTeamScreen> {
   AppImagePickerController logoController = AppImagePickerController();
 
-  String? fullPhoneNumber;
-  PhoneNumber number = PhoneNumber(isoCode: 'PH');
-  bool isValidPhoneNumber = false;
+  String? phoneNumber;
 
   bool hasAcceptedTerms = false;
-  late Future<void> _networkDataFuture;
-  late Future<String> _termsFuture;
 
   final teamNameController = TextEditingController();
   final teamAddressController = TextEditingController();
@@ -47,24 +39,6 @@ class _TeamCreatorCreateTeamScreenState
   @override
   void initState() {
     super.initState();
-    _networkDataFuture = _loadNetworkData();
-  }
-
-  Future<void> _loadNetworkData() async {
-    _termsFuture = Future.value(_loadTermsAndConditions());
-  }
-
-  Future<String> _loadTermsAndConditions() async {
-    try {
-      String jsonString = await rootBundle.loadString(
-        'assets/data/terms_and_conditions.json',
-      );
-      Map<String, dynamic> data = jsonDecode(jsonString);
-      return data['terms_and_conditions'] ??
-          'Error: Terms and conditions not found.';
-    } catch (e) {
-      return 'Failed to load terms and conditions.';
-    }
   }
 
   Future<void> handleCreateTeam() async {
@@ -77,7 +51,7 @@ class _TeamCreatorCreateTeamScreenState
         teamAddressController: teamAddressController,
         teamMotoController: teamMotoController,
         hasAcceptedTerms: hasAcceptedTerms,
-        fullPhoneNumber: fullPhoneNumber,
+        fullPhoneNumber: phoneNumber,
         coachNameController: teamCoachController,
         assistantCoachNameController: teamAssistantCoachController,
       );
@@ -93,7 +67,7 @@ class _TeamCreatorCreateTeamScreenState
         user_id: testUserId,
         team_name: teamNameController.text,
         team_address: teamAddressController.text,
-        contact_number: fullPhoneNumber!,
+        contact_number: phoneNumber!,
         team_motto: teamMotoController.text,
         coach_name: teamCoachController.text,
         team_logo_image: multipartFile,
@@ -198,36 +172,10 @@ class _TeamCreatorCreateTeamScreenState
               ),
             ),
             SizedBox(height: Sizes.spaceMd),
-            InternationalPhoneNumberInput(
-              countries: ['PH'],
-              onInputChanged: (PhoneNumber number) {
-                setState(() {
-                  fullPhoneNumber = number.phoneNumber ?? '';
-                });
+            PHPhoneInput(
+              onChanged: (phone) {
+                phoneNumber = phone;
               },
-              onInputValidated: (_) {
-                setState(() {
-                  isValidPhoneNumber = true;
-                });
-              },
-              ignoreBlank: false,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Phone number\nis required';
-                }
-
-                final digitsOnly = value.replaceAll(RegExp(r'\D'), '');
-
-                if (digitsOnly.length != 10) {
-                  return 'Phone number must\nbe exactly 10 digits';
-                }
-                if (!digitsOnly.startsWith('9')) {
-                  return 'Phone number must\nstart with 9';
-                }
-                return null;
-              },
-              autoValidateMode: AutovalidateMode.onUserInteraction,
-              initialValue: number,
             ),
             SizedBox(height: Sizes.spaceMd),
             TextField(
@@ -256,11 +204,16 @@ class _TeamCreatorCreateTeamScreenState
                 label: Text("Assistant Coach full name (optional)"),
               ),
             ),
-            termAndCondition(context, hasAcceptedTerms, _termsFuture, (value) {
-              setState(() {
-                hasAcceptedTerms = value ?? false;
-              });
-            }),
+            termAndCondition(
+              context: context,
+              hasAcceptedTerms: hasAcceptedTerms,
+              onChanged: (value) {
+                setState(() {
+                  hasAcceptedTerms = value ?? false;
+                });
+              },
+              key: 'team_creation_terms_and_conditions',
+            ),
             SizedBox(height: Sizes.spaceLg),
             AppButton(
               isDisabled: !hasAcceptedTerms,
@@ -294,24 +247,7 @@ class _TeamCreatorCreateTeamScreenState
                 color: context.appColors.accent900,
               ),
             )
-          : FutureBuilder(
-              future: _networkDataFuture,
-              builder: (context, asyncSnapshot) {
-                if (asyncSnapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator(
-                    color: context.appColors.accent900,
-                  );
-                } else if (asyncSnapshot.hasError) {
-                  return retryError(context, asyncSnapshot.error, () {
-                    setState(() {
-                      _networkDataFuture = _loadNetworkData();
-                    });
-                  });
-                } else {
-                  return createTeamController;
-                }
-              },
-            ),
+          : createTeamController,
     );
   }
 }

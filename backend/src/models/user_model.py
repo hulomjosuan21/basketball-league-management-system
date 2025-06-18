@@ -23,6 +23,7 @@ class UserModel(db.Model):
     is_verified = db.Column(db.Boolean, default=False)
 
     account_type = db.Column(create_account_type_enum(db), nullable=False)
+    fcm_token = db.Column(db.Text, nullable=True)
 
     def set_password(self, password_str: str) -> None:
         # if len(password_str) < 8:
