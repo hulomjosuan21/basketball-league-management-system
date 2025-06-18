@@ -15,15 +15,14 @@ class NotificationService {
   final _localNotifications = FlutterLocalNotificationsPlugin();
   bool isFlutterLocalNotificationsInitialized = false;
 
-  Future<void> initialize() async {
+  Future<String?> initialize() async {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
     await _requestPermission();
 
     await _setupMessagingHandlers();
 
-    final token = await _messaging.getToken();
-    print("Token: $token");
+    return await _messaging.getToken();
   }
 
   Future<void> _requestPermission() async {

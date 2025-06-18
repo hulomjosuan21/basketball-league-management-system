@@ -18,33 +18,49 @@ import 'firebase_options.dart';
 /// 15/06/2025
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await dotenv.load(fileName: ".env");
-  await AppBox.init();
-  await NotificationService.instance.initialize();
-  await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL']!,
-    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
-  );
-  checkSupabaseStatus();
-  if (kIsWeb || Platform.isIOS || Platform.isAndroid) {
-    runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => PlayerProvider()),
-          ChangeNotifierProvider(create: (_) => TeamCreatorProvider()),
-        ],
-        child: ClientMaterialScreen(),
+  try {
+    await dotenv.load(fileName: ".env");
+
+    await Future.wait([
+      AppBox.init(),
+      Supabase.initialize(
+        url: dotenv.env['SUPABASE_URL']!,
+        anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
       ),
-    );
-  } else if (Platform.isWindows || Platform.isMacOS) {
-    runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => LeagueAdministratorProvider()),
-        ],
-        child: AdministratorMaterialScreen(),
-      ),
-    );
+    ]);
+
+    checkSupabaseStatus();
+    if (kIsWeb || Platform.isIOS || Platform.isAndroid) {
+      final results = await Future.wait([
+        Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
+        NotificationService.instance.initialize(),
+      ]);
+
+      final fcmToken = results[1] as String?;
+      debugPrint("FCM Token: $fcmToken");
+
+      runApp(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => PlayerProvider()),
+            ChangeNotifierProvider(create: (_) => TeamCreatorProvider()),
+          ],
+          child: ClientMaterialScreen(),
+        ),
+      );
+    } else if (Platform.isWindows || Platform.isMacOS) {
+      runApp(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(
+              create: (_) => LeagueAdministratorProvider(),
+            ),
+          ],
+          child: AdministratorMaterialScreen(),
+        ),
+      );
+    }
+  } catch (e) {
+    debugPrint("Error: $e");
   }
 }
