@@ -90,6 +90,7 @@ flutter:
       - assets/logos/hawks_logo.png
       - assets/logos/celtics_logo.png
       - assets/images/example-team-logo.png
+      - assets/logos/splash_logo.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

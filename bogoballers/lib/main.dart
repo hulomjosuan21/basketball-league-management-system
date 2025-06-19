@@ -14,10 +14,12 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 /// 15/06/2025
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   try {
     await dotenv.load(fileName: ".env");
 
@@ -36,6 +38,7 @@ Future<void> main() async {
       );
       final fcmToken = await NotificationService.instance.initialize();
       debugPrint("FCM Token: $fcmToken");
+      FlutterNativeSplash.remove();
 
       runApp(
         MultiProvider(
@@ -47,6 +50,7 @@ Future<void> main() async {
         ),
       );
     } else if (Platform.isWindows || Platform.isMacOS) {
+      FlutterNativeSplash.remove();
       runApp(
         MultiProvider(
           providers: [
@@ -60,5 +64,6 @@ Future<void> main() async {
     }
   } catch (e) {
     debugPrint("Error: $e");
+    FlutterNativeSplash.remove();
   }
 }
