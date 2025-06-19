@@ -15,6 +15,7 @@ class LeagueModel(db.Model):
     league_title = db.Column(db.String(100), nullable=False)
     league_description = db.Column(db.String(100), nullable=False)
     league_budget = db.Column(db.Float, nullable=False, default=0.0)
+    entrance_fee_amount = db.Column(db.Float, nullable=True, default=0.0)
 
     registration_deadline = db.Column(db.DateTime, nullable=False)
     opening_date = db.Column(db.DateTime, nullable=False)
@@ -49,6 +50,8 @@ class LeagueModel(db.Model):
         cascade='all, delete-orphan'
     )
 
+    payments = db.relationship('PaymentModel', back_populates='league', cascade="all, delete-orphan")
+
     def copy_with(self, **kwargs):
         for key, value in kwargs.items():
             if value is not None and hasattr(self, key):
@@ -61,6 +64,7 @@ class LeagueModel(db.Model):
             "league_title": self.league_title,
             "league_budget": float(self.league_budget),
             "league_budget": self.league_budget,
+            "entrance_fee_amount": float(self.entrance_fee_amount) if self.entrance_fee_amount else 0.0,
             "registration_deadline": self.registration_deadline.isoformat() if self.registration_deadline else None,
             "opening_date": self.opening_date.isoformat() if self.opening_date else None,
             "start_date": self.start_date.isoformat() if self.start_date else None,

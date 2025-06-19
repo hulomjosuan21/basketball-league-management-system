@@ -14,4 +14,3 @@ with open(league_categories_list_path, 'r', encoding='utf-8') as f:
 organization_type_list_path = os.path.join(BASE_DIR, 'assets/jsons/organization_types.json')
 with open(organization_type_list_path, 'r', encoding='utf-8') as f:
     organization_type_list = json.load(f)
-    print(organization_type_list)
