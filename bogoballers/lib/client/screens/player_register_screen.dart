@@ -7,9 +7,14 @@ import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/enums/gender_enum.dart';
 import 'package:bogoballers/core/enums/user_enum.dart';
 import 'package:bogoballers/core/extensions/extensions.dart';
+import 'package:bogoballers/core/models/player_model.dart';
+import 'package:bogoballers/core/models/user.dart';
+import 'package:bogoballers/core/services/player_services.dart';
 import 'package:bogoballers/core/theme/datime_picker.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
+import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:bogoballers/core/utils/terms.dart';
+import 'package:bogoballers/core/validations/auth_validations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -22,7 +27,7 @@ class PlayerRegisterScreen extends StatefulWidget {
 
 class _PlayerRegisterScreenState extends State<PlayerRegisterScreen> {
   final ValueNotifier<Gender?> selectedGender = ValueNotifier(null);
-  final TextEditingController birthdateController = TextEditingController();
+  DateTime? selectedBirthDate;
   final List<String> positions = ["Guard", "Forward", "Center"];
   final ValueNotifier<Set<String>> selectedPositions = ValueNotifier({});
   AppImagePickerController profileImageController = AppImagePickerController();
@@ -159,8 +164,14 @@ class _PlayerRegisterScreenState extends State<PlayerRegisterScreen> {
             ),
             const SizedBox(height: Sizes.spaceMd),
             DateTimePickerField(
-              controller: bdayController,
+              selectedDate: selectedBirthDate,
               labelText: 'Birthdate',
+              helperText: "You must be at least 4 years old to continue.",
+              onChanged: (date) {
+                setState(() {
+                  selectedBirthDate = date;
+                });
+              },
             ),
             const SizedBox(height: Sizes.spaceMd),
             TextField(
@@ -236,6 +247,7 @@ class _PlayerRegisterScreenState extends State<PlayerRegisterScreen> {
             ),
             const SizedBox(height: Sizes.spaceMd),
             PHPhoneInput(
+              phoneValue: phoneNumber,
               onChanged: (phone) {
                 phoneNumber = phone;
               },
@@ -266,7 +278,7 @@ class _PlayerRegisterScreenState extends State<PlayerRegisterScreen> {
             SizedBox(height: Sizes.spaceLg),
             AppButton(
               label: "Register",
-              onPressed: () {},
+              onPressed: _handleRegisterPlayer,
               width: double.infinity,
               isDisabled: !hasAcceptedTerms,
             ),
@@ -276,12 +288,92 @@ class _PlayerRegisterScreenState extends State<PlayerRegisterScreen> {
     }
 
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Center(child: buildPlayerRegisterInputs()),
-        ),
-      ),
+      body: isRegistering
+          ? Center(
+              child: CircularProgressIndicator(
+                color: context.appColors.accent900,
+              ),
+            )
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(child: buildPlayerRegisterInputs()),
+              ),
+            ),
     );
+  }
+
+  Future<void> _handleRegisterPlayer() async {
+    setState(() {
+      isRegistering = true;
+    });
+    try {
+      validatePlayerFields(
+        fullNameController: fullNameController,
+        selectedGender: selectedGender,
+        selectedBirthDate: selectedBirthDate,
+        jerseyNameController: jerseyNameController,
+        addressController: addressController,
+        jerseyNumberController: jerseyNumberController,
+        selectedPositions: selectedPositions,
+        emailController: emailController,
+        passwordController: passwordController,
+        confirmPassController: confirmPassController,
+        fullPhoneNumber: phoneNumber,
+      );
+
+      final multipartFile = profileImageController.multipartFile;
+      if (multipartFile == null) {
+        throw ValidationException("Please select an organization logo!");
+      }
+
+      final user = UserModel.create(
+        email: emailController.text,
+        contact_number: phoneNumber!,
+        password_str: passwordController.text,
+        account_type: AccountTypeEnum.PLAYER,
+      );
+
+      final player = PlayerModel.create(
+        full_name: fullNameController.text,
+        gender: selectedGender.value!.name,
+        player_address: addressController.text,
+        birth_date: selectedBirthDate!,
+        jersey_name: jerseyNameController.text,
+        jersey_number: double.parse(jerseyNumberController.text),
+        position: selectedPositions.value.join(', '),
+        user: user,
+        profile_image: multipartFile,
+      );
+
+      final service = PlayerServices();
+
+      final response = await service.registerAccount(player);
+      if (mounted) {
+        showAppSnackbar(
+          context,
+          message: response.message,
+          title: "Success",
+          variant: SnackbarVariant.success,
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        handleErrorCallBack(e, (message) {
+          showAppSnackbar(
+            context,
+            message: message,
+            title: "Error",
+            variant: SnackbarVariant.error,
+          );
+        });
+      }
+    } finally {
+      if (context.mounted) {
+        setState(() {
+          isRegistering = false;
+        });
+      }
+    }
   }
 }

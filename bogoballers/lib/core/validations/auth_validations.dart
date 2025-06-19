@@ -1,3 +1,4 @@
+import 'package:bogoballers/core/constants/validation_patterns.dart';
 import 'package:bogoballers/core/enums/gender_enum.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:bogoballers/core/utils/league_utils.dart';
@@ -36,10 +37,9 @@ void validateOrganizationFields({
 }
 
 void validatePlayerFields({
-  required TextEditingController firstNameController,
-  required TextEditingController lastNameController,
+  required TextEditingController fullNameController,
   required ValueNotifier<Gender?> selectedGender,
-  required TextEditingController birthdateController,
+  required DateTime? selectedBirthDate,
   required TextEditingController jerseyNameController,
   required TextEditingController jerseyNumberController,
   required ValueNotifier<Set<String>> selectedPositions,
@@ -49,16 +49,19 @@ void validatePlayerFields({
   required TextEditingController addressController,
   required String? fullPhoneNumber,
 }) {
-  if (firstNameController.text.trim().isEmpty) {
-    throw ValidationException("First name cannot be empty");
+  final fullName = fullNameController.text.trim();
+  if (fullName.isEmpty) {
+    throw ValidationException("Full name cannot be empty");
   }
-  if (lastNameController.text.trim().isEmpty) {
-    throw ValidationException("Last name cannot be empty");
+  if (!RegExPatterns.fullName.hasMatch(fullName)) {
+    throw ValidationException(
+      "Invalid Full name format\nUse: Firstname Lastname",
+    );
   }
   if (selectedGender.value == null) {
     throw ValidationException("Gender must be selected");
   }
-  if (birthdateController.text.trim().isEmpty) {
+  if (selectedBirthDate == null) {
     throw ValidationException("Birthdate must be selected");
   }
   if (addressController.text.trim().isEmpty) {

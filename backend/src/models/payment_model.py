@@ -14,8 +14,8 @@ class PaymentModel(db.Model):
 
     paid_at = CreatedAt(db)
 
-    team = db.relationship('TeamModel', backref='payments')
-    league = db.relationship('LeagueModel', backref='payments')
+    team = db.relationship('TeamModel', back_populates='payments')
+    league = db.relationship('LeagueModel', back_populates='payments')
 
     def to_json(self):
         return {

@@ -26,8 +26,7 @@ class PlayerAuthControllers:
             )
             user.set_password(password_str)
 
-            first_name = request.form.get('first_name')
-            last_name = request.form.get('last_name')
+            full_name = request.form.get('full_name')
             gender = request.form.get('gender')
             birth_date = request.form.get('birth_date')
 
@@ -40,15 +39,14 @@ class PlayerAuthControllers:
             height_in = request.form.get('height_in')
             weight_kg = request.form.get('weight_kg')
 
-            profile_image_file = request.files.get('profile_image_file')
+            profile_image = request.files.get('profile_image')
 
-            if not all([first_name, last_name, gender, birth_date, jersey_name, jersey_number, position, profile_image_file, player_address]):
+            if not all([full_name, gender, birth_date, jersey_name, jersey_number, position, profile_image, player_address]):
                 raise ValueError("All fields must be provided and not empty.")
 
-            full_url = await save_file(profile_image_file, 'profiles', request, 'supabase')
+            profile_image_url = await save_file(profile_image, 'profiles', request, 'supabase')
             player = PlayerModel(
-                first_name=first_name,
-                last_name=last_name,
+                full_name=full_name,
                 gender=gender,
                 birth_date=birth_date,
                 player_address=player_address,
@@ -57,7 +55,7 @@ class PlayerAuthControllers:
                 position=position,
                 height_in=float(height_in) if height_in else None,
                 weight_kg=float(weight_kg) if weight_kg else None,
-                profile_image_url=full_url,
+                profile_image_url=profile_image_url,
                 user=user
             )
             db.session.add(user)
@@ -67,8 +65,10 @@ class PlayerAuthControllers:
             verify_link = f"/user/{user.user_id}"
 
             await send_verification_email(email, verify_link, request)
+
+            message = "A verification link has been sent to your email. Please verify your account before logging in."
             
-            return ApiResponse.success(message="Verification link sent to email.",status_code=201)
+            return ApiResponse.success(redirect="/login",message=message,status_code=201)
         except Exception as e:
             db.session.rollback()
             return ApiResponse.error(e)

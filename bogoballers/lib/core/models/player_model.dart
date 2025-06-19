@@ -6,8 +6,7 @@ import 'package:dio/dio.dart';
 class PlayerModel {
   late String player_id;
   late String user_id;
-  String first_name;
-  String last_name;
+  String full_name;
   String gender;
   DateTime birth_date;
   String player_address;
@@ -26,17 +25,15 @@ class PlayerModel {
   String? document_url_2;
 
   UserModel user;
-  late List<dynamic> my_teams;
 
   late DateTime created_at;
   late DateTime updated_at;
-  late MultipartFile profile_image_file;
+  late MultipartFile profile_image;
 
   PlayerModel({
     required this.player_id,
     required this.user_id,
-    required this.first_name,
-    required this.last_name,
+    required this.full_name,
     required this.gender,
     required this.birth_date,
     required this.player_address,
@@ -54,8 +51,7 @@ class PlayerModel {
   });
 
   PlayerModel.create({
-    required this.first_name,
-    required this.last_name,
+    required this.full_name,
     required this.gender,
     required this.birth_date,
     required this.player_address,
@@ -63,21 +59,20 @@ class PlayerModel {
     required this.jersey_number,
     required this.position,
     required this.user,
-    required this.profile_image_file,
+    required this.profile_image,
   });
 
   FormData toFormDataForCreation() {
     final userMap = user.toJsonForCreation();
     final formMap = {
-      'first_name': first_name,
-      'last_name': last_name,
+      'full_name': full_name,
       'gender': gender,
-      'birth_date': birth_date,
+      'birth_date': birth_date.toIso8601String(),
       'player_address': player_address,
       'jersey_name': jersey_name,
       'jersey_number': jersey_number,
       'position': position,
-      'profile_image_file': profile_image_file,
+      'profile_image': profile_image,
     };
 
     userMap.forEach((key, value) {
@@ -91,8 +86,7 @@ class PlayerModel {
     return PlayerModel(
       player_id: json['player_id'],
       user_id: json['user_id'],
-      first_name: json['first_name'],
-      last_name: json['last_name'],
+      full_name: json['full_name'],
       gender: json['gender'],
       birth_date: DateTime.parse(json['birth_date']),
       player_address: json['player_address'],
@@ -114,7 +108,7 @@ class PlayerModel {
     return {
       'player_id': player_id,
       'user_id': user_id,
-      'last_name': last_name,
+      'full_name': full_name,
       'gender': gender,
       'birth_date': birth_date,
       'player_address': player_address,

@@ -73,7 +73,6 @@ class PlayerModel(db.Model):
             "profile_image_url": self.profile_image_url,
             "document_url_1": self.document_url_1 if self.created_at else None,
             "document_url_2": self.document_url_2 if self.created_at else None,
-            "teams": [assoc.team.to_json() for assoc in self.my_teams] if self.my_teams else [],
             "user": self.user.to_json() if self.user else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,

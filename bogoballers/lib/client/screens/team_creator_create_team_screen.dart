@@ -173,6 +173,7 @@ class _TeamCreatorCreateTeamScreenState
             ),
             SizedBox(height: Sizes.spaceMd),
             PHPhoneInput(
+              phoneValue: phoneNumber,
               onChanged: (phone) {
                 phoneNumber = phone;
               },

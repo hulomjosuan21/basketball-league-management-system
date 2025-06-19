@@ -4,13 +4,13 @@ import 'package:bogoballers/core/network/dio_client.dart';
 import 'package:dio/dio.dart';
 
 class PlayerServices {
-  Future<String> registerAccount(PlayerModel player) async {
+  Future<ApiResponse> registerAccount(PlayerModel player) async {
     final api = DioClient().client;
     Response response = await api.post(
       '/player/register-account',
       data: player.toFormDataForCreation(),
     );
     final apiResponse = ApiResponse.fromJsonNoPayload(response.data);
-    return apiResponse.message;
+    return apiResponse;
   }
 }

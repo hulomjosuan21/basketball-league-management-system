@@ -82,21 +82,19 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
     });
 
     try {
-      validatePlayerFields(
-        firstNameController: firstNameController,
-        lastNameController: lastNameController,
-        selectedGender: selectedGender,
-        birthdateController: birthdateController,
-        jerseyNameController: jerseyNameController,
-        addressController: addressController,
-        jerseyNumberController: jerseyNumberController,
-        selectedPositions: selectedPositions,
-        emailController: emailController,
-        passwordController: passwordController,
-        confirmPassController: confirmPassController,
-        fullPhoneNumber: phoneNumber,
-      );
-      final multipartFile = profileImageController.multipartFile;
+      // validatePlayerFields(
+      //   fullNameController: firstNameController,
+      //   selectedGender: selectedGender,
+      //   birthdateController: birthdateController,
+      //   jerseyNameController: jerseyNameController,
+      //   addressController: addressController,
+      //   jerseyNumberController: jerseyNumberController,
+      //   selectedPositions: selectedPositions,
+      //   emailController: emailController,
+      //   passwordController: passwordController,
+      //   confirmPassController: confirmPassController,
+      //   fullPhoneNumber: phoneNumber,
+      // );
       final user = UserModel.create(
         email: emailController.text,
         contact_number: phoneNumber!,
@@ -104,19 +102,19 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
         account_type: selectedAccountType!,
       );
 
+      final multipartFile = profileImageController.multipartFile;
       if (multipartFile == null) {
         throw ValidationException("Please select an organization logo!");
       }
       final player = PlayerModel.create(
-        first_name: firstNameController.text,
-        last_name: lastNameController.text,
+        full_name: firstNameController.text,
         gender: selectedGender.value!.name,
         birth_date: DateTime.parse(birthdateController.text),
         jersey_name: jerseyNameController.text,
         jersey_number: double.parse(jerseyNumberController.text),
         position: selectedPositions.value.join(', '),
         user: user,
-        profile_image_file: multipartFile,
+        profile_image: multipartFile,
         player_address: addressController.text,
       );
 
@@ -126,7 +124,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
       if (mounted) {
         showAppSnackbar(
           context,
-          message: response,
+          message: response.message,
           title: "Success",
           variant: SnackbarVariant.success,
         );
@@ -384,10 +382,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen>
               ],
             ),
             const SizedBox(height: Sizes.spaceMd),
-            DateTimePickerField(
-              controller: bdayController,
-              labelText: 'Birthdate',
-            ),
+
             const SizedBox(height: Sizes.spaceMd),
             TextField(
               controller: addressController,
