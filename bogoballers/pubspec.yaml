@@ -91,6 +91,7 @@ flutter:
       - assets/logos/celtics_logo.png
       - assets/images/example-team-logo.png
       - assets/logos/splash_logo.png
+      - assets/images/bg-image1.jpg
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

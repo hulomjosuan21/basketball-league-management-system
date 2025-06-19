@@ -46,6 +46,7 @@ class DateTimePickerField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: labelText,
         suffixIcon: const Icon(Icons.calendar_today),
+        helperText: "You must be at least 4 years old to continue.",
       ),
       onTap: () async {
         DateTime? pickedDate = await showDatePicker(

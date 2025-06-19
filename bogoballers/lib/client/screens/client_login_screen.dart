@@ -1,10 +1,12 @@
 import 'dart:async';
 
-import 'package:bogoballers/client/screens/client_register_screen.dart';
+import 'package:bogoballers/client/screens/client_auth_screen.dart';
+import 'package:bogoballers/client/widgets/sliding_announcement.dart';
 import 'package:bogoballers/core/components/app_button.dart';
 import 'package:bogoballers/core/components/auth_navigator.dart';
 import 'package:bogoballers/core/components/password_field.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
+import 'package:bogoballers/core/constants/image_strings.dart';
 import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/models/user.dart';
 import 'package:bogoballers/core/services/client_services.dart';
@@ -22,6 +24,7 @@ class ClientLoginScreen extends StatefulWidget {
 
 class _ClientLoginScreenState extends State<ClientLoginScreen> {
   bool isLoading = false;
+  bool stayLoggedIn = false;
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
@@ -73,83 +76,151 @@ class _ClientLoginScreenState extends State<ClientLoginScreen> {
   Widget build(BuildContext context) {
     final appColors = context.appColors;
 
-    final loginControll = <Widget>[
-      const SizedBox(height: Sizes.spaceMd),
-      TextField(
-        decoration: const InputDecoration(label: Text("Email")),
-        controller: emailController,
-      ),
-      const SizedBox(height: Sizes.spaceMd),
-      PasswordField(controller: passwordController, hintText: "Password"),
-    ];
-
     return Scaffold(
-      body: SafeArea(
-        child: Container(
-          decoration: BoxDecoration(gradient: appColors.secondaryGradient),
-          child: Center(
-            child: isLoading
-                ? CircularProgressIndicator(color: context.appColors.accent900)
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.all(Sizes.spaceLg),
-                    child: Container(
-                      constraints: const BoxConstraints(maxWidth: 400),
-                      child: Container(
-                        padding: const EdgeInsets.all(Sizes.spaceMd),
-                        decoration: BoxDecoration(
-                          color: context.appColors.gray100,
-                          borderRadius: BorderRadius.circular(Sizes.radiusMd),
-                          border: Border.all(
-                            width: Sizes.borderWidthSm,
-                            color: context.appColors.gray600,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(
+                child: Column(
+                  children: [
+                    // Top banner with logo
+                    Stack(
+                      children: [
+                        Container(
+                          height: 400,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: AssetImage(ImageStrings.bgImg1),
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Center(
-                              child: Text(
-                                "Welcome",
-                                style: TextStyle(
-                                  fontSize: Sizes.fontSizeXl,
-                                  fontWeight: FontWeight.w600,
+                        Positioned.fill(
+                          child: Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Image.asset(
+                                  ImageStrings.appLogo,
+                                  width: 80,
+                                  height: 80,
                                 ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  "BogoBallers",
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                    shadows: [
+                                      Shadow(
+                                        blurRadius: 4,
+                                        color: Colors.black.withAlpha(128),
+                                        offset: Offset(2, 2),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SlidingIntroBanner(),
+                      ],
+                    ),
+
+                    // Login form fills remaining space
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: Sizes.spaceMd),
+                            TextField(
+                              controller: emailController,
+                              decoration: const InputDecoration(
+                                label: Text("Email"),
                               ),
                             ),
-                            ...loginControll,
-                            const SizedBox(height: Sizes.spaceLg),
+                            const SizedBox(height: Sizes.spaceMd),
+                            PasswordField(
+                              controller: passwordController,
+                              hintText: "Password",
+                            ),
+                            const SizedBox(height: Sizes.spaceSm),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                authNavigator(
-                                  context,
-                                  "Don't have an account yet?",
-                                  " Register",
-                                  () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const ClientRegisterScreen(),
+                                Row(
+                                  children: [
+                                    Checkbox(
+                                      value: stayLoggedIn,
+                                      onChanged: (value) => setState(
+                                        () => stayLoggedIn = value ?? false,
                                       ),
-                                    );
-                                  },
+                                    ),
+                                    const Text(
+                                      "Stay logged in",
+                                      style: TextStyle(fontSize: 10),
+                                    ),
+                                  ],
                                 ),
-                                AppButton(
-                                  label: "Login",
-                                  onPressed: handleLogin,
-                                  isDisabled: isLoading,
-                                  size: ButtonSize.sm,
+                                GestureDetector(
+                                  onTap: () {}, // forgot password
+                                  child: Text(
+                                    "Forgot password?",
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: appColors.accent900,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
                                 ),
                               ],
+                            ),
+                            const SizedBox(height: Sizes.spaceMd),
+                            AppButton(
+                              label: "Login",
+                              onPressed: handleLogin,
+                              width: double.infinity,
                             ),
                           ],
                         ),
                       ),
                     ),
-                  ),
-          ),
-        ),
+
+                    // Register navigator
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.only(
+                          left: Sizes.spaceSm,
+                          right: Sizes.spaceSm,
+                          top: Sizes.spaceSm,
+                          bottom: Sizes.spaceLg,
+                        ),
+                        child: authNavigator(
+                          context,
+                          "Don't have an account yet?",
+                          " Register",
+                          () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ClientAuthScreen(),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

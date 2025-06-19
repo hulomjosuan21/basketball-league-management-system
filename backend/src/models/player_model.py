@@ -13,8 +13,7 @@ class PlayerModel(db.Model):
         nullable=False
     )
 
-    first_name = db.Column(db.String(100), nullable=False)
-    last_name = db.Column(db.String(100), nullable=False)
+    full_name = db.Column(db.String(250), nullable=False)
     gender = db.Column(db.String(10), nullable=False)
     birth_date = db.Column(db.Date, nullable=False)
 
@@ -58,8 +57,7 @@ class PlayerModel(db.Model):
         return {
             "player_id": self.player_id,
             "user_id": self.user_id,
-            "first_name": self.first_name,
-            "last_name": self.last_name,
+            "full_name": self.full_name,
             "gender": self.gender,
             "birth_date": self.birth_date.isoformat(),
             "player_address": self.player_address,
