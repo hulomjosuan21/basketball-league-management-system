@@ -1,7 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
 import 'dart:async';
 import 'package:bogoballers/administrator/screen/administrator_login_screen.dart';
-import 'package:bogoballers/client/screens/phone_number_input.dart';
+import 'package:bogoballers/core/components/phone_number_input.dart';
 import 'package:bogoballers/core/components/app_button.dart';
 import 'package:bogoballers/core/components/auth_navigator.dart';
 import 'package:bogoballers/core/components/error.dart';

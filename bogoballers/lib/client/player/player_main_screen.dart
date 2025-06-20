@@ -1,9 +1,12 @@
 import 'package:bogoballers/client/widgets/bottom_navigation.dart';
 import 'package:bogoballers/client/widgets/navigation_controllers.dart';
+import 'package:bogoballers/core/constants/sizes.dart';
+import 'package:bogoballers/core/providers/player_provider.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:provider/provider.dart';
 
 class PlayerMainScreen extends StatelessWidget {
   const PlayerMainScreen({super.key});
@@ -13,17 +16,42 @@ class PlayerMainScreen extends StatelessWidget {
     final controller = Get.put(PlayerScreenNavigationController());
     final appColors = context.appColors;
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final player = context.read<PlayerProvider>().getCurrentPlayer;
+
+      if (player != null) {
+        debugPrint("✅ Current player: ${player.toJson()}");
+      } else {
+        debugPrint("⚠️ No playuer set");
+      }
+    });
+
     return Scaffold(
       body: Obx(() => controller.screens[controller.selectedIndex.value]),
       bottomNavigationBar: Obx(
         () => NavigationBar(
           height: 68,
           backgroundColor: appColors.gray100,
-          indicatorColor: appColors.accent600,
+          indicatorColor: Colors.transparent,
           elevation: 0,
           selectedIndex: controller.selectedIndex.value,
           onDestinationSelected: (index) =>
               controller.selectedIndex.value = index,
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+          labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((states) {
+            if (states.contains(WidgetState.selected)) {
+              return TextStyle(
+                color: appColors.accent900,
+                fontWeight: FontWeight.w500,
+                fontSize: Sizes.fontSizeSm,
+              );
+            }
+            return TextStyle(
+              color: appColors.gray1100,
+              fontWeight: FontWeight.w500,
+              fontSize: Sizes.fontSizeSm,
+            );
+          }),
           destinations: [
             NavigationDestinationItem(
               icon: Iconsax.home,

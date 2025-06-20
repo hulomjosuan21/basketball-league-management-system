@@ -2,6 +2,7 @@ import 'package:bogoballers/client/screens/team_creator_create_team_screen.dart'
 import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class TeamCreatorTeamListScreen extends StatelessWidget {
   const TeamCreatorTeamListScreen({super.key});
@@ -19,21 +20,19 @@ class TeamCreatorTeamListScreen extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: appColors.accent900,
-        elevation: 1,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) {
-                return TeamCreatorCreateTeamScreen();
-              },
+        actions: [
+          IconButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return TeamCreatorCreateTeamScreen();
+                },
+              ),
             ),
-          );
-        },
-        child: Icon(Icons.add, color: appColors.gray100),
+            icon: Icon(Icons.add),
+          ),
+        ],
       ),
     );
   }

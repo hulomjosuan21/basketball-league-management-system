@@ -28,7 +28,7 @@ class ApiResponse<T> {
       status: json['status'] ?? false,
       message: json['message'] ?? '',
       redirect: json['redirect'],
-      payload: null,
+      payload: json['payload'],
     );
   }
 }

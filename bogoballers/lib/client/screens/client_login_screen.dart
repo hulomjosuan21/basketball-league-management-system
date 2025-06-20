@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:bogoballers/client/screens/client_auth_screen.dart';
-import 'package:bogoballers/client/team_creator/team_creator_main_screen.dart';
 import 'package:bogoballers/client/widgets/sliding_announcement.dart';
 import 'package:bogoballers/core/components/app_button.dart';
 import 'package:bogoballers/core/components/auth_navigator.dart';
@@ -10,7 +9,7 @@ import 'package:bogoballers/core/components/snackbars.dart';
 import 'package:bogoballers/core/constants/image_strings.dart';
 import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/models/user.dart';
-import 'package:bogoballers/core/services/client_services.dart';
+import 'package:bogoballers/core/services/entity_services.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:bogoballers/core/validations/auth_validations.dart';
@@ -25,48 +24,46 @@ class ClientLoginScreen extends StatefulWidget {
 
 class _ClientLoginScreenState extends State<ClientLoginScreen> {
   bool isLoading = false;
-  bool stayLoggedIn = false;
+  bool stayLoggedIn = true;
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  Future<void> handleLogin() async {
+  Future<void> _handleLogin() async {
     setState(() => isLoading = true);
     try {
-      // validateLoginFields(
-      //   emailController: emailController,
-      //   passwordController: passwordController,
-      // );
-
-      // final user = UserModel.login(
-      //   email: emailController.text,
-      //   password_str: passwordController.text,
-      // );
-
-      // final service = ClientServices();
-
-      // final response = await service.loginAccount(user);
-
-      // if (mounted) {
-      //   showAppSnackbar(
-      //     context,
-      //     message: response.message,
-      //     title: "Success",
-      //     variant: SnackbarVariant.success,
-      //   );
-      // }
-      await Future.delayed(Duration(seconds: 3));
-
-      await Navigator.pushReplacement(
-        context,
-        PageRouteBuilder(
-          transitionDuration: Duration(milliseconds: 500),
-          pageBuilder: (_, __, ___) => TeamCreatorMainScreen(),
-          transitionsBuilder: (_, anim, __, child) {
-            return FadeTransition(opacity: anim, child: child);
-          },
-        ),
+      validateLoginFields(
+        emailController: emailController,
+        passwordController: passwordController,
       );
+
+      final user = UserModel.login(
+        email: emailController.text,
+        password_str: passwordController.text,
+      );
+
+      final service = EntityServices();
+
+      final response = await service.login(
+        context: context,
+        user: user,
+        stayLoggedIn: stayLoggedIn,
+      );
+      if (mounted) {
+        showAppSnackbar(
+          context,
+          message: response.message,
+          title: "Success",
+          variant: SnackbarVariant.success,
+        );
+
+        final redirect = response.redirect;
+        if (redirect == null) {
+          throw AppException("Something went wrong!");
+        }
+
+        await Navigator.pushReplacementNamed(context, redirect);
+      }
     } catch (e) {
       if (context.mounted) {
         handleErrorCallBack(e, (message) {
@@ -212,7 +209,7 @@ class _ClientLoginScreenState extends State<ClientLoginScreen> {
                                   const SizedBox(height: Sizes.spaceMd),
                                   AppButton(
                                     label: "Login",
-                                    onPressed: handleLogin,
+                                    onPressed: _handleLogin,
                                     width: double.infinity,
                                   ),
                                 ],

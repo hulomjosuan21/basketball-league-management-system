@@ -1,15 +1,15 @@
-import 'package:bogoballers/core/components/app_button.dart';
+import 'package:bogoballers/core/components/index.dart';
 import 'package:bogoballers/core/hive/app_box.dart';
 import 'package:flutter/material.dart';
 
-class PlayerProfileScreen extends StatefulWidget {
-  const PlayerProfileScreen({super.key});
+class TeamCreatorHomeScreen extends StatefulWidget {
+  const TeamCreatorHomeScreen({super.key});
 
   @override
-  State<PlayerProfileScreen> createState() => _PlayerProfileScreenState();
+  State<TeamCreatorHomeScreen> createState() => _TeamCreatorHomeScreenState();
 }
 
-class _PlayerProfileScreenState extends State<PlayerProfileScreen> {
+class _TeamCreatorHomeScreenState extends State<TeamCreatorHomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

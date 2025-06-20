@@ -1,12 +1,15 @@
 import 'package:bogoballers/administrator/administrator_app.dart';
 import 'package:bogoballers/client/client_app.dart';
+import 'package:bogoballers/core/enums/user_enum.dart';
 import 'package:bogoballers/core/helpers/supabase_helpers.dart';
 import 'package:bogoballers/core/hive/app_box.dart';
+import 'package:bogoballers/core/models/access_token.dart';
 import 'package:bogoballers/core/providers/league_adminstrator_provider.dart';
 import 'package:bogoballers/core/providers/player_provider.dart';
 import 'package:bogoballers/core/providers/team_creator_provider.dart';
 import 'package:bogoballers/core/services/notification_services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -20,6 +23,15 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 Future<void> main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+    ),
+  );
+
   try {
     await dotenv.load(fileName: ".env");
 
@@ -32,25 +44,34 @@ Future<void> main() async {
     ]);
 
     checkSupabaseStatus();
+
+    AccessToken? accessToken = AppBox.accessTokenBox.get('access_token');
+    String? user_id;
+    AccountTypeEnum? accountType;
+    if (accessToken != null) {
+      user_id = accessToken.user_id;
+      accountType = AccountTypeEnum.fromValue(accessToken.getAccountType);
+    }
+
     if (kIsWeb || Platform.isIOS || Platform.isAndroid) {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
-      final fcmToken = await NotificationService.instance.initialize();
-      debugPrint("FCM Token: $fcmToken");
-      FlutterNativeSplash.remove();
+      await NotificationService.instance.initialize(); // returns fcm token
 
       runApp(
         MultiProvider(
           providers: [
-            ChangeNotifierProvider(create: (_) => PlayerProvider()),
             ChangeNotifierProvider(create: (_) => TeamCreatorProvider()),
+            ChangeNotifierProvider(create: (_) => PlayerProvider()),
           ],
-          child: ClientMaterialScreen(),
+          child: ClientMaterialScreen(
+            user_id: user_id,
+            accountType: accountType,
+          ),
         ),
       );
     } else if (Platform.isWindows || Platform.isMacOS) {
-      FlutterNativeSplash.remove();
       runApp(
         MultiProvider(
           providers: [
@@ -64,6 +85,7 @@ Future<void> main() async {
     }
   } catch (e) {
     debugPrint("Error: $e");
+  } finally {
     FlutterNativeSplash.remove();
   }
 }

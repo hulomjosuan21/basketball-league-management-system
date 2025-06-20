@@ -47,6 +47,10 @@ class PlayerModel {
     required this.assists,
     required this.rebounds,
     required this.profile_image_url,
+    required this.created_at,
+    required this.updated_at,
+    required this.document_url_1,
+    required this.document_url_2,
     required this.user,
   });
 
@@ -84,23 +88,27 @@ class PlayerModel {
 
   factory PlayerModel.fromJson(Map<String, dynamic> json) {
     return PlayerModel(
-      player_id: json['player_id'],
-      user_id: json['user_id'],
-      full_name: json['full_name'],
-      gender: json['gender'],
+      assists: json['assists'],
       birth_date: DateTime.parse(json['birth_date']),
-      player_address: json['player_address'],
+      created_at: DateTime.parse(json['created_at']),
+      document_url_1: json['document_url_1'],
+      document_url_2: json['document_url_2'],
+      full_name: json['full_name'],
+      games_played: json['games_played'],
+      gender: json['gender'],
+      height_in: json['height_in'],
       jersey_name: json['jersey_name'],
       jersey_number: json['jersey_number'],
+      player_address: json['player_address'],
+      player_id: json['player_id'],
+      points_scored: json['points_scored'],
       position: json['position'],
-      height_in: json['height_in'],
-      weight_kg: json['weight_kg'],
-      games_played: json['games_played'] ?? 0,
-      points_scored: json['points_scored'] ?? 0,
-      assists: json['assists'] ?? 0,
-      rebounds: json['rebounds'] ?? 0,
       profile_image_url: json['profile_image_url'],
+      rebounds: json['rebounds'],
+      updated_at: DateTime.parse(json['updated_at']),
       user: UserModel.fromJson(json['user']),
+      user_id: json['user_id'],
+      weight_kg: json['weight_kg'],
     );
   }
 
@@ -122,7 +130,6 @@ class PlayerModel {
       'assists': assists,
       'rebounds': rebounds,
       'profile_image_url': profile_image_url,
-      'user': user.toJson(),
     };
   }
 }

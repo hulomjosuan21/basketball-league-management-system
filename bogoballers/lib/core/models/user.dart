@@ -1,6 +1,7 @@
 // ignore_for_file: non_constant_identifier_names
 
 import 'package:bogoballers/core/enums/user_enum.dart';
+import 'package:dio/dio.dart';
 
 class UserModel {
   late String user_id;
@@ -35,6 +36,11 @@ class UserModel {
     return {'email': email, 'password_str': password_str};
   }
 
+  FormData toFormDataForLogin() {
+    final formMap = {'email': email, 'password_str': password_str};
+    return FormData.fromMap(formMap);
+  }
+
   Map<String, dynamic> toJsonForCreation() {
     return {
       'email': email,
@@ -46,13 +52,13 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      user_id: json['user_id'],
-      email: json['email'],
-      contact_number: json['contact_number'],
       account_type: AccountTypeEnum.fromValue(json['account_type'])!,
-      is_verified: json['is_verified'],
+      contact_number: json['contact_number'],
       created_at: DateTime.parse(json['created_at']),
+      email: json['email'],
+      is_verified: json['is_verified'],
       updated_at: DateTime.parse(json['updated_at']),
+      user_id: json['user_id'],
     );
   }
 
