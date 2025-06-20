@@ -77,7 +77,10 @@ class _TeamCreatorRegisterScreenState extends State<TeamCreatorRegisterScreen> {
                       const SizedBox(height: Sizes.spaceMd),
                       TextField(
                         controller: emailController,
-                        decoration: const InputDecoration(labelText: "Email"),
+                        decoration: const InputDecoration(
+                          labelText: "Email",
+                          prefixIcon: Icon(Icons.email),
+                        ),
                       ),
                       const SizedBox(height: Sizes.spaceMd),
                       PasswordField(

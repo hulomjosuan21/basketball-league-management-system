@@ -12,7 +12,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class ClientMaterialScreen extends StatefulWidget {
-  ClientMaterialScreen({
+  const ClientMaterialScreen({
     super.key,
     required this.user_id,
     required this.accountType,
@@ -35,16 +35,11 @@ class _ClientMaterialScreenState extends State<ClientMaterialScreen> {
   }
 
   Future<bool> checkIfUserIsLoggedInAsync() async {
-    if (widget.user_id == null) return false;
-    if (widget.accountType == null) return false;
+    if (widget.user_id == null || widget.accountType == null) return false;
 
     try {
       final service = EntityServices();
-      final user_id = widget.user_id;
-      if (user_id == null) {
-        return false;
-      }
-      await service.fetch(context, user_id);
+      await service.fetch(context, widget.user_id!);
       return true;
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionError ||
@@ -52,42 +47,55 @@ class _ClientMaterialScreenState extends State<ClientMaterialScreen> {
         throw ValidationException(
           "You are offline. Please check your connection.",
         );
-      } else {
-        return false;
       }
+      return false;
     } catch (_) {
       throw ValidationException("Something went wrong!");
     }
   }
 
+  Widget _buildHomeScreen() {
+    final userId = widget.user_id;
+    final accountType = widget.accountType;
+
+    if (userId != null && accountType != null) {
+      switch (accountType) {
+        case AccountTypeEnum.PLAYER:
+          return const PlayerMainScreen();
+        case AccountTypeEnum.TEAM_CREATOR:
+          return const TeamCreatorMainScreen();
+        default:
+          return fullScreenRetryError(
+            context,
+            "Unsupported account type: ${accountType.value}",
+            _retry,
+          );
+      }
+    } else {
+      return const ClientLoginScreen();
+    }
+  }
+
+  void _retry() {
+    setState(() {
+      _checkLoginFuture = checkIfUserIsLoggedInAsync();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    debugPrint(
-      "User id: ${widget.user_id != null ? widget.user_id : "No user id"}",
-    );
-    debugPrint(
-      "Account type: ${widget.accountType != null ? widget.accountType!.value : "No user"}",
-    );
-
-    Widget home() {
-      if (widget.user_id != null) {
-        if (widget.accountType == AccountTypeEnum.PLAYER) {
-          return PlayerMainScreen();
-        } else if (widget.accountType == AccountTypeEnum.TEAM_CREATOR) {
-          return TeamCreatorMainScreen();
-        }
-      }
-      return ClientLoginScreen();
-    }
+    debugPrint("User ID: ${widget.user_id ?? "None"}");
+    debugPrint("Account Type: ${widget.accountType?.value ?? "None"}");
 
     return MaterialApp(
       title: 'BogoBallers',
       theme: lightTheme(context),
-      routes: clientRoutes,
-      home: FutureBuilder(
+      routes: appRoutes,
+      debugShowCheckedModeBanner: false,
+      home: FutureBuilder<bool>(
         future: _checkLoginFuture,
-        builder: (context, asyncSnapshot) {
-          if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return Scaffold(
               extendBodyBehindAppBar: true,
               body: Center(
@@ -96,20 +104,15 @@ class _ClientMaterialScreenState extends State<ClientMaterialScreen> {
                 ),
               ),
             );
-          } else if (asyncSnapshot.hasError) {
-            return fullScreenRetryError(context, asyncSnapshot.error, _retry);
+          } else if (snapshot.hasError) {
+            return fullScreenRetryError(context, snapshot.error, _retry);
+          } else if (snapshot.data == true) {
+            return _buildHomeScreen();
           } else {
-            return home();
+            return const ClientLoginScreen();
           }
         },
       ),
-      debugShowCheckedModeBanner: false,
     );
-  }
-
-  void _retry() {
-    setState(() {
-      _checkLoginFuture = checkIfUserIsLoggedInAsync();
-    });
   }
 }

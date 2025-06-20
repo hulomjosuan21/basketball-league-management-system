@@ -1,5 +1,4 @@
 import 'package:bogoballers/core/constants/sizes.dart';
-import 'package:bogoballers/core/providers/player_provider.dart';
 import 'package:bogoballers/core/providers/team_creator_provider.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';

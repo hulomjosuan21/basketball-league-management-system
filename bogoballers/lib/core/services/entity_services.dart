@@ -1,11 +1,13 @@
 import 'package:bogoballers/core/enums/user_enum.dart';
 import 'package:bogoballers/core/hive/app_box.dart';
 import 'package:bogoballers/core/models/access_token.dart';
+import 'package:bogoballers/core/models/league_administrator.dart';
 import 'package:bogoballers/core/models/login_response.dart';
 import 'package:bogoballers/core/models/player_model.dart';
 import 'package:bogoballers/core/models/user.dart';
 import 'package:bogoballers/core/network/api_response.dart';
 import 'package:bogoballers/core/network/dio_client.dart';
+import 'package:bogoballers/core/providers/league_adminstrator_provider.dart';
 import 'package:bogoballers/core/providers/player_provider.dart';
 import 'package:bogoballers/core/providers/team_creator_provider.dart';
 import 'package:bogoballers/core/routes.dart';
@@ -29,7 +31,7 @@ class EntityServices<T> {
       final apiResponse = ApiResponse.fromJsonNoPayload(response.data);
 
       final redirect = apiResponse.redirect;
-      if (!clientRoutes.containsKey(redirect)) {
+      if (!appRoutes.containsKey(redirect)) {
         throw Exception("Unknown redirect route: $redirect");
       }
 
@@ -80,6 +82,21 @@ class EntityServices<T> {
 
         case AccountTypeEnum.LOCAL_ADMINISTRATOR:
         case AccountTypeEnum.LGU_ADMINISTRATOR:
+          final loginResponse =
+              LoginResponse<LeagueAdministratorModel>.fromJson(
+                payload,
+                (json) => LeagueAdministratorModel.fromJson(json),
+              );
+
+          if (loginResponse.access_token != null) {
+            accessToken = AccessToken(
+              access_token: loginResponse.access_token!,
+            );
+          }
+
+          final administratorProvider =
+              Provider.of<LeagueAdministratorProvider>(context, listen: false);
+          administratorProvider.setCurrentAdministrator(loginResponse.entity);
           break;
 
         default:
@@ -124,15 +141,21 @@ class EntityServices<T> {
 
         case AccountTypeEnum.TEAM_CREATOR:
           final user = UserModel.fromJson(payload['entity']);
-          final teamCreatorrovider = Provider.of<TeamCreatorProvider>(
+          final teamCreatorProvider = Provider.of<TeamCreatorProvider>(
             context,
             listen: false,
           );
-          teamCreatorrovider.setCurrentTeamCreator(user);
+          teamCreatorProvider.setCurrentTeamCreator(user);
           break;
 
         case AccountTypeEnum.LOCAL_ADMINISTRATOR:
         case AccountTypeEnum.LGU_ADMINISTRATOR:
+          final administrator = LeagueAdministratorModel.fromJson(
+            payload['entity'],
+          );
+          final administratorProvider =
+              Provider.of<LeagueAdministratorProvider>(context, listen: false);
+          administratorProvider.setCurrentAdministrator(administrator);
           break;
 
         default:

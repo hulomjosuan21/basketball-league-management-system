@@ -79,7 +79,10 @@ Future<void> main() async {
               create: (_) => LeagueAdministratorProvider(),
             ),
           ],
-          child: AdministratorMaterialScreen(),
+          child: AdministratorMaterialScreen(
+            user_id: user_id,
+            accountType: accountType,
+          ),
         ),
       );
     }

@@ -28,6 +28,18 @@ class LeagueAdministratorMainScreen extends StatelessWidget {
     final navController = Get.put(AdministratorScreenNavigationController());
     final showSidebar = RxBool(true);
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final leagueAdministrator = context
+          .read<LeagueAdministratorProvider>()
+          .getCurrentLeagueAdministrator;
+
+      if (leagueAdministrator != null) {
+        debugPrint("✅ Current administrator: ${leagueAdministrator.toJson()}");
+      } else {
+        debugPrint("⚠️ No administrator set");
+      }
+    });
+
     return Scaffold(
       body: SafeArea(
         child: Obx(() {

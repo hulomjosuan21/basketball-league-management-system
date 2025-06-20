@@ -117,7 +117,7 @@ class EntityControllers:
             organization_name = request.form.get('organization_name')
             organization_address = request.form.get('organization_address')
 
-            organization_logo_file = request.files.get('organization_logo_file')
+            organization_logo = request.files.get('organization_logo')
 
             if not all([email, password_str, account_type, organization_name, contact_number, organization_address]):
                 raise ValueError("All fields must be provided and not empty.")
@@ -136,7 +136,7 @@ class EntityControllers:
                 organization_address=organization_address,
             )
             
-            full_url = await save_file(organization_logo_file, 'images', request, 'supabase')
+            full_url = await save_file(organization_logo, 'images', request, 'supabase')
             league_administrator.organization_logo_url = full_url
 
             db.session.add(user)
@@ -149,7 +149,7 @@ class EntityControllers:
 
             message = "A verification link has been sent to your email. Please verify your account before logging in."
 
-            return ApiResponse.success(redirect="/administrator/login", message=message,status_code=201)
+            return ApiResponse.success(redirect="/administrator/login/sreen", message=message,status_code=201)
         except Exception as e:
             db.session.rollback()
             return ApiResponse.error(e)
@@ -181,10 +181,9 @@ class EntityControllers:
                 case AccountTypeEnum.TEAM_CREATOR.value:
                     entity = user
                     redirect = '/team-creator/home'
-                case AccountTypeEnum.LOCAL_ADMINISTRATOR.value:
-                    entity= {}
-                case AccountTypeEnum.LGU_ADMINISTRATOR.value:
-                    entity= {}
+                case AccountTypeEnum.LOCAL_ADMINISTRATOR.value | AccountTypeEnum.LGU_ADMINISTRATOR.value:
+                    entity = LeagueAdministratorModel.query.filter_by(user_id=user.user_id).first()
+                    redirect = '/administrator/main/screen'
                 case _:
                     raise ValueError(f"Unknown account type {account_type}")
 
@@ -224,10 +223,8 @@ class EntityControllers:
                     entity = PlayerModel.query.filter_by(user_id=user.user_id).first()
                 case AccountTypeEnum.TEAM_CREATOR.value:
                     entity = user
-                case AccountTypeEnum.LOCAL_ADMINISTRATOR.value:
-                    entity= {}
-                case AccountTypeEnum.LGU_ADMINISTRATOR.value:
-                    entity= {}
+                case AccountTypeEnum.LOCAL_ADMINISTRATOR.value | AccountTypeEnum.LGU_ADMINISTRATOR.value:
+                    entity = LeagueAdministratorModel.query.filter_by(user_id=user.user_id).first()
                 case _:
                     raise ValueError(f"Unknown account type {account_type}")
                 

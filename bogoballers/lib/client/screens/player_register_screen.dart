@@ -255,7 +255,10 @@ class _PlayerRegisterScreenState extends State<PlayerRegisterScreen> {
             const SizedBox(height: Sizes.spaceMd),
             TextField(
               controller: emailController,
-              decoration: InputDecoration(label: Text("Email")),
+              decoration: InputDecoration(
+                label: Text("Email"),
+                prefixIcon: Icon(Icons.email),
+              ),
             ),
             const SizedBox(height: Sizes.spaceMd),
             PasswordField(controller: passwordController, hintText: 'Password'),
