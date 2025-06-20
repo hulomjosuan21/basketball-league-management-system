@@ -65,7 +65,11 @@ class TeamModel(db.Model):
 
     team_id = UUIDGenerator(db, 'team')
 
-    user_id = db.Column(db.String, db.ForeignKey('users_table.user_id'))
+    user_id = db.Column(
+        db.String,
+        db.ForeignKey('users_table.user_id', ondelete='CASCADE'),
+        nullable=False
+    )
     # Many-to-One
     user = db.relationship('UserModel', back_populates='teams', single_parent=True)
 

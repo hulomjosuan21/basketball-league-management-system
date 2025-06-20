@@ -6,16 +6,16 @@ import 'package:dio/dio.dart';
 import 'package:flutter/rendering.dart';
 
 class TeamCreatorServices {
-  Future<String> registerAccount(UserModel user) async {
+  Future<ApiResponse> createNewTeamCreator(UserModel user) async {
     final api = DioClient().client;
 
     debugPrint(user.toJsonForCreation().toString());
     Response response = await api.post(
-      '/team-creator/register-account',
+      '/entity/create-new/team-creator',
       data: user.toJsonForCreation(),
     );
     final apiResponse = ApiResponse.fromJsonNoPayload(response.data);
-    return apiResponse.message;
+    return apiResponse;
   }
 
   Future<ApiResponse> createNewTeam(TeamModel team) async {

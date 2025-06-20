@@ -104,7 +104,7 @@ void validateTeamCreatorFields({
   required TextEditingController emailController,
   required TextEditingController passwordController,
   required TextEditingController confirmPassController,
-  required String? fullPhoneNumber,
+  required String? phoneNumber,
 }) {
   if (emailController.text.trim().isEmpty) {
     throw ValidationException("Email cannot be empty");
@@ -116,10 +116,10 @@ void validateTeamCreatorFields({
   if (passwordController.text.trim() != confirmPassController.text.trim()) {
     throw ValidationException("Passwords do not match");
   }
-  if (fullPhoneNumber == null || fullPhoneNumber.trim().isEmpty) {
+  if (phoneNumber == null || phoneNumber.trim().isEmpty) {
     throw ValidationException("Phone number cannot be empty");
   }
-  if (!isValidateContactNumber(fullPhoneNumber)) {
+  if (!isValidateContactNumber(phoneNumber)) {
     throw ValidationException("Invalid Phone number");
   }
 }

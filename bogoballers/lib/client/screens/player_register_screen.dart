@@ -348,7 +348,7 @@ class _PlayerRegisterScreenState extends State<PlayerRegisterScreen> {
 
       final service = PlayerServices();
 
-      final response = await service.registerAccount(player);
+      final response = await service.createNewPlayer(player);
       if (mounted) {
         showAppSnackbar(
           context,
@@ -356,6 +356,13 @@ class _PlayerRegisterScreenState extends State<PlayerRegisterScreen> {
           title: "Success",
           variant: SnackbarVariant.success,
         );
+
+        final redirect = response.redirect;
+        if (redirect == null) {
+          throw AppException("Something went wrong!");
+        }
+
+        await Navigator.pushReplacementNamed(context, redirect);
       }
     } catch (e) {
       if (context.mounted) {
