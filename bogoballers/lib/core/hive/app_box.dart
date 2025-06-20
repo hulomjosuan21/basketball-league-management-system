@@ -14,8 +14,8 @@ class AppBox {
     accessTokenBox = await Hive.openBox<AccessToken>(accessTokenBoxName);
   }
 
-  static Future<void> clearSpecificAccessToken() async {
-    await accessTokenBox.delete('user_token');
+  static Future<void> clearAccessToken() async {
+    await accessTokenBox.delete('access_token');
   }
 
   static Future<void> clearAll() async {

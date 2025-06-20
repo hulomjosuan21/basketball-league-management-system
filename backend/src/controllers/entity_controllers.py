@@ -156,6 +156,8 @@ class EntityControllers:
         
     def login_entity(self):
         try:
+            stay_login = str(request.args.get('stay_login', 'true')).lower() == 'true'
+            print(f"Stay login: {"Yes" if stay_login else "Not"}")
             email = request.form.get('email')
             password_str = request.form.get('password_str')
 
@@ -175,8 +177,10 @@ class EntityControllers:
             match account_type:
                 case AccountTypeEnum.PLAYER.value:
                     entity = PlayerModel.query.filter_by(user_id=user.user_id).first()
+                    redirect = '/player/home'
                 case AccountTypeEnum.TEAM_CREATOR.value:
                     entity = user
+                    redirect = '/team-creator/home'
                 case AccountTypeEnum.LOCAL_ADMINISTRATOR.value:
                     entity= {}
                 case AccountTypeEnum.LGU_ADMINISTRATOR.value:
@@ -187,18 +191,51 @@ class EntityControllers:
             additional_claims = {
                 "account_type": account_type
             }
- 
-            access_token = create_access_token(
-                identity=user.user_id,
-                additional_claims=additional_claims,
-                expires_delta=timedelta(weeks=1)
-            )
+
+            access_token = None
+            if stay_login:
+                access_token = create_access_token(
+                    identity=user.user_id,
+                    additional_claims=additional_claims,
+                    expires_delta=timedelta(weeks=1)
+                )
 
             payload = {
                 'access_token': access_token,
-                'entity': entity.to_json()
+                'entity': entity.to_json(),
+                'account_type': account_type,
             }
 
-            return ApiResponse.success(message="Login successful.",payload=payload)
+            return ApiResponse.success(redirect=redirect,message="Login successful.",payload=payload)
+        except Exception as e:
+            return ApiResponse.error(e)
+        
+    def fetch_entity(self, user_id):
+        try:
+            if not user_id:
+                raise ValueError("Missing user id.")
+            
+            user = UserModel.query.get(user_id)
+
+            account_type = str(user.account_type)
+
+            match account_type:
+                case AccountTypeEnum.PLAYER.value:
+                    entity = PlayerModel.query.filter_by(user_id=user.user_id).first()
+                case AccountTypeEnum.TEAM_CREATOR.value:
+                    entity = user
+                case AccountTypeEnum.LOCAL_ADMINISTRATOR.value:
+                    entity= {}
+                case AccountTypeEnum.LGU_ADMINISTRATOR.value:
+                    entity= {}
+                case _:
+                    raise ValueError(f"Unknown account type {account_type}")
+                
+            payload = {
+                'entity': entity.to_json(),
+                'account_type': account_type
+            }
+                
+            return ApiResponse.success(message="Fetch successful.",payload=payload)
         except Exception as e:
             return ApiResponse.error(e)

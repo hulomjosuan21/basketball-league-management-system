@@ -1,4 +1,4 @@
-import 'package:bogoballers/client/screens/phone_number_input.dart';
+import 'package:bogoballers/core/components/phone_number_input.dart';
 import 'package:bogoballers/core/components/app_button.dart';
 import 'package:bogoballers/core/components/image_picker.dart';
 import 'package:bogoballers/core/components/snackbars.dart';

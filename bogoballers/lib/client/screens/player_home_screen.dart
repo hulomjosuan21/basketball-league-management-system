@@ -1,4 +1,6 @@
+import 'package:bogoballers/core/providers/player_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class PlayerHomeScreen extends StatefulWidget {
   const PlayerHomeScreen({super.key});
@@ -16,63 +18,71 @@ class _PlayerHomeScreenState extends State<PlayerHomeScreen> {
 
     return Scaffold(
       appBar: AppBar(),
-      body: Column(
-        children: [
-          SizedBox(height: 16),
-          SizedBox(
-            height: 140,
-            width: double.infinity,
-            child: PageView.builder(
-              controller: controller,
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                return Align(
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    margin: items.length > 1
-                        ? EdgeInsets.only(right: 10)
-                        : null,
-                    decoration: BoxDecoration(
-                      color: Colors.blueAccent,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      items[index],
-                      style: TextStyle(fontSize: 12, color: Colors.white),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          SizedBox(height: 16),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: ListView.builder(
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    height: 140,
-                    decoration: BoxDecoration(
-                      color: Colors.blueAccent.withAlpha((0.5 * 255).toInt()),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    margin: EdgeInsets.only(bottom: 8),
-                    child: Center(
-                      child: Text(
-                        items[index],
-                        style: TextStyle(fontSize: 12, color: Colors.black),
+      body: Consumer<PlayerProvider>(
+        builder: (context, value, child) {
+          final player = value.getCurrentPlayer;
+
+          return Column(
+            children: [
+              SizedBox(height: 16),
+              SizedBox(
+                height: 140,
+                width: double.infinity,
+                child: PageView.builder(
+                  controller: controller,
+                  itemCount: items.length,
+                  itemBuilder: (context, index) {
+                    return Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        margin: items.length > 1
+                            ? EdgeInsets.only(right: 10)
+                            : null,
+                        decoration: BoxDecoration(
+                          color: Colors.blueAccent,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          player?.full_name ?? 'No Data',
+                          style: TextStyle(fontSize: 12, color: Colors.white),
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
-          ),
-        ],
+              SizedBox(height: 16),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: ListView.builder(
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        height: 140,
+                        decoration: BoxDecoration(
+                          color: Colors.blueAccent.withAlpha(
+                            (0.5 * 255).toInt(),
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        margin: EdgeInsets.only(bottom: 8),
+                        child: Center(
+                          child: Text(
+                            player?.full_name ?? 'No Data',
+                            style: TextStyle(fontSize: 12, color: Colors.black),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
