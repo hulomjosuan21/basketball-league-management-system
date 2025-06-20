@@ -85,6 +85,6 @@ class LeagueAdministratorModel(db.Model):
             "organization_photo_url": self.organization_photo_url,
             "organization_logo_url": self.organization_logo_url,
             "user": self.user.to_json() if self.user else None,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
         }

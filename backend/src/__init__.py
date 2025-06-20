@@ -10,11 +10,9 @@ import os
 import atexit
 from functools import partial
 from apscheduler.triggers.interval import IntervalTrigger
-from src.routes.administrator.administrator_route import administrator_bp
 from src.routes.test_route import test_bp
 from src.routes.user.user_route import user_bp
 from src.routes.file_routes import FileRoutes
-from src.routes.client.client_route import client_bp
 from src.routes.player.player_route import player_bp
 from src.routes.team_creator.team_creator_route import team_creator_bp 
 from src.routes.league.league_routes import league_bp
@@ -85,9 +83,7 @@ class FlaskServer:
         self.server.register_blueprint(league_bp)
         self.server.register_blueprint(team_bp)
         self.server.register_blueprint(user_bp)
-        self.server.register_blueprint(administrator_bp)
         self.server.register_blueprint(test_bp)
-        self.server.register_blueprint(client_bp)
         file_routes = FileRoutes(self.server)
         self.server.register_blueprint(file_routes.get_blueprint())
         

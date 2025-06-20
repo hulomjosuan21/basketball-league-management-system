@@ -1,6 +1,5 @@
 // ignore_for_file: non_constant_identifier_names
 import 'dart:async';
-import 'package:bogoballers/administrator/screen/administrator_login_screen.dart';
 import 'package:bogoballers/core/components/phone_number_input.dart';
 import 'package:bogoballers/core/components/app_button.dart';
 import 'package:bogoballers/core/components/auth_navigator.dart';
@@ -109,16 +108,14 @@ class _AdministratorRegisterScreenState
         organization_type: _selectedOrgType!,
         organization_address: orgAddressController.text,
         user: user,
-        organization_logo_file: multipartFile,
+        organization_logo: multipartFile,
       );
 
-      final response = await leagueAdministratorService.registerAccount(
+      final response = await leagueAdministratorService.createNewAdministrator(
         leagueAdministrator: leagueAdministrator,
       );
 
-      if (mounted &&
-          response.redirect != null &&
-          response.redirect! == "/administrator/login") {
+      if (mounted) {
         showAppSnackbar(
           context,
           message: response.message,
@@ -126,9 +123,12 @@ class _AdministratorRegisterScreenState
           variant: SnackbarVariant.success,
         );
 
-        Navigator.pushNamed(context, response.redirect!);
-      } else {
-        throw AppException("Something went wrong!");
+        final redirect = response.redirect;
+        if (redirect == null) {
+          throw AppException("Something went wrong!");
+        }
+
+        await Navigator.pushReplacementNamed(context, redirect);
       }
     } catch (e) {
       if (context.mounted) {
@@ -211,6 +211,7 @@ class _AdministratorRegisterScreenState
       ),
       const SizedBox(height: Sizes.spaceMd),
       PHPhoneInput(
+        phoneValue: phoneNumber,
         onChanged: (phone) {
           phoneNumber = phone;
         },
@@ -300,6 +301,7 @@ class _AdministratorRegisterScreenState
                                   TextField(
                                     decoration: const InputDecoration(
                                       labelText: "Email",
+                                      prefixIcon: Icon(Icons.email),
                                     ),
                                     controller: emailController,
                                   ),
@@ -325,15 +327,10 @@ class _AdministratorRegisterScreenState
                                         context,
                                         "Already have an account?",
                                         " Login",
-                                        () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const AdministratorLoginScreen(),
-                                            ),
-                                          );
-                                        },
+                                        () => Navigator.pushReplacementNamed(
+                                          context,
+                                          '/administrator/login/sreen',
+                                        ),
                                       ),
                                       AppButton(
                                         label: "Register",
@@ -354,5 +351,10 @@ class _AdministratorRegisterScreenState
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }

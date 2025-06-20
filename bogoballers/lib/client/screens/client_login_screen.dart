@@ -152,7 +152,6 @@ class _ClientLoginScreenState extends State<ClientLoginScreen> {
                             ],
                           ),
 
-                          // Login form fills remaining space
                           Expanded(
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
@@ -166,6 +165,7 @@ class _ClientLoginScreenState extends State<ClientLoginScreen> {
                                     controller: emailController,
                                     decoration: const InputDecoration(
                                       label: Text("Email"),
+                                      prefixIcon: Icon(Icons.email),
                                     ),
                                   ),
                                   const SizedBox(height: Sizes.spaceMd),
@@ -247,5 +247,12 @@ class _ClientLoginScreenState extends State<ClientLoginScreen> {
               },
             ),
     );
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 }
