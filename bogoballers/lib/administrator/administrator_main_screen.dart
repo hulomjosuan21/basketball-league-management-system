@@ -11,7 +11,6 @@ import 'package:get/get.dart';
 
 class AdministratorScreenNavigationController extends GetxController {
   final Rx<int> selectedIndex = 0.obs;
-  final RxBool showSidebar = true.obs;
 
   final contents = [
     const DashboardContent(),
@@ -26,19 +25,16 @@ class LeagueAdministratorMainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final navController = Get.put(AdministratorScreenNavigationController());
+    final showSidebar = RxBool(true);
 
-    final entity = getIt<EntityState<LeagueAdministratorModel>>().entity;
-
-    if (entity != null) {
-      print("Current Administrator: ${entity.toJson()}");
-    }
+    final entity = getIt<EntityState<LeagueAdministratorModel>>();
 
     return Scaffold(
       body: SafeArea(
         child: Obx(() {
           final screenWidth = MediaQuery.of(context).size.width;
           final isSmallScreen = screenWidth < 600;
-          navController.showSidebar.value = !isSmallScreen;
+          showSidebar.value = !isSmallScreen;
 
           final sidebarItems = [
             SidebarItem(
@@ -83,7 +79,7 @@ class LeagueAdministratorMainScreen extends StatelessWidget {
 
           return Row(
             children: [
-              if (navController.showSidebar.value)
+              if (showSidebar.value)
                 AppSidebar(
                   sidebarItems: sidebarItems,
                   sidebarFooterItems: sidebarFooterItems,
@@ -92,9 +88,9 @@ class LeagueAdministratorMainScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     AppHeader(
-                      showSidebar: navController.showSidebar.value,
-                      onToggleSidebar: () => navController.showSidebar.value =
-                          !navController.showSidebar.value,
+                      showSidebar: showSidebar.value,
+                      onToggleSidebar: () =>
+                          showSidebar.value = !showSidebar.value,
                     ),
                     Expanded(
                       child: Obx(
