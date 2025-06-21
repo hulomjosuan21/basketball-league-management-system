@@ -11,6 +11,8 @@ import 'package:bogoballers/core/routes.dart';
 import 'package:bogoballers/core/state/entity_state.dart';
 import 'package:bogoballers/service_locator.dart';
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class EntityServices<T> {
   Future<ApiResponse> login({
@@ -37,6 +39,22 @@ class EntityServices<T> {
       AccountTypeEnum? accountType = AccountTypeEnum.fromValue(
         payload['account_type'],
       );
+
+      if (accountType == AccountTypeEnum.LOCAL_ADMINISTRATOR ||
+          accountType == AccountTypeEnum.LGU_ADMINISTRATOR) {
+        if (kIsWeb || Platform.isIOS || Platform.isAndroid) {
+          throw Exception(
+            "Administrator accounts are not supported on this platform.",
+          );
+        }
+      } else if (accountType == AccountTypeEnum.PLAYER ||
+          accountType == AccountTypeEnum.TEAM_CREATOR) {
+        if (Platform.isWindows || Platform.isMacOS) {
+          throw Exception(
+            "Player and Team Creator accounts are not supported on desktop platforms.",
+          );
+        }
+      }
 
       AccessToken? accessToken;
 
@@ -118,6 +136,22 @@ class EntityServices<T> {
       AccountTypeEnum? accountType = AccountTypeEnum.fromValue(
         payload['account_type'],
       );
+
+      if (accountType == AccountTypeEnum.LOCAL_ADMINISTRATOR ||
+          accountType == AccountTypeEnum.LGU_ADMINISTRATOR) {
+        if (kIsWeb || Platform.isIOS || Platform.isAndroid) {
+          throw Exception(
+            "Administrator accounts are not supported on this platform.",
+          );
+        }
+      } else if (accountType == AccountTypeEnum.PLAYER ||
+          accountType == AccountTypeEnum.TEAM_CREATOR) {
+        if (Platform.isWindows || Platform.isMacOS) {
+          throw Exception(
+            "Player and Team Creator accounts are not supported on desktop platforms.",
+          );
+        }
+      }
 
       switch (accountType) {
         case AccountTypeEnum.PLAYER:
