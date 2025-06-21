@@ -1,5 +1,5 @@
 import 'package:bogoballers/core/components/index.dart';
-import 'package:bogoballers/core/hive/app_box.dart';
+import 'package:bogoballers/core/helpers/logout.dart';
 import 'package:flutter/material.dart';
 
 class TeamCreatorHomeScreen extends StatefulWidget {
@@ -14,13 +14,12 @@ class _TeamCreatorHomeScreenState extends State<TeamCreatorHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: AppButton(label: "Logut", onPressed: _handleLogout),
+        child: AppButton(
+          label: "Logut",
+          onPressed: () =>
+              handleLogout(context: context, route: '/client/login'),
+        ),
       ),
     );
-  }
-
-  Future<void> _handleLogout() async {
-    await AppBox.clearAccessToken();
-    Navigator.pushReplacementNamed(context, '/client/login');
   }
 }

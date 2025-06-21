@@ -1,6 +1,109 @@
+import 'package:bogoballers/core/constants/image_strings.dart';
 import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
+
+class AppSidebar extends StatelessWidget {
+  final List<SidebarItem> sidebarItems;
+  final List<SidebarItem> sidebarFooterItems;
+  final bool isCollapsed;
+
+  const AppSidebar({
+    super.key,
+    required this.sidebarItems,
+    required this.sidebarFooterItems,
+    required this.isCollapsed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final appColors = context.appColors;
+
+    return Container(
+      width: isCollapsed ? 70 : 220,
+      decoration: BoxDecoration(
+        color: appColors.gray100,
+        border: Border(
+          right: BorderSide(
+            width: Sizes.borderWidthSm,
+            color: appColors.gray600,
+          ),
+        ),
+      ),
+      child: Column(
+        children: [
+          // Logo Area
+          Container(
+            height: 80,
+            width: double.infinity,
+            alignment: Alignment.center,
+            child: ClipOval(
+              child: Image.asset(
+                ImageStrings.exampleTeamLogo,
+                width: isCollapsed ? 30 : 50,
+                height: isCollapsed ? 30 : 50,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(Sizes.spaceSm),
+                child: Column(
+                  children: sidebarItems
+                      .map(
+                        (item) => SidebarItem(
+                          label: item.label,
+                          icon: item.icon,
+                          selected: item.selected,
+                          onTap: item.onTap,
+                          subMenu: item.subMenu,
+                          isCollapsed: isCollapsed,
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+            ),
+          ),
+          if (sidebarFooterItems.isNotEmpty)
+            Container(
+              width: double.infinity,
+              height: 180,
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: appColors.gray600,
+                    width: Sizes.borderWidthSm,
+                  ),
+                ),
+              ),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(Sizes.spaceSm),
+                  child: Column(
+                    children: sidebarFooterItems
+                        .map(
+                          (item) => SidebarItem(
+                            label: item.label,
+                            icon: item.icon,
+                            selected: item.selected,
+                            onTap: item.onTap,
+                            subMenu: item.subMenu,
+                            isCollapsed: isCollapsed,
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
 
 class SidebarItem extends StatelessWidget {
   final String label;
@@ -8,6 +111,7 @@ class SidebarItem extends StatelessWidget {
   final bool selected;
   final VoidCallback? onTap;
   final List<SubMenuItem>? subMenu;
+  final bool isCollapsed;
 
   const SidebarItem({
     super.key,
@@ -16,6 +120,7 @@ class SidebarItem extends StatelessWidget {
     this.selected = false,
     this.onTap,
     this.subMenu,
+    this.isCollapsed = false,
   });
 
   @override
@@ -29,42 +134,46 @@ class SidebarItem extends StatelessWidget {
         InkWell(
           onTap: onTap,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
             decoration: BoxDecoration(
-              color: selected ? appColors.gray300 : Colors.transparent,
+              color: selected ? appColors.accent900 : Colors.transparent,
               borderRadius: BorderRadius.circular(Sizes.radiusMd),
             ),
             child: Row(
+              mainAxisAlignment: isCollapsed
+                  ? MainAxisAlignment.center
+                  : MainAxisAlignment.start,
               children: [
                 if (icon != null)
                   Icon(
                     icon,
                     size: 20,
-                    color: selected ? appColors.accent900 : appColors.gray700,
+                    color: selected ? appColors.gray100 : appColors.gray900,
                   ),
-                if (icon != null) const SizedBox(width: Sizes.spaceSm),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      color: selected ? appColors.gray1000 : appColors.gray700,
-                      fontWeight: selected
-                          ? FontWeight.bold
-                          : FontWeight.normal,
+                if (!isCollapsed) const SizedBox(width: Sizes.spaceSm),
+                if (!isCollapsed)
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        color: selected ? appColors.gray100 : appColors.gray900,
+                        fontWeight: selected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
                     ),
                   ),
-                ),
-                if (hasSubMenu)
+                if (hasSubMenu && !isCollapsed)
                   Icon(
                     Icons.keyboard_arrow_down,
                     size: 18,
-                    color: appColors.gray500,
+                    color: selected ? appColors.gray100 : appColors.gray900,
                   ),
               ],
             ),
           ),
         ),
-        if (hasSubMenu && selected)
+        if (hasSubMenu && selected && !isCollapsed)
           Padding(
             padding: const EdgeInsets.only(left: 32),
             child: Column(children: subMenu!),
@@ -105,87 +214,12 @@ class SubMenuItem extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color: selected ? appColors.accent900 : appColors.gray600,
+                color: selected ? appColors.accent1100 : appColors.gray900,
                 fontSize: Sizes.fontSizeSm,
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class AppSidebar extends StatelessWidget {
-  final List<SidebarItem> sidebarItems;
-  final List<SidebarItem> sidebarFooterItems;
-  const AppSidebar({
-    super.key,
-    required this.sidebarItems,
-    required this.sidebarFooterItems,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final appColors = context.appColors;
-
-    return Container(
-      width: 220,
-      decoration: BoxDecoration(
-        color: appColors.gray100,
-        border: Border(
-          right: BorderSide(
-            width: Sizes.borderWidthSm,
-            color: appColors.gray600,
-          ),
-        ),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(Sizes.spaceMd),
-            width: double.infinity,
-            height: 80,
-            decoration: BoxDecoration(
-              color: appColors.gray100,
-              border: Border(
-                bottom: BorderSide(
-                  width: Sizes.borderWidthSm,
-                  color: appColors.gray600,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(Sizes.spaceSm),
-                child: Column(children: sidebarItems),
-              ),
-            ),
-          ),
-
-          // Sidebar footer
-          if (sidebarFooterItems.isNotEmpty)
-            Container(
-              width: double.infinity,
-              height: 200,
-              decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(
-                    color: appColors.gray600,
-                    width: Sizes.borderWidthSm,
-                  ),
-                ),
-              ),
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(Sizes.spaceSm),
-                  child: Column(children: sidebarFooterItems),
-                ),
-              ),
-            ),
-        ],
       ),
     );
   }

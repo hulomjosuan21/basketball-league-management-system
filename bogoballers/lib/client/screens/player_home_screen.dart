@@ -1,3 +1,6 @@
+import 'package:bogoballers/core/models/player_model.dart';
+import 'package:bogoballers/core/state/entity_state.dart';
+import 'package:bogoballers/service_locator.dart';
 import 'package:flutter/material.dart';
 
 class PlayerHomeScreen extends StatefulWidget {
@@ -13,6 +16,8 @@ class _PlayerHomeScreenState extends State<PlayerHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final PageController controller = PageController(viewportFraction: 0.9);
+
+    final player = getIt<EntityState<PlayerModel>>().entity;
 
     return Scaffold(
       appBar: AppBar(),
@@ -39,7 +44,7 @@ class _PlayerHomeScreenState extends State<PlayerHomeScreen> {
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      'No Data',
+                      player?.full_name ?? 'No data',
                       style: TextStyle(fontSize: 12, color: Colors.white),
                     ),
                   ),
@@ -63,7 +68,7 @@ class _PlayerHomeScreenState extends State<PlayerHomeScreen> {
                     margin: EdgeInsets.only(bottom: 8),
                     child: Center(
                       child: Text(
-                        'No Data',
+                        player?.full_name ?? 'No data',
                         style: TextStyle(fontSize: 12, color: Colors.black),
                       ),
                     ),
