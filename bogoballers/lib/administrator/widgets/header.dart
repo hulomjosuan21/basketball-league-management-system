@@ -1,4 +1,5 @@
 import 'package:bogoballers/core/constants/sizes.dart';
+import 'package:bogoballers/core/helpers/logout.dart';
 import 'package:bogoballers/core/models/league_administrator.dart';
 import 'package:bogoballers/core/state/entity_state.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
@@ -6,12 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class AppHeader extends StatelessWidget {
-  final bool showSidebar;
+  final bool isCollapsed;
   final VoidCallback onToggleSidebar;
 
   const AppHeader({
     super.key,
-    required this.showSidebar,
+    required this.isCollapsed,
     required this.onToggleSidebar,
   });
 
@@ -20,45 +21,43 @@ class AppHeader extends StatelessWidget {
     final appColors = context.appColors;
 
     return Container(
-      height: 34,
       width: double.infinity,
       color: appColors.accent900,
-      padding: EdgeInsets.all(Sizes.spaceXs),
+      constraints: BoxConstraints(maxHeight: 38),
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           IconButton(
-            icon: Icon(Icons.menu, color: appColors.accent100, size: 14),
+            icon: const Icon(Icons.menu, size: 18),
+            color: appColors.accent100,
             onPressed: onToggleSidebar,
           ),
-          const Spacer(),
-          Expanded(
-            child: Center(
-              child: Container(
-                alignment: Alignment.center,
-                constraints: BoxConstraints(minWidth: 200),
-                padding: EdgeInsets.symmetric(vertical: 2, horizontal: 12),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    width: Sizes.borderWidthSm,
-                    color: appColors.gray100,
-                  ),
-                  borderRadius: BorderRadius.circular(Sizes.radiusSm),
+          Container(
+            constraints: BoxConstraints(minWidth: 200, maxWidth: 400),
+            decoration: BoxDecoration(
+              border: BoxBorder.all(width: 0.5, color: appColors.gray600),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(2),
+              child: Text(
+                context
+                        .watch<EntityState<LeagueAdministratorModel>>()
+                        .entity
+                        ?.organization_name ??
+                    'No data',
+                style: TextStyle(
+                  fontSize: Sizes.fontSizeSm,
+                  color: appColors.gray100,
                 ),
-                child: Text(
-                  context
-                          .watch<EntityState<LeagueAdministratorModel>>()
-                          .entity
-                          ?.organization_name ??
-                      'No data',
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                  style: TextStyle(fontSize: 11, color: appColors.accent100),
-                ),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ),
           ),
-          const Spacer(),
           PopupMenuButton<String>(
             icon: Icon(Icons.more_vert, color: appColors.accent100, size: 14),
             onSelected: (String value) {
@@ -67,9 +66,15 @@ class AppHeader extends StatelessWidget {
               ).showSnackBar(SnackBar(content: Text('Selected: $value')));
             },
             itemBuilder: (BuildContext context) => [
-              const PopupMenuItem(child: Text('About Organization')),
-              const PopupMenuItem(child: Text('Settings')),
-              const PopupMenuItem(child: Text('Logout')),
+              PopupMenuItem(child: Text('About Organization')),
+              PopupMenuItem(child: Text('Settings')),
+              PopupMenuItem(
+                child: Text('Logout'),
+                onTap: () => handleLogout(
+                  context: context,
+                  route: '/administrator/login/sreen',
+                ),
+              ),
             ],
           ),
         ],

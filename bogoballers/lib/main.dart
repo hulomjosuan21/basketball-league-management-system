@@ -1,5 +1,6 @@
 import 'package:bogoballers/administrator/administrator_app.dart';
 import 'package:bogoballers/client/client_app.dart';
+import 'package:bogoballers/core/state/app_state.dart';
 import 'package:bogoballers/core/state/entity_state.dart';
 import 'package:bogoballers/core/enums/user_enum.dart';
 import 'package:bogoballers/core/helpers/supabase_helpers.dart';
@@ -61,38 +62,39 @@ Future<void> main() async {
         options: DefaultFirebaseOptions.currentPlatform,
       );
       await NotificationService.instance.initialize();
-
-      runApp(
-        MultiProvider(
-          providers: [
-            ChangeNotifierProvider(
-              create: (_) => getIt<EntityState<PlayerModel>>(),
-            ),
-            ChangeNotifierProvider(
-              create: (_) => getIt<EntityState<UserModel>>(),
-            ),
-          ],
-          child: ClientMaterialScreen(
-            user_id: user_id,
-            accountType: accountType,
-          ),
-        ),
-      );
-    } else if (Platform.isWindows || Platform.isMacOS) {
-      runApp(
-        MultiProvider(
-          providers: [
-            ChangeNotifierProvider(
-              create: (_) => getIt<EntityState<LeagueAdministratorModel>>(),
-            ),
-          ],
-          child: AdministratorMaterialScreen(
-            user_id: user_id,
-            accountType: accountType,
-          ),
-        ),
-      );
     }
+
+    final List<ChangeNotifierProvider> providers = [];
+
+    if (kIsWeb || Platform.isIOS || Platform.isAndroid) {
+      providers.addAll([
+        ChangeNotifierProvider<EntityState<PlayerModel>>.value(
+          value: getIt<EntityState<PlayerModel>>(),
+        ),
+        ChangeNotifierProvider<EntityState<UserModel>>.value(
+          value: getIt<EntityState<UserModel>>(),
+        ),
+      ]);
+    } else if (Platform.isWindows || Platform.isMacOS) {
+      providers.addAll([
+        ChangeNotifierProvider<EntityState<LeagueAdministratorModel>>.value(
+          value: getIt<EntityState<LeagueAdministratorModel>>(),
+        ),
+        ChangeNotifierProvider<AppState>.value(value: getIt<AppState>()),
+      ]);
+    }
+
+    runApp(
+      MultiProvider(
+        providers: providers,
+        child: (kIsWeb || Platform.isIOS || Platform.isAndroid)
+            ? ClientMaterialScreen(user_id: user_id, accountType: accountType)
+            : AdministratorMaterialScreen(
+                user_id: user_id,
+                accountType: accountType,
+              ),
+      ),
+    );
   } catch (e) {
     debugPrint("Error: $e");
   } finally {

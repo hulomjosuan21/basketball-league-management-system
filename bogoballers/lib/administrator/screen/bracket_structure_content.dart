@@ -1,4 +1,4 @@
-import 'package:bogoballers/administrator/contents/league_content/widgets/bracket/bracket.dart';
+import 'package:bogoballers/administrator/screen/league_content/widgets/bracket/bracket.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 

@@ -67,7 +67,6 @@ class _CreateLeagueState extends State<CreateLeague> {
   List<String> allCategoryOptions = [];
 
   List<CategoryInputData> addedCategories = [];
-  // for cat in addedCategories = Category {cat.category}, Format: ${cat.format}, Max Team: ${cat.maxTeam}
 
   String selectedStatus = MatchStatus.scheduled.value;
   final List<String> statuses = MatchStatus.values.map((e) => e.value).toList();

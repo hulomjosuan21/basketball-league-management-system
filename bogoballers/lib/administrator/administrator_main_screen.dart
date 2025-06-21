@@ -1,11 +1,9 @@
-import 'package:bogoballers/administrator/contents/bracket_structure_content.dart';
-import 'package:bogoballers/administrator/contents/dashboard_content.dart';
-import 'package:bogoballers/administrator/contents/league_content/league_content.dart';
+import 'package:bogoballers/administrator/screen/administrator_analytics_screen.dart';
+import 'package:bogoballers/administrator/screen/bracket_structure_content.dart';
+import 'package:bogoballers/administrator/screen/dashboard_content.dart';
+import 'package:bogoballers/administrator/screen/league_content/league_content.dart';
 import 'package:bogoballers/administrator/widgets/header.dart';
 import 'package:bogoballers/administrator/widgets/sidebar.dart';
-import 'package:bogoballers/core/models/league_administrator.dart';
-import 'package:bogoballers/core/state/entity_state.dart';
-import 'package:bogoballers/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,6 +12,7 @@ class AdministratorScreenNavigationController extends GetxController {
 
   final contents = [
     const DashboardContent(),
+    const AdministratorAnalytics(),
     LeagueContent(),
     const Center(child: Text('Account Page')),
   ];
@@ -25,16 +24,14 @@ class LeagueAdministratorMainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final navController = Get.put(AdministratorScreenNavigationController());
-    final showSidebar = RxBool(true);
-
-    final entity = getIt<EntityState<LeagueAdministratorModel>>();
+    final RxBool isCollapsed = false.obs;
 
     return Scaffold(
       body: SafeArea(
         child: Obx(() {
           final screenWidth = MediaQuery.of(context).size.width;
-          final isSmallScreen = screenWidth < 600;
-          showSidebar.value = !isSmallScreen;
+          final bool smallScreen = screenWidth < 600;
+          isCollapsed.value = smallScreen ? true : isCollapsed.value;
 
           final sidebarItems = [
             SidebarItem(
@@ -44,10 +41,16 @@ class LeagueAdministratorMainScreen extends StatelessWidget {
               onTap: () => navController.selectedIndex.value = 0,
             ),
             SidebarItem(
-              label: 'League',
+              label: 'Analytics',
               icon: Icons.analytics,
               selected: navController.selectedIndex.value == 1,
               onTap: () => navController.selectedIndex.value = 1,
+            ),
+            SidebarItem(
+              label: 'League',
+              icon: Icons.emoji_events,
+              selected: navController.selectedIndex.value == 2,
+              onTap: () => navController.selectedIndex.value = 2,
               subMenu: [
                 SubMenuItem(
                   label: 'Bracket Structure',
@@ -59,38 +62,29 @@ class LeagueAdministratorMainScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                SubMenuItem(label: 'More', selected: false, onTap: () {}),
-              ],
-            ),
-          ];
-
-          final sidebarFooterItems = [
-            SidebarItem(
-              label: 'Settings',
-              icon: Icons.settings,
-              selected: navController.selectedIndex.value == 2,
-              onTap: () => navController.selectedIndex.value = 2,
-              subMenu: [
-                SubMenuItem(label: 'About Us', onTap: () {}),
-                SubMenuItem(label: 'App Settings', onTap: () {}),
+                SubMenuItem(
+                  label: 'More',
+                  selected: false,
+                  onTap: () => navController.selectedIndex.value = 0,
+                ),
               ],
             ),
           ];
 
           return Row(
             children: [
-              if (showSidebar.value)
-                AppSidebar(
-                  sidebarItems: sidebarItems,
-                  sidebarFooterItems: sidebarFooterItems,
-                ),
+              AppSidebar(
+                sidebarItems: sidebarItems,
+                sidebarFooterItems: [],
+                isCollapsed: isCollapsed.value,
+              ),
               Expanded(
                 child: Column(
                   children: [
                     AppHeader(
-                      showSidebar: showSidebar.value,
+                      isCollapsed: isCollapsed.value,
                       onToggleSidebar: () =>
-                          showSidebar.value = !showSidebar.value,
+                          isCollapsed.value = !isCollapsed.value,
                     ),
                     Expanded(
                       child: Obx(
