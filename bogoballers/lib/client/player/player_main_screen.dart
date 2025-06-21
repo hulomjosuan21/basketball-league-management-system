@@ -1,12 +1,10 @@
 import 'package:bogoballers/client/widgets/bottom_navigation.dart';
 import 'package:bogoballers/client/widgets/navigation_controllers.dart';
 import 'package:bogoballers/core/constants/sizes.dart';
-import 'package:bogoballers/core/providers/player_provider.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import 'package:provider/provider.dart';
 
 class PlayerMainScreen extends StatelessWidget {
   const PlayerMainScreen({super.key});
@@ -15,16 +13,6 @@ class PlayerMainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(PlayerScreenNavigationController());
     final appColors = context.appColors;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final player = context.read<PlayerProvider>().getCurrentPlayer;
-
-      if (player != null) {
-        debugPrint("✅ Current player: ${player.toJson()}");
-      } else {
-        debugPrint("⚠️ No playuer set");
-      }
-    });
 
     return Scaffold(
       body: Obx(() => controller.screens[controller.selectedIndex.value]),

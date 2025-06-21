@@ -1,17 +1,17 @@
 import 'package:bogoballers/administrator/contents/bracket_structure_content.dart';
 import 'package:bogoballers/administrator/contents/dashboard_content.dart';
 import 'package:bogoballers/administrator/contents/league_content/league_content.dart';
-import 'package:bogoballers/administrator/screen/administrator_login_screen.dart';
 import 'package:bogoballers/administrator/widgets/header.dart';
 import 'package:bogoballers/administrator/widgets/sidebar.dart';
-import 'package:bogoballers/core/hive/app_box.dart';
-import 'package:bogoballers/core/providers/league_adminstrator_provider.dart';
+import 'package:bogoballers/core/models/league_administrator.dart';
+import 'package:bogoballers/core/state/entity_state.dart';
+import 'package:bogoballers/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:provider/provider.dart';
 
 class AdministratorScreenNavigationController extends GetxController {
   final Rx<int> selectedIndex = 0.obs;
+  final RxBool showSidebar = true.obs;
 
   final contents = [
     const DashboardContent(),
@@ -26,26 +26,19 @@ class LeagueAdministratorMainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final navController = Get.put(AdministratorScreenNavigationController());
-    final showSidebar = RxBool(true);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final leagueAdministrator = context
-          .read<LeagueAdministratorProvider>()
-          .getCurrentLeagueAdministrator;
+    final entity = getIt<EntityState<LeagueAdministratorModel>>().entity;
 
-      if (leagueAdministrator != null) {
-        debugPrint("✅ Current administrator: ${leagueAdministrator.toJson()}");
-      } else {
-        debugPrint("⚠️ No administrator set");
-      }
-    });
+    if (entity != null) {
+      print("Current Administrator: ${entity.toJson()}");
+    }
 
     return Scaffold(
       body: SafeArea(
         child: Obx(() {
           final screenWidth = MediaQuery.of(context).size.width;
           final isSmallScreen = screenWidth < 600;
-          showSidebar.value = !isSmallScreen;
+          navController.showSidebar.value = !isSmallScreen;
 
           final sidebarItems = [
             SidebarItem(
@@ -70,18 +63,7 @@ class LeagueAdministratorMainScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                SubMenuItem(
-                  label: 'More',
-                  selected: false,
-                  onTap: () {
-                    final provider = Provider.of<LeagueAdministratorProvider>(
-                      context,
-                      listen: false,
-                    );
-                    provider.clearCurrentAdministrator();
-                    AppBox.clearAllInBox(AppBox.accessTokenBox);
-                  },
-                ),
+                SubMenuItem(label: 'More', selected: false, onTap: () {}),
               ],
             ),
           ];
@@ -101,7 +83,7 @@ class LeagueAdministratorMainScreen extends StatelessWidget {
 
           return Row(
             children: [
-              if (showSidebar.value)
+              if (navController.showSidebar.value)
                 AppSidebar(
                   sidebarItems: sidebarItems,
                   sidebarFooterItems: sidebarFooterItems,
@@ -109,46 +91,10 @@ class LeagueAdministratorMainScreen extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [
-                    Consumer<LeagueAdministratorProvider>(
-                      builder: (context, provider, _) {
-                        if (provider.getCurrentLeagueAdministrator == null) {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            showDialog(
-                              context: context,
-                              builder: (_) => AlertDialog(
-                                title: const Text('Session Expired'),
-                                content: const Text(
-                                  'Please log in again to continue.',
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                      Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              const AdministratorLoginScreen(),
-                                        ),
-                                      );
-                                    },
-                                    child: const Text('OK'),
-                                  ),
-                                ],
-                              ),
-                            );
-                          });
-                          return const SizedBox.shrink();
-                        }
-
-                        return AppHeader(
-                          showSidebar: showSidebar.value,
-                          onToggleSidebar: () =>
-                              showSidebar.value = !showSidebar.value,
-                          leagueAdministrator:
-                              provider.getCurrentLeagueAdministrator!,
-                        );
-                      },
+                    AppHeader(
+                      showSidebar: navController.showSidebar.value,
+                      onToggleSidebar: () => navController.showSidebar.value =
+                          !navController.showSidebar.value,
                     ),
                     Expanded(
                       child: Obx(

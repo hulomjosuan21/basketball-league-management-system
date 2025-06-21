@@ -7,12 +7,10 @@ import 'package:bogoballers/core/models/player_model.dart';
 import 'package:bogoballers/core/models/user.dart';
 import 'package:bogoballers/core/network/api_response.dart';
 import 'package:bogoballers/core/network/dio_client.dart';
-import 'package:bogoballers/core/providers/league_adminstrator_provider.dart';
-import 'package:bogoballers/core/providers/player_provider.dart';
-import 'package:bogoballers/core/providers/team_creator_provider.dart';
 import 'package:bogoballers/core/routes.dart';
+import 'package:bogoballers/core/state/entity_state.dart';
+import 'package:bogoballers/service_locator.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class EntityServices<T> {
   Future<ApiResponse> login({
@@ -54,11 +52,7 @@ class EntityServices<T> {
               access_token: loginResponse.access_token!,
             );
           }
-          final playerProvider = Provider.of<PlayerProvider>(
-            context,
-            listen: false,
-          );
-          playerProvider.setCurrentPlayer(loginResponse.entity);
+          getIt<EntityState<PlayerModel>>().setEntity(loginResponse.entity);
           break;
 
         case AccountTypeEnum.TEAM_CREATOR:
@@ -73,11 +67,7 @@ class EntityServices<T> {
             );
           }
 
-          final teamCreatorrovider = Provider.of<TeamCreatorProvider>(
-            context,
-            listen: false,
-          );
-          teamCreatorrovider.setCurrentTeamCreator(loginResponse.entity);
+          getIt<EntityState<UserModel>>().setEntity(loginResponse.entity);
           break;
 
         case AccountTypeEnum.LOCAL_ADMINISTRATOR:
@@ -94,9 +84,9 @@ class EntityServices<T> {
             );
           }
 
-          final administratorProvider =
-              Provider.of<LeagueAdministratorProvider>(context, listen: false);
-          administratorProvider.setCurrentAdministrator(loginResponse.entity);
+          getIt<EntityState<LeagueAdministratorModel>>().setEntity(
+            loginResponse.entity,
+          );
           break;
 
         default:
@@ -132,20 +122,12 @@ class EntityServices<T> {
       switch (accountType) {
         case AccountTypeEnum.PLAYER:
           final player = PlayerModel.fromJson(payload['entity']);
-          final playerProvider = Provider.of<PlayerProvider>(
-            context,
-            listen: false,
-          );
-          playerProvider.setCurrentPlayer(player);
+          getIt<EntityState<PlayerModel>>().setEntity(player);
           break;
 
         case AccountTypeEnum.TEAM_CREATOR:
           final user = UserModel.fromJson(payload['entity']);
-          final teamCreatorProvider = Provider.of<TeamCreatorProvider>(
-            context,
-            listen: false,
-          );
-          teamCreatorProvider.setCurrentTeamCreator(user);
+          getIt<EntityState<UserModel>>().setEntity(user);
           break;
 
         case AccountTypeEnum.LOCAL_ADMINISTRATOR:
@@ -153,10 +135,9 @@ class EntityServices<T> {
           final administrator = LeagueAdministratorModel.fromJson(
             payload['entity'],
           );
-          final administratorProvider =
-              Provider.of<LeagueAdministratorProvider>(context, listen: false);
-          administratorProvider.setCurrentAdministrator(administrator);
-          break;
+          getIt<EntityState<LeagueAdministratorModel>>().setEntity(
+            administrator,
+          );
 
         default:
           throw Exception("Unknown account type: $accountType");

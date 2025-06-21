@@ -1,18 +1,18 @@
 import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/models/league_administrator.dart';
+import 'package:bogoballers/core/state/entity_state.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class AppHeader extends StatelessWidget {
   final bool showSidebar;
   final VoidCallback onToggleSidebar;
-  final LeagueAdministratorModel leagueAdministrator;
 
   const AppHeader({
     super.key,
     required this.showSidebar,
     required this.onToggleSidebar,
-    required this.leagueAdministrator,
   });
 
   @override
@@ -25,6 +25,7 @@ class AppHeader extends StatelessWidget {
       color: appColors.accent900,
       padding: EdgeInsets.all(Sizes.spaceXs),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           IconButton(
             icon: Icon(Icons.menu, color: appColors.accent100, size: 14),
@@ -45,7 +46,11 @@ class AppHeader extends StatelessWidget {
                   borderRadius: BorderRadius.circular(Sizes.radiusSm),
                 ),
                 child: Text(
-                  leagueAdministrator.organization_name,
+                  context
+                          .watch<EntityState<LeagueAdministratorModel>>()
+                          .entity
+                          ?.organization_name ??
+                      'No data',
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                   style: TextStyle(fontSize: 11, color: appColors.accent100),
@@ -54,7 +59,19 @@ class AppHeader extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          const SizedBox(width: 38),
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert, color: appColors.accent100, size: 14),
+            onSelected: (String value) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('Selected: $value')));
+            },
+            itemBuilder: (BuildContext context) => [
+              const PopupMenuItem(child: Text('About Organization')),
+              const PopupMenuItem(child: Text('Settings')),
+              const PopupMenuItem(child: Text('Logout')),
+            ],
+          ),
         ],
       ),
     );

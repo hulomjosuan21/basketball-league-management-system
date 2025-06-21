@@ -1,12 +1,10 @@
 import 'package:bogoballers/core/constants/sizes.dart';
-import 'package:bogoballers/core/providers/team_creator_provider.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:bogoballers/client/widgets/bottom_navigation.dart';
 import 'package:bogoballers/client/widgets/navigation_controllers.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import 'package:provider/provider.dart';
 
 class TeamCreatorMainScreen extends StatelessWidget {
   const TeamCreatorMainScreen({super.key});
@@ -15,16 +13,6 @@ class TeamCreatorMainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(TeamCreatorScreenNavigationController());
     final appColors = context.appColors;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final player = context.read<TeamCreatorProvider>().getCurrentTeamCreator;
-
-      if (player != null) {
-        debugPrint("✅ Current team creator: ${player.toJson()}");
-      } else {
-        debugPrint("⚠️ No team creator set");
-      }
-    });
 
     return Scaffold(
       body: Obx(() => controller.screens[controller.selectedIndex.value]),

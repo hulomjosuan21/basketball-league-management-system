@@ -1,13 +1,15 @@
 import 'package:bogoballers/administrator/administrator_app.dart';
 import 'package:bogoballers/client/client_app.dart';
+import 'package:bogoballers/core/state/entity_state.dart';
 import 'package:bogoballers/core/enums/user_enum.dart';
 import 'package:bogoballers/core/helpers/supabase_helpers.dart';
 import 'package:bogoballers/core/hive/app_box.dart';
 import 'package:bogoballers/core/models/access_token.dart';
-import 'package:bogoballers/core/providers/league_adminstrator_provider.dart';
-import 'package:bogoballers/core/providers/player_provider.dart';
-import 'package:bogoballers/core/providers/team_creator_provider.dart';
+import 'package:bogoballers/core/models/league_administrator.dart';
+import 'package:bogoballers/core/models/player_model.dart';
+import 'package:bogoballers/core/models/user.dart';
 import 'package:bogoballers/core/services/notification_services.dart';
+import 'package:bogoballers/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -19,7 +21,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
-/// 15/06/2025
 Future<void> main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
@@ -31,6 +32,8 @@ Future<void> main() async {
       statusBarBrightness: Brightness.light,
     ),
   );
+
+  setupLocator();
 
   try {
     await dotenv.load(fileName: ".env");
@@ -57,13 +60,17 @@ Future<void> main() async {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
-      await NotificationService.instance.initialize(); // returns fcm token
+      await NotificationService.instance.initialize();
 
       runApp(
         MultiProvider(
           providers: [
-            ChangeNotifierProvider(create: (_) => TeamCreatorProvider()),
-            ChangeNotifierProvider(create: (_) => PlayerProvider()),
+            ChangeNotifierProvider(
+              create: (_) => getIt<EntityState<PlayerModel>>(),
+            ),
+            ChangeNotifierProvider(
+              create: (_) => getIt<EntityState<UserModel>>(),
+            ),
           ],
           child: ClientMaterialScreen(
             user_id: user_id,
@@ -76,7 +83,7 @@ Future<void> main() async {
         MultiProvider(
           providers: [
             ChangeNotifierProvider(
-              create: (_) => LeagueAdministratorProvider(),
+              create: (_) => getIt<EntityState<LeagueAdministratorModel>>(),
             ),
           ],
           child: AdministratorMaterialScreen(

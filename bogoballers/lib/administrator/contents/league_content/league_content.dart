@@ -6,17 +6,17 @@ import 'package:bogoballers/core/components/labeled_text.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
 import 'package:bogoballers/core/components/text_field.dart';
 import 'package:bogoballers/core/enums/league_status_enum.dart';
+import 'package:bogoballers/core/models/league_administrator.dart';
 import 'package:bogoballers/core/models/league_model.dart';
-import 'package:bogoballers/core/providers/league_adminstrator_provider.dart';
 import 'package:bogoballers/core/services/league_services.dart';
-import 'package:bogoballers/core/theme/datime_picker.dart';
+import 'package:bogoballers/core/state/entity_state.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:bogoballers/core/utils/league_utils.dart';
 import 'package:bogoballers/core/validations/auth_validations.dart';
+import 'package:bogoballers/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 
 class LeagueContent extends StatefulWidget {
   const LeagueContent({super.key});
@@ -218,11 +218,8 @@ class _CreateLeagueState extends State<CreateLeague> {
       if (confirm != true) return;
       if (!mounted) return;
 
-      final adminProvider = Provider.of<LeagueAdministratorProvider>(
-        context,
-        listen: false,
-      );
-      final currentAdmin = adminProvider.getCurrentLeagueAdministrator;
+      final currentAdmin =
+          getIt<EntityState<LeagueAdministratorModel>>().entity;
 
       if (currentAdmin == null) return;
 
