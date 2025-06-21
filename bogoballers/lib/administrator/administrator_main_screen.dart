@@ -1,6 +1,6 @@
 import 'package:bogoballers/administrator/screen/administrator_analytics_screen.dart';
 import 'package:bogoballers/administrator/screen/bracket_structure_content.dart';
-import 'package:bogoballers/administrator/screen/dashboard_content.dart';
+import 'package:bogoballers/administrator/screen/dashboard.dart';
 import 'package:bogoballers/administrator/screen/league_content/league_content.dart';
 import 'package:bogoballers/administrator/widgets/header.dart';
 import 'package:bogoballers/administrator/widgets/sidebar.dart';
@@ -11,7 +11,7 @@ class AdministratorScreenNavigationController extends GetxController {
   final Rx<int> selectedIndex = 0.obs;
 
   final contents = [
-    const DashboardContent(),
+    const AdministratorDashboard(),
     const AdministratorAnalytics(),
     LeagueContent(),
     const Center(child: Text('Account Page')),
