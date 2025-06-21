@@ -6,6 +6,7 @@ import 'package:bogoballers/core/components/labeled_text.dart';
 import 'package:bogoballers/core/components/snackbars.dart';
 import 'package:bogoballers/core/components/text_field.dart';
 import 'package:bogoballers/core/enums/league_status_enum.dart';
+import 'package:bogoballers/core/enums/user_enum.dart';
 import 'package:bogoballers/core/models/league_administrator.dart';
 import 'package:bogoballers/core/models/league_model.dart';
 import 'package:bogoballers/core/services/league_services.dart';
@@ -220,7 +221,8 @@ class _CreateLeagueState extends State<CreateLeague> {
       final currentAdmin =
           getIt<EntityState<LeagueAdministratorModel>>().entity;
 
-      if (currentAdmin == null) return;
+      if (currentAdmin == null)
+        throw EntityNotFound(AccountTypeEnum.LGU_ADMINISTRATOR);
 
       List<LeagueCategoryModel> categories = [];
 
@@ -261,6 +263,17 @@ class _CreateLeagueState extends State<CreateLeague> {
           title: "Success",
           variant: SnackbarVariant.success,
         );
+      }
+    } on EntityNotFound catch (e) {
+      if (context.mounted) {
+        showAppSnackbar(
+          context,
+          message: e.toString(),
+          title: "Error",
+          variant: SnackbarVariant.error,
+        );
+
+        Navigator.pushReplacementNamed(context, '/administrator/login/sreen');
       }
     } catch (e) {
       if (context.mounted) {

@@ -45,6 +45,8 @@ Widget fullScreenRetryError(
             Text(
               error.toString(),
               style: TextStyle(fontSize: 18, color: context.appColors.gray1100),
+              overflow: TextOverflow.fade,
+              maxLines: 4,
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 20),
@@ -52,6 +54,8 @@ Widget fullScreenRetryError(
               onPressed: callback,
               icon: Icon(Icons.refresh),
               label: 'Retry',
+              size: ButtonSize.sm,
+              variant: ButtonVariant.ghost,
             ),
           ],
         ),

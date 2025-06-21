@@ -58,12 +58,26 @@ class _AdministratorDashboardState extends State<AdministratorDashboard> {
                     (0.5 * 255).toInt(),
                   ),
                 ),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: IconButton(
+                      onPressed: () {},
+                      icon: Icon(
+                        Icons.edit_square,
+                        color: context.appColors.gray400,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ),
                 Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        admin?.organization_name ?? 'Test Organization',
+                        admin?.organization_name ?? 'No data',
                         style: TextStyle(
                           color: context.appColors.gray100,
                           fontSize: Sizes.fontSize4Xl,
@@ -71,8 +85,7 @@ class _AdministratorDashboardState extends State<AdministratorDashboard> {
                         ),
                       ),
                       Text(
-                        admin?.organization_address ??
-                            'Brgy. Dakit, Bogo City, Cebu',
+                        admin?.organization_address ?? 'No data',
                         style: TextStyle(
                           color: context.appColors.gray100,
                           fontSize: Sizes.fontSizeSm,
@@ -110,7 +123,8 @@ class _AdministratorDashboardState extends State<AdministratorDashboard> {
                     scrollDirection: Axis.horizontal,
                     itemCount: 3,
                     shrinkWrap: true,
-                    itemBuilder: (_, index) => _buildLearnMoreCards(),
+                    itemBuilder: (_, index) =>
+                        _buildLearnMoreCards(action: () {}),
                   ),
                 ),
               ),
@@ -121,7 +135,10 @@ class _AdministratorDashboardState extends State<AdministratorDashboard> {
     );
   }
 
-  Padding _buildLearnMoreCards() {
+  Padding _buildLearnMoreCards({
+    String text = "No data",
+    required VoidCallback action,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Container(
@@ -144,11 +161,10 @@ class _AdministratorDashboardState extends State<AdministratorDashboard> {
                     alignment: Alignment.centerLeft,
                     child: Opacity(
                       opacity: 0.2,
-                      child: Image.asset(
-                        ImageStrings.appLogoGray,
-                        width: 120,
-                        height: 120,
-                        fit: BoxFit.cover,
+                      child: Icon(
+                        Icons.sports_basketball,
+                        color: context.appColors.gray100,
+                        size: 120,
                       ),
                     ),
                   ),
@@ -156,6 +172,11 @@ class _AdministratorDashboardState extends State<AdministratorDashboard> {
                     child: CircleAvatar(
                       radius: 40,
                       backgroundColor: context.appColors.gray400,
+                      child: Icon(
+                        Icons.abc_sharp,
+                        size: 54,
+                        color: context.appColors.accent900,
+                      ),
                     ),
                   ),
                 ],
@@ -163,7 +184,7 @@ class _AdministratorDashboardState extends State<AdministratorDashboard> {
             ),
             SizedBox(height: 8),
             Text(
-              'Leagues',
+              text,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: Sizes.fontSizeMd,
@@ -177,7 +198,7 @@ class _AdministratorDashboardState extends State<AdministratorDashboard> {
               padding: const EdgeInsets.all(8.0),
               child: AppButton(
                 label: "Learn More",
-                onPressed: () {},
+                onPressed: action,
                 size: ButtonSize.sm,
               ),
             ),

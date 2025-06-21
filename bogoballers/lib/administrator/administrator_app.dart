@@ -7,6 +7,7 @@ import 'package:bogoballers/core/services/entity_services.dart';
 import 'package:bogoballers/core/theme/theme.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
+import 'package:bogoballers/main.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 
@@ -93,6 +94,7 @@ class _AdministratorMaterialScreenState
     return MaterialApp(
       title: 'BogoBallers',
       theme: lightTheme(context),
+      navigatorKey: navigatorKey,
       routes: appRoutes,
       debugShowCheckedModeBanner: false,
       home: FutureBuilder<bool>(

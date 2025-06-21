@@ -1,8 +1,33 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:bogoballers/core/enums/user_enum.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+
+class EntityNotFound implements Exception {
+  final String message;
+
+  EntityNotFound(AccountTypeEnum accountType)
+    : message = _resolveMessage(accountType);
+
+  static String _resolveMessage(AccountTypeEnum accountType) {
+    switch (accountType) {
+      case AccountTypeEnum.LOCAL_ADMINISTRATOR:
+      case AccountTypeEnum.LGU_ADMINISTRATOR:
+        return 'Administrator not found.';
+      case AccountTypeEnum.PLAYER:
+        return 'User not found.';
+      case AccountTypeEnum.TEAM_CREATOR:
+        return 'User not found.';
+      default:
+        return 'Entity not found.';
+    }
+  }
+
+  @override
+  String toString() => 'EntityNotFound: $message';
+}
 
 class ValidationException implements Exception {
   final String message;

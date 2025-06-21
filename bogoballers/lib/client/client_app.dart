@@ -8,6 +8,7 @@ import 'package:bogoballers/core/services/entity_services.dart';
 import 'package:bogoballers/core/theme/theme.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
+import 'package:bogoballers/main.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -89,6 +90,7 @@ class _ClientMaterialScreenState extends State<ClientMaterialScreen> {
 
     return MaterialApp(
       title: 'BogoBallers',
+      navigatorKey: navigatorKey,
       theme: lightTheme(context),
       routes: appRoutes,
       debugShowCheckedModeBanner: false,
