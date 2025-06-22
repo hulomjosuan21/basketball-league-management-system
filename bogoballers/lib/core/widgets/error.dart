@@ -1,4 +1,4 @@
-import 'package:bogoballers/core/components/app_button.dart';
+import 'package:bogoballers/core/widgets/app_button.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 

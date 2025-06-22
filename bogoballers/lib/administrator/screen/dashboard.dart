@@ -1,4 +1,4 @@
-import 'package:bogoballers/core/components/app_button.dart';
+import 'package:bogoballers/core/widgets/app_button.dart';
 import 'package:bogoballers/core/constants/image_strings.dart';
 import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/models/league_administrator.dart';

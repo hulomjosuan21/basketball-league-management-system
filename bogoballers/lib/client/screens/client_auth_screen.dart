@@ -1,7 +1,7 @@
 import 'package:bogoballers/client/screens/client_login_screen.dart';
 import 'package:bogoballers/client/screens/player_register_screen.dart';
 import 'package:bogoballers/client/screens/team_creator_register_screen.dart';
-import 'package:bogoballers/core/components/auth_navigator.dart';
+import 'package:bogoballers/core/widgets/auth_navigator.dart';
 import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';

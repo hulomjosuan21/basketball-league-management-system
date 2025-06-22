@@ -49,7 +49,7 @@ class TeamCreatorMainScreen extends StatelessWidget {
             ),
             NavigationDestinationItem(
               icon: Iconsax.people,
-              label: "Team",
+              label: "Teams",
               index: 1,
               selectedIndex: controller.selectedIndex,
             ),

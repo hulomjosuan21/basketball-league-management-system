@@ -66,7 +66,9 @@ Future<void> main() async {
       await NotificationService.instance.initialize();
     }
 
-    final List<ChangeNotifierProvider> providers = [];
+    final List<ChangeNotifierProvider> providers = [
+      ChangeNotifierProvider<AppState>.value(value: getIt<AppState>()),
+    ];
 
     if (kIsWeb || Platform.isIOS || Platform.isAndroid) {
       providers.addAll([
@@ -82,7 +84,6 @@ Future<void> main() async {
         ChangeNotifierProvider<EntityState<LeagueAdministratorModel>>.value(
           value: getIt<EntityState<LeagueAdministratorModel>>(),
         ),
-        ChangeNotifierProvider<AppState>.value(value: getIt<AppState>()),
       ]);
     }
 

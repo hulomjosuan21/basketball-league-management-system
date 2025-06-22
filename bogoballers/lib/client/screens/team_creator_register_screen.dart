@@ -1,7 +1,7 @@
-import 'package:bogoballers/core/components/phone_number_input.dart';
-import 'package:bogoballers/core/components/app_button.dart';
-import 'package:bogoballers/core/components/password_field.dart';
-import 'package:bogoballers/core/components/snackbars.dart';
+import 'package:bogoballers/core/widgets/phone_number_input.dart';
+import 'package:bogoballers/core/widgets/app_button.dart';
+import 'package:bogoballers/core/widgets/password_field.dart';
+import 'package:bogoballers/core/widgets/snackbars.dart';
 import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/enums/user_enum.dart';
 import 'package:bogoballers/core/models/user.dart';

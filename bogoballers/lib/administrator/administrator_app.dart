@@ -1,6 +1,6 @@
 import 'package:bogoballers/administrator/administrator_main_screen.dart';
 import 'package:bogoballers/administrator/screen/administrator_login_screen.dart';
-import 'package:bogoballers/core/components/error.dart';
+import 'package:bogoballers/core/widgets/error.dart';
 import 'package:bogoballers/core/enums/user_enum.dart';
 import 'package:bogoballers/core/routes.dart';
 import 'package:bogoballers/core/services/entity_services.dart';
