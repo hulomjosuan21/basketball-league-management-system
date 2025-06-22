@@ -87,6 +87,7 @@ class _ClientMaterialScreenState extends State<ClientMaterialScreen> {
   Widget build(BuildContext context) {
     debugPrint("User ID: ${widget.user_id ?? "None"}");
     debugPrint("Account Type: ${widget.accountType?.value ?? "None"}");
+    // Josuan
 
     return MaterialApp(
       title: 'BogoBallers',
