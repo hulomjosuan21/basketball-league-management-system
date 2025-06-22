@@ -101,6 +101,9 @@ class TeamModel(db.Model):
     total_wins = db.Column(db.Integer, default=0, nullable=False)
     total_losses = db.Column(db.Integer, default=0, nullable=False)
 
+    is_recruiting = db.Column(db.Boolean, nullable=False, default=False)
+
+
     team_captain_id = db.Column(
         db.String,
         db.ForeignKey('player_team_table.player_team_id', use_alter=True, name='fk_team_captain_id', deferrable=True),
@@ -133,6 +136,7 @@ class TeamModel(db.Model):
             "assistant_coach_name": self.assistant_coach_name if self.assistant_coach_name else None,
             "team_captain": team_captain,
             "players": players,
+            "is_recruiting": self.is_recruiting,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
         }

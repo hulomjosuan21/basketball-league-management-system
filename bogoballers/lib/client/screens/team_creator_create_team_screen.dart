@@ -1,7 +1,10 @@
-import 'package:bogoballers/core/components/phone_number_input.dart';
-import 'package:bogoballers/core/components/app_button.dart';
-import 'package:bogoballers/core/components/image_picker.dart';
-import 'package:bogoballers/core/components/snackbars.dart';
+import 'package:bogoballers/core/enums/user_enum.dart';
+import 'package:bogoballers/core/models/user.dart';
+import 'package:bogoballers/core/state/entity_state.dart';
+import 'package:bogoballers/core/widgets/phone_number_input.dart';
+import 'package:bogoballers/core/widgets/app_button.dart';
+import 'package:bogoballers/core/widgets/image_picker.dart';
+import 'package:bogoballers/core/widgets/snackbars.dart';
 import 'package:bogoballers/core/constants/image_strings.dart';
 import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/models/team_model.dart';
@@ -10,6 +13,7 @@ import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:bogoballers/core/utils/terms.dart';
 import 'package:bogoballers/core/validations/validators.dart';
+import 'package:bogoballers/service_locator.dart';
 import 'package:flutter/material.dart';
 
 class TeamCreatorCreateTeamScreen extends StatefulWidget {
@@ -46,6 +50,12 @@ class _TeamCreatorCreateTeamScreenState
       isCreating = true;
     });
     try {
+      final teamCreator = getIt<EntityState<UserModel>>().entity;
+
+      if (teamCreator == null) {
+        throw EntityNotFound(AccountTypeEnum.TEAM_CREATOR);
+      }
+
       validateCreateTeamFields(
         teamNameController: teamNameController,
         teamAddressController: teamAddressController,
@@ -56,15 +66,13 @@ class _TeamCreatorCreateTeamScreenState
         assistantCoachNameController: teamAssistantCoachController,
       );
 
-      String testUserId = "user-02f28a11-cd42-4e6c-b753-2f493d88cbb6";
-
       final multipartFile = logoController.multipartFile;
       if (multipartFile == null) {
         throw ValidationException("Please select a team logo!");
       }
 
       final team = TeamModel.create(
-        user_id: testUserId,
+        user_id: teamCreator.user_id,
         team_name: teamNameController.text,
         team_address: teamAddressController.text,
         contact_number: phoneNumber!,
@@ -84,6 +92,17 @@ class _TeamCreatorCreateTeamScreenState
           title: "Success",
           variant: SnackbarVariant.success,
         );
+      }
+    } on EntityNotFound catch (e) {
+      if (context.mounted) {
+        showAppSnackbar(
+          context,
+          message: e.toString(),
+          title: "Error",
+          variant: SnackbarVariant.error,
+        );
+
+        Navigator.pushReplacementNamed(context, '/client/login');
       }
     } catch (e) {
       if (context.mounted) {

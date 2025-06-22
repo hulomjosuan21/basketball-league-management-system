@@ -2,7 +2,7 @@ import 'dart:typed_data';
 import 'dart:io';
 import 'dart:ui' as ui;
 
-import 'package:bogoballers/core/components/app_button.dart';
+import 'package:bogoballers/core/widgets/app_button.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:file_picker/file_picker.dart';

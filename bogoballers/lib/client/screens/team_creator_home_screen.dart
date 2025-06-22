@@ -1,4 +1,4 @@
-import 'package:bogoballers/core/components/index.dart';
+import 'package:bogoballers/core/widgets/index.dart';
 import 'package:bogoballers/core/helpers/logout.dart';
 import 'package:flutter/material.dart';
 

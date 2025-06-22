@@ -1,7 +1,7 @@
 import 'package:bogoballers/client/player/player_main_screen.dart';
 import 'package:bogoballers/client/screens/client_login_screen.dart';
 import 'package:bogoballers/client/team_creator/team_creator_main_screen.dart';
-import 'package:bogoballers/core/components/error.dart';
+import 'package:bogoballers/core/widgets/error.dart';
 import 'package:bogoballers/core/enums/user_enum.dart';
 import 'package:bogoballers/core/routes.dart';
 import 'package:bogoballers/core/services/entity_services.dart';
@@ -87,6 +87,7 @@ class _ClientMaterialScreenState extends State<ClientMaterialScreen> {
   Widget build(BuildContext context) {
     debugPrint("User ID: ${widget.user_id ?? "None"}");
     debugPrint("Account Type: ${widget.accountType?.value ?? "None"}");
+    // Josuan
 
     return MaterialApp(
       title: 'BogoBallers',

@@ -16,6 +16,7 @@ class TeamModel {
   String? team_captain_id;
   late DateTime created_at;
   late DateTime updated_at;
+  late bool is_recruiting;
 
   TeamModel({
     required this.team_id,
@@ -31,6 +32,7 @@ class TeamModel {
     required this.team_captain_id,
     required this.created_at,
     required this.updated_at,
+    required this.is_recruiting,
   });
 
   TeamModel.create({

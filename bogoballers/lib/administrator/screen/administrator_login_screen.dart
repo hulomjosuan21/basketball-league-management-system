@@ -1,8 +1,8 @@
 import 'package:bogoballers/client/widgets/sliding_announcement.dart';
-import 'package:bogoballers/core/components/app_button.dart';
-import 'package:bogoballers/core/components/auth_navigator.dart';
-import 'package:bogoballers/core/components/password_field.dart';
-import 'package:bogoballers/core/components/snackbars.dart';
+import 'package:bogoballers/core/widgets/app_button.dart';
+import 'package:bogoballers/core/widgets/auth_navigator.dart';
+import 'package:bogoballers/core/widgets/password_field.dart';
+import 'package:bogoballers/core/widgets/snackbars.dart';
 import 'package:bogoballers/core/constants/image_strings.dart';
 import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/models/user.dart';

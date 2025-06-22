@@ -8,8 +8,9 @@ class DioClient {
     : _dio = Dio(
         BaseOptions(
           baseUrl: dotenv.env['API_BASE_URL'] ?? 'http://localhost:5000',
-          // connectTimeout: const Duration(seconds: 2),
-          // receiveTimeout: const Duration(seconds: 2),
+          connectTimeout: const Duration(seconds: 5),
+          receiveTimeout: const Duration(minutes: 10),
+          sendTimeout: const Duration(minutes: 5),
         ),
       ) {
     _dio.interceptors.add(

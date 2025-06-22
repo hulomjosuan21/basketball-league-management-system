@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:bogoballers/core/components/app_button.dart';
-import 'package:bogoballers/core/components/image_picker.dart';
-import 'package:bogoballers/core/components/labeled_text.dart';
-import 'package:bogoballers/core/components/snackbars.dart';
-import 'package:bogoballers/core/components/text_field.dart';
+import 'package:bogoballers/core/widgets/app_button.dart';
+import 'package:bogoballers/core/widgets/image_picker.dart';
+import 'package:bogoballers/core/widgets/labeled_text.dart';
+import 'package:bogoballers/core/widgets/snackbars.dart';
+import 'package:bogoballers/core/widgets/text_field.dart';
 import 'package:bogoballers/core/enums/league_status_enum.dart';
 import 'package:bogoballers/core/enums/user_enum.dart';
 import 'package:bogoballers/core/models/league_administrator.dart';
