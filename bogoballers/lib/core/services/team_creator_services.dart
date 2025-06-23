@@ -18,13 +18,16 @@ class TeamCreatorServices {
     return apiResponse;
   }
 
-  Future<ApiResponse> createNewTeam(TeamModel team) async {
+  Future<ApiResponse<TeamModel>> createNewTeam(TeamModel team) async {
     final api = DioClient().client;
     Response response = await api.post(
-      '/team/create-new',
+      '/team/new',
       data: team.toFormDataForCreation(),
     );
-    final apiResponse = ApiResponse.fromJsonNoPayload(response.data);
+    final apiResponse = await ApiResponse<TeamModel>.fromJson(
+      response.data,
+      (data) => TeamModel.fromJson(data),
+    );
     return apiResponse;
   }
 }

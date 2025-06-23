@@ -1,6 +1,7 @@
 from src.utils.db_utils import CreatedAt, UUIDGenerator, UpdatedAt
 from src.extensions import db
 from datetime import datetime
+from copy import deepcopy
 
 class LeagueModel(db.Model):
     __tablename__ = 'leagues_table'
@@ -52,10 +53,24 @@ class LeagueModel(db.Model):
 
     payments = db.relationship('PaymentModel', back_populates='league', cascade="all, delete-orphan")
 
-    def copy_with(self, **kwargs):
+
+    def copy_with(self, *, skip_none=True, strict_types=False, **kwargs):
         for key, value in kwargs.items():
-            if value is not None and hasattr(self, key):
-                setattr(self, key, value)
+            if not hasattr(self, key):
+                raise AttributeError(f"[LeagueModel] No attribute named '{key}'")
+
+            # Skip None values if requested
+            if skip_none and value is None:
+                continue
+
+            current_value = getattr(self, key)
+
+            if strict_types and value is not None and current_value is not None:
+                if not isinstance(value, type(current_value)):
+                    raise TypeError(f"[LeagueModel] Field '{key}' must be of type {type(current_value).__name__}, got {type(value).__name__}")
+
+            safe_value = deepcopy(value) if isinstance(value, (dict, list)) else value
+            setattr(self, key, safe_value)
 
     def to_json(self) -> dict:
         return {

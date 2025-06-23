@@ -1,13 +1,34 @@
 import 'package:bogoballers/client/screens/team_creator_create_team_screen.dart';
 import 'package:bogoballers/core/constants/image_strings.dart';
 import 'package:bogoballers/core/constants/sizes.dart';
+import 'package:bogoballers/core/state/team_provider.dart';
 import 'package:bogoballers/core/theme/colors.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/widgets/flexible_network_image.dart';
+import 'package:bogoballers/service_locator.dart';
 import 'package:flutter/material.dart';
 
-class TeamCreatorTeamListScreen extends StatelessWidget {
+class TeamCreatorTeamListScreen extends StatefulWidget {
   const TeamCreatorTeamListScreen({super.key});
+
+  @override
+  State<TeamCreatorTeamListScreen> createState() =>
+      _TeamCreatorTeamListScreenState();
+}
+
+class _TeamCreatorTeamListScreenState extends State<TeamCreatorTeamListScreen> {
+  @override
+  initState() {
+    super.initState();
+    checkTeams();
+  }
+
+  void checkTeams() {
+    final teams = getIt<TeamProvider>().teams;
+    teams.forEach((team) {
+      print("Teams: ${team.toMap()}");
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
