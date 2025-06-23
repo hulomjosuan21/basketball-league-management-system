@@ -7,9 +7,9 @@ import 'package:bogoballers/client/team_creator/team_creator_main_screen.dart';
 import 'package:flutter/material.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
-  '/client/login': (context) => ClientLoginScreen(),
-  '/team-creator/home': (context) => TeamCreatorMainScreen(),
-  '/player/home': (context) => PlayerMainScreen(),
+  '/client/login/screen': (context) => ClientLoginScreen(),
+  '/team-creator/home/screen': (context) => TeamCreatorMainScreen(),
+  '/player/home/screen': (context) => PlayerMainScreen(),
   '/administrator/login/sreen': (context) => AdministratorLoginScreen(),
   '/administrator/main/screen': (context) => LeagueAdministratorMainScreen(),
   '/administrator/register/screen': (context) => AdministratorRegisterScreen(),

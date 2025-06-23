@@ -136,7 +136,9 @@ class TeamModel(db.Model):
             "assistant_coach_name": self.assistant_coach_name if self.assistant_coach_name else None,
             "team_captain": team_captain,
             "players": players,
+            "total_wins": self.total_wins,
             "is_recruiting": self.is_recruiting,
+            "total_losses": self.total_losses,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
         }

@@ -101,7 +101,7 @@ class EntityControllers:
 
             message = "A verification link has been sent to your email. Please verify your account before logging in."
             
-            return ApiResponse.success(redirect="/client/login",message=message,status_code=201)
+            return ApiResponse.success(redirect="/client/login/screen",message=message,status_code=201)
         except Exception as e:
             db.session.rollback()
             return ApiResponse.error(e)
@@ -177,10 +177,10 @@ class EntityControllers:
             match account_type:
                 case AccountTypeEnum.PLAYER.value:
                     entity = PlayerModel.query.filter_by(user_id=user.user_id).first()
-                    redirect = '/player/home'
+                    redirect = '/player/home/screen'
                 case AccountTypeEnum.TEAM_CREATOR.value:
                     entity = user
-                    redirect = '/team-creator/home'
+                    redirect = '/team-creator/home/screen'
                 case AccountTypeEnum.LOCAL_ADMINISTRATOR.value | AccountTypeEnum.LGU_ADMINISTRATOR.value:
                     entity = LeagueAdministratorModel.query.filter_by(user_id=user.user_id).first()
                     redirect = '/administrator/main/screen'

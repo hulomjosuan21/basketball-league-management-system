@@ -11,6 +11,11 @@ class TeamCreatorHomeScreen extends StatefulWidget {
 
 class _TeamCreatorHomeScreenState extends State<TeamCreatorHomeScreen> {
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(

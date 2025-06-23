@@ -5,13 +5,25 @@ from src.models.team_model import TeamModel, PlayerTeamModel
 from src.utils.file_utils import save_file
 
 class TeamControllers:
-    async def get_team(self, team_id):
+    def get_team_by_team_id(self, team_id):
         try:
             team = TeamModel.query.filter(TeamModel.team_id == team_id).first()
             payload = team.to_json()
             return ApiResponse.success(payload=payload)
         except Exception as e:
             return ApiResponse.error(str(e))
+        
+    def get_teams_by_user_id(self, user_id: str):
+        try:
+            teams = TeamModel.query.filter(TeamModel.user_id == user_id).all()
+            if not teams:
+                return ApiResponse.success(message="No teams found.", payload=[])
+            
+            payload = [team.to_json() for team in teams]
+            return ApiResponse.success(payload=payload)
+        except Exception as e:
+            return ApiResponse.error(f"Error fetching teams for user {user_id}: {str(e)}")
+
         
     async def create_team(self):
         try:
@@ -43,21 +55,21 @@ class TeamControllers:
 
             db.session.add(team)
             db.session.commit()
-
-            return ApiResponse.success(message=f"New Team Created: {team_name}")
+            payload = team.to_json()
+            return ApiResponse.success(message=f"New Team Created: {team_name}",payload=payload)
         except Exception as e:
             db.session.rollback()
             return ApiResponse.error(str(e))
         
-    def set_team_captain(self, team_id):
+    def set_team_captain(self, player_team_id):
         try:
             data = request.get_json()
             team_captain_id = data.get('team_captain_id')
 
-            if not all([team_id, team_captain_id]):
+            if not all([player_team_id, team_captain_id]):
                 raise ValueError("All fields must be provided and not empty.")
 
-            team = TeamModel.query.get(team_id)
+            team = TeamModel.query.get(player_team_id)
             team.team_captain_id = team_captain_id
 
             db.session.commit()
