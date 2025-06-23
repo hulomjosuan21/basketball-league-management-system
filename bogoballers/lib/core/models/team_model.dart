@@ -150,6 +150,8 @@ class TeamModel {
     this.players = const [],
   });
 
+  get imageUrl => null;
+
   FormData toFormDataForCreation() {
     final formMap = {
       'user_id': user_id,

@@ -1,3 +1,4 @@
+import 'package:bogoballers/core/constants/custom_icons.dart';
 import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
@@ -42,13 +43,13 @@ class TeamCreatorMainScreen extends StatelessWidget {
           }),
           destinations: [
             NavigationDestinationItem(
-              icon: Iconsax.home,
+              icon: CustomIcon.leauge,
               label: "Home",
               index: 0,
               selectedIndex: controller.selectedIndex,
             ),
             NavigationDestinationItem(
-              icon: Iconsax.people,
+              icon: CustomIcon.basketballTeam,
               label: "Teams",
               index: 1,
               selectedIndex: controller.selectedIndex,
