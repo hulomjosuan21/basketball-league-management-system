@@ -1,6 +1,9 @@
 import 'package:bogoballers/client/player/player_main_screen.dart';
 import 'package:bogoballers/client/screens/client_login_screen.dart';
+import 'package:bogoballers/client/screens/notification_screen.dart';
 import 'package:bogoballers/client/team_creator/team_creator_main_screen.dart';
+import 'package:bogoballers/core/helpers/fcm_token_handler.dart';
+import 'package:bogoballers/core/socket_controller.dart';
 import 'package:bogoballers/core/widgets/error.dart';
 import 'package:bogoballers/core/enums/user_enum.dart';
 import 'package:bogoballers/core/routes.dart';
@@ -33,6 +36,17 @@ class _ClientMaterialScreenState extends State<ClientMaterialScreen> {
   void initState() {
     super.initState();
     _checkLoginFuture = checkIfUserIsLoggedInAsync();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (widget.user_id != null) {
+        try {
+          await FCMTokenHandler.syncToken(widget.user_id!);
+        } catch (e, stackTrace) {
+          debugPrintStack(stackTrace: stackTrace);
+        }
+      } else {
+        debugPrint("⚠️ Skipped FCM token sync: no user ID");
+      }
+    });
   }
 
   Future<bool> checkIfUserIsLoggedInAsync() async {
@@ -60,6 +74,13 @@ class _ClientMaterialScreenState extends State<ClientMaterialScreen> {
     final accountType = widget.accountType;
 
     if (userId != null && accountType != null) {
+      try {
+        SocketService().init(userId: userId);
+      } catch (e) {
+        debugPrint("🧨 Socket init failed: $e");
+        return const ClientLoginScreen();
+      }
+
       switch (accountType) {
         case AccountTypeEnum.PLAYER:
           return const PlayerMainScreen();
@@ -88,6 +109,8 @@ class _ClientMaterialScreenState extends State<ClientMaterialScreen> {
     debugPrint("User ID: ${widget.user_id ?? "None"}");
     debugPrint("Account Type: ${widget.accountType?.value ?? "None"}");
     // Josuan
+
+    // return MaterialApp(home: NotificationScreen());
 
     return MaterialApp(
       title: 'BogoBallers',

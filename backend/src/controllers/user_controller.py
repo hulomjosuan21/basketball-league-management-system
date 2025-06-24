@@ -1,5 +1,5 @@
 from src.models.user_model import UserModel
-from flask import make_response
+from flask import request
 from src.utils.api_response import ApiResponse
 from src.utils.html_template import email_html_template
 from src.extensions import db
@@ -32,3 +32,20 @@ class UserControllers:
             return ApiResponse.html(
                 template=email_html_template("Error Occurred","✕ Something went wrong!",'error'), status_code=500
             )
+        
+    def set_fcm_token(self, user_id):
+        try:
+            data = request.get_json()
+            token = data.get('token', None)
+            if not user_id:
+                raise ValueError("Missing user credentials")
+            
+            user = UserModel.query.get(user_id)
+
+            user.fcm_token = token
+
+            db.session.commit()
+
+            return ApiResponse.success(message="Supabase initialized successfully!")
+        except Exception as e:
+            return ApiResponse.error(str(e))

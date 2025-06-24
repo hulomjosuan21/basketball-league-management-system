@@ -13,7 +13,7 @@ import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:bogoballers/core/widgets/app_button.dart';
 import 'package:bogoballers/core/widgets/flexible_network_image.dart';
 import 'package:bogoballers/core/widgets/snackbars.dart';
-import 'package:bogoballers/service_locator.dart';
+import 'package:bogoballers/core/service_locator.dart';
 import 'package:flutter/material.dart';
 
 class TeamCreatorTeamListScreen extends StatefulWidget {

@@ -11,7 +11,7 @@ import 'package:bogoballers/core/models/player_model.dart';
 import 'package:bogoballers/core/models/user.dart';
 import 'package:bogoballers/core/services/notification_services.dart';
 import 'package:bogoballers/core/state/team_provider.dart';
-import 'package:bogoballers/service_locator.dart';
+import 'package:bogoballers/core/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';

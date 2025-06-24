@@ -1,3 +1,4 @@
+import 'package:bogoballers/client/screens/notification_screen.dart';
 import 'package:bogoballers/client/screens/player_home_screen.dart';
 import 'package:bogoballers/client/screens/player_profile_screen.dart';
 import 'package:bogoballers/client/screens/team_creator_home_screen.dart';
@@ -19,5 +20,9 @@ class PlayerScreenNavigationController extends GetxController {
 class TeamCreatorScreenNavigationController extends GetxController {
   final Rx<int> selectedIndex = 0.obs;
 
-  final screens = [TeamCreatorHomeScreen(), TeamCreatorTeamListScreen()];
+  final screens = [
+    TeamCreatorHomeScreen(),
+    TeamCreatorTeamListScreen(),
+    NotificationScreen(),
+  ];
 }

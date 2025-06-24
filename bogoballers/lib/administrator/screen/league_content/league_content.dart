@@ -15,7 +15,7 @@ import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:bogoballers/core/utils/league_utils.dart';
 import 'package:bogoballers/core/validations/auth_validations.dart';
-import 'package:bogoballers/service_locator.dart';
+import 'package:bogoballers/core/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

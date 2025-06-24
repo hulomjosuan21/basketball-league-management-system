@@ -7,7 +7,7 @@ import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/widgets/app_button.dart';
 import 'package:bogoballers/core/widgets/flexible_network_image.dart';
 import 'package:bogoballers/core/widgets/setting_menu_list.dart';
-import 'package:bogoballers/service_locator.dart';
+import 'package:bogoballers/core/service_locator.dart';
 import 'package:flutter/material.dart';
 
 class PlayerProfileScreen extends StatefulWidget {

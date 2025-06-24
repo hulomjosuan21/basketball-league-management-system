@@ -2,7 +2,7 @@ import 'package:bogoballers/client/widgets/navigation_controllers.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart'; // if you're using GetX for controller
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class NavigationDestinationItem extends StatelessWidget {
   final IconData icon;

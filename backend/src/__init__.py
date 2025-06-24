@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+from src.controllers.socket_controllers import SocketController
 from src.services.notification_serices import NotificationService
 from src.workers.test import job_wrapper
 from src.config import Config
@@ -70,6 +71,12 @@ class FlaskServer:
         
         self.server.get("/organization-types")(organization_type_list)
         self.server.get("/barangay-list")(barangay_list)
+
+        socket_controller = SocketController()
+
+        def socket_send_handler(user_id):
+            return socket_controller.send(user_id)
+        self.server.post('/send/<string:user_id>')(socket_send_handler)
 
         self.server.get('/log/<string:audit_id>')(AuditLogModel.fetch_log)
         self.server.get('/logs/<string:audit_to_id>')(AuditLogModel.fetch_logs_for)
