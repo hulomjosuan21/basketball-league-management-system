@@ -43,7 +43,7 @@ class TeamCreatorMainScreen extends StatelessWidget {
           }),
           destinations: [
             NavigationDestinationItem(
-              icon: CustomIcon.leauge,
+              icon: Iconsax.home,
               label: "Home",
               index: 0,
               selectedIndex: controller.selectedIndex,
@@ -52,6 +52,12 @@ class TeamCreatorMainScreen extends StatelessWidget {
               icon: CustomIcon.basketballTeam,
               label: "Teams",
               index: 1,
+              selectedIndex: controller.selectedIndex,
+            ),
+            NavigationDestinationItem(
+              icon: Iconsax.notification,
+              label: "Notification",
+              index: 2,
               selectedIndex: controller.selectedIndex,
             ),
           ],

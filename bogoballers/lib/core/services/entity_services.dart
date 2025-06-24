@@ -9,7 +9,7 @@ import 'package:bogoballers/core/network/api_response.dart';
 import 'package:bogoballers/core/network/dio_client.dart';
 import 'package:bogoballers/core/routes.dart';
 import 'package:bogoballers/core/state/entity_state.dart';
-import 'package:bogoballers/service_locator.dart';
+import 'package:bogoballers/core/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;

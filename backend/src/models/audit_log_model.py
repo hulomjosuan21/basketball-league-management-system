@@ -22,7 +22,10 @@ class AuditLogModel(db.Model):
     audit_to_type = db.Column(create_account_type_enum(db), nullable=False)
 
     action = db.Column(db.String(100), nullable=False)  
-    details = db.Column(db.String, nullable=True)  
+    details = db.Column(db.String, nullable=True)
+
+    is_read = db.Column(db.Boolean, default=False, nullable=False)
+    read_at = db.Column(db.DateTime, nullable=True)
 
     def to_json(self):
         return {
@@ -33,6 +36,8 @@ class AuditLogModel(db.Model):
             "auditor_obj": self.get_auditor_json(),
             "action": self.action,
             "details": self.details,
+            "is_read": self.is_read,
+            "read_at": self.isoformat()
         }
 
     def get_auditor_json(self) -> Optional[dict]:

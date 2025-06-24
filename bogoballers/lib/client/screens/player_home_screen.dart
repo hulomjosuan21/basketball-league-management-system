@@ -3,7 +3,7 @@ import 'package:bogoballers/core/models/player_model.dart';
 import 'package:bogoballers/core/state/entity_state.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/widgets/flexible_network_image.dart';
-import 'package:bogoballers/service_locator.dart';
+import 'package:bogoballers/core/service_locator.dart';
 import 'package:flutter/material.dart';
 
 class PlayerHomeScreen extends StatefulWidget {
