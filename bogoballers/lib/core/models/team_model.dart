@@ -138,6 +138,78 @@ class TeamModel {
     required this.total_losses,
   });
 
+  TeamModel copyWith({
+    String? team_id,
+    String? user_id,
+    String? team_name,
+    String? team_address,
+    String? contact_number,
+    String? team_motto,
+    String? team_logo_url,
+    int? championships_won,
+    String? coach_name,
+    String? assistant_coach_name,
+    int? total_wins,
+    int? total_losses,
+    bool? is_recruiting,
+    String? team_captain_id,
+    PlayerTeamModel? team_captain,
+    LeagueModel? active_league,
+    List<PlayerModel>? players,
+    MultipartFile? team_logo_image,
+    DateTime? created_at,
+    DateTime? updated_at,
+  }) {
+    return TeamModel(
+      team_id: team_id ?? this.team_id,
+      user_id: user_id ?? this.user_id,
+      team_name: team_name ?? this.team_name,
+      team_address: team_address ?? this.team_address,
+      contact_number: contact_number ?? this.contact_number,
+      team_motto: team_motto ?? this.team_motto,
+      team_logo_url: team_logo_url ?? this.team_logo_url,
+      championships_won: championships_won ?? this.championships_won,
+      coach_name: coach_name ?? this.coach_name,
+      assistant_coach_name: assistant_coach_name ?? this.assistant_coach_name,
+      total_wins: total_wins ?? this.total_wins,
+      total_losses: total_losses ?? this.total_losses,
+      is_recruiting: is_recruiting ?? this.is_recruiting,
+      team_captain_id: team_captain_id ?? this.team_captain_id,
+      team_captain: team_captain ?? this.team_captain,
+      active_league: active_league ?? this.active_league,
+      players: players ?? this.players,
+      created_at: created_at ?? this.created_at,
+      updated_at: updated_at ?? this.updated_at,
+    );
+  }
+
+  Map<String, dynamic> toChangedJson(TeamModel other) {
+    final Map<String, dynamic> changes = {};
+
+    if (team_name != other.team_name) changes['team_name'] = team_name;
+    if (team_address != other.team_address)
+      changes['team_address'] = team_address;
+    if (contact_number != other.contact_number)
+      changes['contact_number'] = contact_number;
+    if (team_motto != other.team_motto) changes['team_motto'] = team_motto;
+    if (team_logo_url != other.team_logo_url)
+      changes['team_logo_url'] = team_logo_url;
+    if (championships_won != other.championships_won)
+      changes['championships_won'] = championships_won;
+    if (coach_name != other.coach_name) changes['coach_name'] = coach_name;
+    if (assistant_coach_name != other.assistant_coach_name)
+      changes['assistant_coach_name'] = assistant_coach_name;
+    if (total_wins != other.total_wins) changes['total_wins'] = total_wins;
+    if (total_losses != other.total_losses)
+      changes['total_losses'] = total_losses;
+    if (is_recruiting != other.is_recruiting)
+      changes['is_recruiting'] = is_recruiting;
+    if (team_captain_id != other.team_captain_id)
+      changes['team_captain_id'] = team_captain_id;
+
+    return changes;
+  }
+
   TeamModel.create({
     required this.user_id,
     required this.team_name,

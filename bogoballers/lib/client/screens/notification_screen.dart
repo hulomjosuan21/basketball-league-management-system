@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class NotificationScreen extends StatefulWidget {
-  const NotificationScreen({super.key});
+  const NotificationScreen({this.enableBack = false, super.key});
+
+  final bool enableBack;
 
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
@@ -49,10 +51,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
         backgroundColor: appColors.gray200,
         flexibleSpace: Container(color: appColors.gray200),
         centerTitle: true,
+        iconTheme: IconThemeData(color: appColors.accent1100),
+        leading: widget.enableBack
+            ? IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: Sizes.spaceXs),
-            child: Icon(Iconsax.setting_4, color: appColors.gray1100),
+            child: Icon(Iconsax.setting_4),
           ),
         ],
         title: Text(

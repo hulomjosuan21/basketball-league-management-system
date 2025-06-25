@@ -36,23 +36,13 @@ class _ClientMaterialScreenState extends State<ClientMaterialScreen> {
   void initState() {
     super.initState();
     _checkLoginFuture = checkIfUserIsLoggedInAsync();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (widget.user_id != null) {
-        try {
-          await FCMTokenHandler.syncToken(widget.user_id!);
-        } catch (e, stackTrace) {
-          debugPrintStack(stackTrace: stackTrace);
-        }
-      } else {
-        debugPrint("⚠️ Skipped FCM token sync: no user ID");
-      }
-    });
   }
 
   Future<bool> checkIfUserIsLoggedInAsync() async {
     if (widget.user_id == null || widget.accountType == null) return false;
 
     try {
+      await FCMTokenHandler.syncToken(widget.user_id!);
       final service = EntityServices();
       await service.fetch(context, widget.user_id!);
       return true;

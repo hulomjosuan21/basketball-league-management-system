@@ -40,31 +40,31 @@ class SocketController:
             socketio.emit('echo_response', {'message': data.get('message', '')}, to=request.sid)
 
     def send(self, user_id):
+        
         try:
             json_data = request.get_json(force=True) or {}
             event = json_data.get('event')
             payload = json_data.get('payload')
             sid = self.connected_users.get(user_id)
 
+            user = UserModel.query.get(user_id)
+            fcm_token = user.fcm_token
+            message = messaging.Message(
+                notification=messaging.Notification(title=event, body=payload['detail']),
+                token=fcm_token
+            )
+            messaging.send(message)
+            
             if not event or not payload:
                 raise ValueError('Mising data')
 
             if sid and sid in socketio.server.manager.rooms['/']:
-                user = UserModel.query.get(user_id)
-                fcm_token = user.fcm_token
-                message = messaging.Message(
-                    notification=messaging.Notification(title=event, body=payload['detail']),
-                    token=fcm_token
-                )
-
-                messaging.send(message)
-
                 socketio.emit(event, payload, to=sid)
                 print(f"[SocketIO] Sent event '{event}' to user {user_id}")
                 return ApiResponse.success()
 
             print(f"[SocketIO] User {user_id} not connected or sid is invalid")
-            return ApiResponse.error(message="User not connected")
+            return ApiResponse.error("User not connected")
         
         except Exception as e:
             print(f"[SocketIO] Error while sending to user {user_id}: {e}")
