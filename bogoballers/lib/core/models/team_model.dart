@@ -8,23 +8,18 @@ class PlayerTeamModel {
   String player_id;
   String team_id;
   late bool is_ban;
-  late PlayerModel player;
   late DateTime created_at;
   late DateTime updated_at;
-  late String is_accepted;
 
-  PlayerTeamModel({
-    required this.player_team_id,
-    required this.player_id,
-    required this.team_id,
-    required this.is_ban,
-    required this.player,
-    required this.created_at,
-    required this.updated_at,
-    required this.is_accepted,
-  });
-
-  PlayerTeamModel.create({required this.player_id, required this.team_id});
+  late DateTime birth_date;
+  late String full_name;
+  late String gender;
+  late String jersey_name;
+  late String jersey_number;
+  late String player_address;
+  late String position;
+  late String profile_image_url;
+  late String user_id;
 
   factory PlayerTeamModel.fromJson(Map<String, dynamic> json) {
     return PlayerTeamModel(
@@ -32,12 +27,37 @@ class PlayerTeamModel {
       player_id: json['player_id'],
       team_id: json['team_id'],
       is_ban: json['is_ban'],
-      player: json['player'],
       created_at: DateTime.parse(json['created_at']),
       updated_at: DateTime.parse(json['updated_at']),
-      is_accepted: json['is_accepted'],
+      birth_date: DateTime.parse(json['birth_date']),
+      full_name: json['full_name'],
+      gender: json['gender'],
+      jersey_name: json['jersey_name'],
+      jersey_number: json['jersey_number'],
+      player_address: json['player_address'],
+      position: json['position'],
+      profile_image_url: json['profile_image_url'],
+      user_id: json['user_id'],
     );
   }
+
+  PlayerTeamModel({
+    required this.player_team_id,
+    required this.player_id,
+    required this.team_id,
+    required this.is_ban,
+    required this.created_at,
+    required this.updated_at,
+    required this.birth_date,
+    required this.full_name,
+    required this.gender,
+    required this.jersey_name,
+    required this.jersey_number,
+    required this.player_address,
+    required this.position,
+    required this.profile_image_url,
+    required this.user_id,
+  });
 
   Map<String, dynamic> toMap() {
     return {
@@ -45,11 +65,21 @@ class PlayerTeamModel {
       'player_id': player_id,
       'team_id': team_id,
       'is_ban': is_ban,
-      'player': player.toJson(),
       'created_at': created_at,
       'updated_at': updated_at,
+      'birth_date': birth_date,
+      'full_name': full_name,
+      'gender': gender,
+      'jersey_name': jersey_name,
+      'jersey_number': jersey_number,
+      'player_address': player_address,
+      'position': position,
+      'profile_image_url': profile_image_url,
+      'user_id': user_id,
     };
   }
+
+  PlayerTeamModel.create({required this.player_id, required this.team_id});
 }
 
 class TeamModel {

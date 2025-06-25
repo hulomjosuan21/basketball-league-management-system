@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:bogoballers/core/constants/sizes.dart';
+import 'package:bogoballers/core/enums/user_enum.dart';
+import 'package:bogoballers/core/models/notification_model.dart';
 import 'package:bogoballers/core/socket_controller.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/widgets/flexible_network_image.dart';
@@ -7,7 +11,6 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({this.enableBack = false, super.key});
-
   final bool enableBack;
 
   @override
@@ -15,24 +18,30 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  final List<Map<String, dynamic>> notifList = [];
+  final List<NotificationModel> notifList = [];
   bool isRead = false;
 
   @override
   void initState() {
     super.initState();
     isRead = true;
+    debugPrint("🔌 Subscribing to notification socket event");
     SocketService().on(SocketEvent.notification, _handleNotification);
   }
 
   void _handleNotification(dynamic payload) {
     if (!mounted) return;
-    debugPrint("✅ Notification received");
+    debugPrint("📦 Payload received: ${jsonEncode(payload)}");
+
+    final accountType = AccountTypeEnum.fromValue(payload['account_type']);
+    final notif =
+        (accountType == AccountTypeEnum.TEAM_CREATOR &&
+            payload.containsKey('team_id'))
+        ? TeamNotificationModel.fromJson(payload)
+        : NotificationModel.fromJson(payload);
+
     setState(() {
-      notifList.insert(0, {
-        'title': payload['title'],
-        'detail': payload['detail'],
-      });
+      notifList.insert(0, notif);
     });
   }
 
@@ -49,18 +58,17 @@ class _NotificationScreenState extends State<NotificationScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: appColors.gray200,
-        flexibleSpace: Container(color: appColors.gray200),
         centerTitle: true,
         iconTheme: IconThemeData(color: appColors.accent1100),
         leading: widget.enableBack
             ? IconButton(
-                icon: Icon(Icons.arrow_back),
+                icon: const Icon(Icons.arrow_back),
                 onPressed: () => Navigator.of(context).pop(),
               )
             : null,
-        actions: [
+        actions: const [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: Sizes.spaceXs),
+            padding: EdgeInsets.symmetric(horizontal: Sizes.spaceXs),
             child: Icon(Iconsax.setting_4),
           ),
         ],
@@ -76,29 +84,32 @@ class _NotificationScreenState extends State<NotificationScreen> {
       backgroundColor: appColors.gray200,
       body: Padding(
         padding: const EdgeInsets.all(Sizes.spaceSm),
-        child: ListView.builder(
-          itemCount: notifList.length,
-          itemBuilder: (context, index) {
-            final notif = notifList[index];
-            return _buildNotificationCard(
-              title: notif['title'],
-              detail: notif['detail'],
-            );
-          },
-        ),
+        child: notifList.isEmpty
+            ? Center(
+                child: Text(
+                  'No notifications yet',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              )
+            : ListView.builder(
+                itemCount: notifList.length,
+                itemBuilder: (context, index) {
+                  final notif = notifList[index];
+                  return _buildNotificationCard(n: notif);
+                },
+              ),
       ),
     );
   }
 
-  Container _buildNotificationCard({
-    required title,
-    required String detail,
+  Widget _buildNotificationCard({
+    required NotificationModel n,
     bool read = false,
   }) {
     final appColors = context.appColors;
     return Container(
-      padding: EdgeInsets.all(Sizes.spaceSm),
-      margin: EdgeInsets.only(bottom: Sizes.spaceSm),
+      padding: const EdgeInsets.all(Sizes.spaceSm),
+      margin: const EdgeInsets.only(bottom: Sizes.spaceSm),
       decoration: BoxDecoration(
         color: appColors.gray100,
         borderRadius: BorderRadius.circular(Sizes.radiusMd),
@@ -110,48 +121,41 @@ class _NotificationScreenState extends State<NotificationScreen> {
       child: Stack(
         children: [
           if (!isRead || !read)
-            Positioned(
+            const Positioned(
               right: 0,
               top: 0,
-              child: Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                ),
-              ),
+              child: CircleAvatar(radius: 6, backgroundColor: Colors.red),
             ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               FlexibleNetworkImage(
-                imageUrl: null,
+                imageUrl: n.image ?? null,
                 isCircular: true,
                 size: 40,
                 enableEdit: false,
               ),
-              SizedBox(width: Sizes.spaceSm),
+              const SizedBox(width: Sizes.spaceSm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
+                      n.author,
                       style: TextStyle(
                         fontSize: Sizes.fontSizeMd,
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,
-                      overflow: TextOverflow.fade,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      detail,
+                      n.detail,
                       style: TextStyle(
                         fontSize: Sizes.fontSizeSm,
                         fontWeight: FontWeight.w400,
                       ),
-                      overflow: TextOverflow.fade,
+                      overflow: TextOverflow.ellipsis,
                       maxLines: 4,
                       textAlign: TextAlign.justify,
                     ),

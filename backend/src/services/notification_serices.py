@@ -33,9 +33,14 @@ class NotificationService:
             raise ValueError('Missing title')
 
         try:
-            messaging.Message(
-                notification=messaging.Notification(title=title, body=body),
+            message = messaging.Message(
+                notification=messaging.Notification(
+                    title="Team Invitation",
+                    body=body
+                ),
                 token=token
             )
+            messaging.send(message)
+
         except Exception as e:
             raise

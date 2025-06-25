@@ -1,3 +1,5 @@
+from src.utils.db_utils import AccountTypeEnum
+from src.services.notification_serices import NotificationService
 from src.models.user_model import UserModel
 from src.models.player_model import PlayerModel
 from src.extensions import db
@@ -7,7 +9,7 @@ from src.models.team_model import TeamModel, PlayerTeamModel
 from src.utils.file_utils import save_file
 from sqlalchemy import or_
 import difflib
-
+from src.controllers.socket_controllers import socket_controller
 class TeamControllers:
     def get_team_by_team_id(self, team_id):
         try:
@@ -118,7 +120,11 @@ class TeamControllers:
                 raise ValueError("Team ID is required.")
             if not search:
                 raise ValueError("Search (name or email) is required.")
-
+            
+            team = TeamModel.query.get(team_id)
+            if not team:
+                raise ValueError(f"Team with id of {team_id} not found.")
+            
             player = None
 
             player = db.session.query(PlayerModel).join(PlayerModel.user).filter(UserModel.email == search).first()
@@ -161,6 +167,7 @@ class TeamControllers:
 
             db.session.add(player_team)
             db.session.commit()
+            socket_controller.send_player_invitation_notification(player.user_id, team, True)
 
             return ApiResponse.success(message=f"{player.full_name} invited to team.")
 

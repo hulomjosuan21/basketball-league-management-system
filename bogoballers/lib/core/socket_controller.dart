@@ -2,6 +2,7 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 enum SocketEvent {
+  connect,
   connectError,
   error,
   disconnect,
@@ -15,6 +16,8 @@ enum SocketEvent {
 extension SocketEventExtension on SocketEvent {
   String get value {
     switch (this) {
+      case SocketEvent.connect:
+        return 'connect';
       case SocketEvent.connectError:
         return 'connect_error';
       case SocketEvent.error:
@@ -56,25 +59,28 @@ class SocketService {
       },
     );
 
-    _socket.connect();
-
-    _socket.onConnect((_) {
+    // Listen for connect
+    on(SocketEvent.connect, (_) {
       print("✅ Connected: ${_socket.id}");
-      _socket.emit('register', {'user_id': userId});
+      emit(SocketEvent.register, {'user_id': userId});
     });
 
+    // Connect manually
+    _socket.connect();
+
+    // Attach error/disconnect listeners once
     if (!_hasErrorListeners) {
       _hasErrorListeners = true;
 
-      _socket.on('connect_error', (payload) {
+      on(SocketEvent.connectError, (payload) {
         print("❌ connect_error: $payload");
       });
 
-      _socket.on('error', (payload) {
+      on(SocketEvent.error, (payload) {
         print("⚠️ error: $payload");
       });
 
-      _socket.on('disconnect', (_) {
+      on(SocketEvent.disconnect, (_) {
         print("🔌 disconnected");
       });
     }
