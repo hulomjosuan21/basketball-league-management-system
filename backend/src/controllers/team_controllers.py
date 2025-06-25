@@ -1,8 +1,12 @@
+from src.models.user_model import UserModel
+from src.models.player_model import PlayerModel
 from src.extensions import db
 from src.utils.api_response import ApiResponse
 from flask import request
 from src.models.team_model import TeamModel, PlayerTeamModel
 from src.utils.file_utils import save_file
+from sqlalchemy import or_
+import difflib
 
 class TeamControllers:
     def get_team_by_team_id(self, team_id):
@@ -77,7 +81,94 @@ class TeamControllers:
         except Exception as e:
             db.session.rollback()
             return ApiResponse.error(str(e))
+
+    def add_player_to_team_with_is_accepted(self):
+        try:
+            data = request.get_json()
+            team_id = data.get('team_id')
+            player_id = data.get('player_id')
+            is_accepted = data.get('is_accepted')
+            if not all([team_id, player_id]):
+                raise ValueError("All fields must be provided and not empty.")
+
+            playerTeam = PlayerTeamModel(
+                team_id=team_id,
+                player_id=player_id
+            )
         
+            db.session.add(playerTeam)
+            db.session.flush()
+            db.session.commit()
+
+            last_name = playerTeam.player.last_name
+
+            return ApiResponse.success(message=f"{last_name} Player Added")
+        
+        except Exception as e:
+            db.session.rollback()
+            return ApiResponse.error(str(e))
+        
+    def invite_player(self):
+        try:
+            data = request.get_json()
+            team_id = data.get('team_id')
+            search = data.get('name_or_email', None)
+
+            if not team_id:
+                raise ValueError("Team ID is required.")
+            if not search:
+                raise ValueError("Search (name or email) is required.")
+
+            player = None
+
+            player = db.session.query(PlayerModel).join(PlayerModel.user).filter(UserModel.email == search).first()
+            if not player:
+                players = PlayerModel.query.all()
+                name_to_player = {
+                    p.full_name.strip(): p for p in players if p.full_name
+                }
+
+                best_matches = difflib.get_close_matches(
+                    search.lower(),
+                    [name.lower() for name in name_to_player.keys()],
+                    n=1,
+                    cutoff=0.5
+                )
+
+                if best_matches:
+                    match = best_matches[0]
+                    for full_name, p in name_to_player.items():
+                        if full_name.lower() == match:
+                            player = p
+                            break
+
+            if not player:
+                raise ValueError("Player not found by name or email.")
+            
+            existing = PlayerTeamModel.query.filter_by(
+                player_id=player.player_id,
+                team_id=team_id
+            ).first()
+
+            if existing:
+                return ApiResponse.error(f"{search} is already invited or in the team.",status_code=409)
+            
+            player_team = PlayerTeamModel(
+                player_id=player.player_id,
+                team_id=team_id,
+                is_accepted='Invited'
+            )
+
+            db.session.add(player_team)
+            db.session.commit()
+
+            return ApiResponse.success(message=f"{player.full_name} invited to team.")
+
+        except Exception as e:
+            db.session.rollback()
+            return ApiResponse.error(str(e))
+
+             
     def add_player(self):
         try:
             data = request.get_json()

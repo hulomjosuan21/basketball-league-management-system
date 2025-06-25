@@ -20,4 +20,24 @@ class TeamService {
       rethrow;
     }
   }
+
+  Future<ApiResponse> invitePlayer({
+    required String team_id,
+    required String name_or_email,
+  }) async {
+    final api = DioClient().client;
+
+    try {
+      final response = await api.get(
+        "/team/invite-player",
+        data: {'team_id': team_id, 'name_or_email': name_or_email},
+      );
+
+      final apiResponse = ApiResponse.fromJsonNoPayload(response.data);
+
+      return apiResponse;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

@@ -28,6 +28,12 @@ class PlayerTeamModel(db.Model):
         foreign_keys=[team_id]
     )
 
+    is_accepted = db.Column(
+        db.Enum('Pending', 'Accepted', 'Rejected', 'Invited',name="player_is_accepted"),
+        nullable=False,
+        default="Pending"
+    )
+
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)
 
@@ -45,7 +51,8 @@ class PlayerTeamModel(db.Model):
             "jersey_number": self.player.jersey_number,
             "position": self.player.position,
             "profile_image_url": self.player.profile_image_url,
-            "is_ban": self.is_ban
+            "is_ban": self.is_ban,
+            "is_accepted": str(self.is_accepted),
         }
 
     def to_json(self) -> dict:
@@ -56,7 +63,8 @@ class PlayerTeamModel(db.Model):
             "player": self.player.to_json() if self.player else None,
             "team": self.team.to_json() if self.team else None,
             "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat()
+            "updated_at": self.updated_at.isoformat(),
+            "is_accepted": str(self.is_accepted),
         }
 
 

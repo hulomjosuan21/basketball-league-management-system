@@ -5,6 +5,7 @@ team_bp = Blueprint('team', __name__, url_prefix='/team')
 
 teamControllers = TeamControllers()
 team_bp.get('/<string:team_id>')(teamControllers.get_team_by_team_id)
+team_bp.post('/invite-player')(teamControllers.invite_player)
 team_bp.get('/user/<string:user_id>')(teamControllers.get_teams_by_user_id)
 team_bp.post('/new')(teamControllers.create_team)
 team_bp.post('/<string:team_id>/players')(teamControllers.add_player)

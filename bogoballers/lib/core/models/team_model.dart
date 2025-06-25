@@ -11,6 +11,7 @@ class PlayerTeamModel {
   late PlayerModel player;
   late DateTime created_at;
   late DateTime updated_at;
+  late String is_accepted;
 
   PlayerTeamModel({
     required this.player_team_id,
@@ -20,6 +21,7 @@ class PlayerTeamModel {
     required this.player,
     required this.created_at,
     required this.updated_at,
+    required this.is_accepted,
   });
 
   PlayerTeamModel.create({required this.player_id, required this.team_id});
@@ -33,6 +35,7 @@ class PlayerTeamModel {
       player: json['player'],
       created_at: DateTime.parse(json['created_at']),
       updated_at: DateTime.parse(json['updated_at']),
+      is_accepted: json['is_accepted'],
     );
   }
 
