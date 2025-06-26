@@ -48,4 +48,12 @@ class TeamProvider extends ChangeNotifier {
     _teams.addAll(newTeams);
     notifyListeners();
   }
+
+  void editTeam(TeamModel updatedTeam) {
+    final index = _teams.indexWhere((t) => t.team_id == updatedTeam.team_id);
+    if (index != -1) {
+      _teams[index] = updatedTeam;
+      notifyListeners();
+    }
+  }
 }

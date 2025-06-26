@@ -28,6 +28,12 @@ class PlayerTeamModel(db.Model):
         foreign_keys=[team_id]
     )
 
+    is_accepted = db.Column(
+        db.Enum('Pending', 'Accepted', 'Rejected', 'Invited',name="player_is_accepted"),
+        nullable=False,
+        default="Pending"
+    )
+
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)
 
@@ -36,8 +42,7 @@ class PlayerTeamModel(db.Model):
             "player_team_id": self.player_team_id,
             "user_id": self.player.user_id,
             "player_id": self.player_id,
-            "first_name": self.player.first_name,
-            "last_name": self.player.last_name,
+            "full_name": self.player.full_name,
             "gender": self.player.gender,
             "birth_date": self.player.birth_date,
             "player_address": self.player.player_address,
@@ -45,7 +50,7 @@ class PlayerTeamModel(db.Model):
             "jersey_number": self.player.jersey_number,
             "position": self.player.position,
             "profile_image_url": self.player.profile_image_url,
-            "is_ban": self.is_ban
+            "is_ban": self.is_ban,
         }
 
     def to_json(self) -> dict:
@@ -56,7 +61,7 @@ class PlayerTeamModel(db.Model):
             "player": self.player.to_json() if self.player else None,
             "team": self.team.to_json() if self.team else None,
             "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat()
+            "updated_at": self.updated_at.isoformat(),
         }
 
 
@@ -118,9 +123,18 @@ class TeamModel(db.Model):
     
     def players_to_json_list(self):
         return [player.to_json_for_team() for player in self.players] if self.players else []
+    
+    def to_json_for_notification(self, detail):
+        return {
+            'team_id': self.team_id,
+            'team_logo_url': self.team_logo_url if self.team_logo_url else None,
+            'team_name': self.team_name,
+            'detail': detail
+        }
 
     def to_json(self):
-        players = [player.to_json_for_team() for player in self.players] if self.players else []
+        # players = [player.to_json_for_team() for player in self.players] if self.players else []
+        players = [player.to_json_for_team() for player in self.players if player.is_accepted == 'Accepted'] if self.players else []
         team_captain = self.team_captain.to_json_for_team() if self.team_captain else None
         return {
             "team_id": self.team_id,

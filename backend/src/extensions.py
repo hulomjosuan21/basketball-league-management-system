@@ -28,7 +28,6 @@ db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
 socketio = SocketIO(cors_allowed_origins="*")
-
 ph = PasswordHasher()
 
 firebase_credentials_path = os.path.join(BASE_DIR, 'firebase_credentials.json')

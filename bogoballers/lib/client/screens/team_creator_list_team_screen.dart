@@ -1,4 +1,5 @@
 import 'package:bogoballers/client/screens/team_creator_create_team_screen.dart';
+import 'package:bogoballers/client/screens/team_creator_team_screen.dart';
 import 'package:bogoballers/core/constants/image_strings.dart';
 import 'package:bogoballers/core/constants/sizes.dart';
 import 'package:bogoballers/core/enums/user_enum.dart';
@@ -192,7 +193,12 @@ class _TeamCreatorTeamListScreenState extends State<TeamCreatorTeamListScreen> {
 
     return GestureDetector(
       onTap: () {
-        print(team.team_address);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TeamCreatorTeamScreen(team: team),
+          ),
+        );
       },
       child: Container(
         clipBehavior: Clip.hardEdge,

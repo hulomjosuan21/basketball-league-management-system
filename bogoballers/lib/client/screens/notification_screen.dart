@@ -1,37 +1,37 @@
 import 'package:bogoballers/core/constants/sizes.dart';
+import 'package:bogoballers/core/helpers/formatNotificationTime.dart';
+import 'package:bogoballers/core/models/notification_model.dart';
 import 'package:bogoballers/core/socket_controller.dart';
+import 'package:bogoballers/core/state/app_state.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
+import 'package:bogoballers/core/widgets/app_button.dart';
 import 'package:bogoballers/core/widgets/flexible_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:provider/provider.dart';
 
 class NotificationScreen extends StatefulWidget {
-  const NotificationScreen({super.key});
+  const NotificationScreen({this.enableBack = false, super.key});
+  final bool enableBack;
 
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  final List<Map<String, dynamic>> notifList = [];
-  bool isRead = false;
+  String? loadingNotificationId;
 
   @override
   void initState() {
     super.initState();
-    isRead = true;
     SocketService().on(SocketEvent.notification, _handleNotification);
   }
 
   void _handleNotification(dynamic payload) {
     if (!mounted) return;
-    debugPrint("✅ Notification received");
-    setState(() {
-      notifList.insert(0, {
-        'title': payload['title'],
-        'detail': payload['detail'],
-      });
-    });
+
+    final notif = NotificationModel.fromDynamicJson(payload);
+    context.read<AppState>().addNotification(notif);
   }
 
   @override
@@ -43,16 +43,23 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   Widget build(BuildContext context) {
     final appColors = context.appColors;
+    final notifList = context.watch<AppState>().notifications;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: appColors.gray200,
-        flexibleSpace: Container(color: appColors.gray200),
         centerTitle: true,
-        actions: [
+        iconTheme: IconThemeData(color: appColors.gray1100),
+        leading: widget.enableBack
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
+        actions: const [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: Sizes.spaceXs),
-            child: Icon(Iconsax.setting_4, color: appColors.gray1100),
+            padding: EdgeInsets.symmetric(horizontal: Sizes.spaceXs),
+            child: Icon(Iconsax.setting_4),
           ),
         ],
         title: Text(
@@ -67,29 +74,48 @@ class _NotificationScreenState extends State<NotificationScreen> {
       backgroundColor: appColors.gray200,
       body: Padding(
         padding: const EdgeInsets.all(Sizes.spaceSm),
-        child: ListView.builder(
-          itemCount: notifList.length,
-          itemBuilder: (context, index) {
-            final notif = notifList[index];
-            return _buildNotificationCard(
-              title: notif['title'],
-              detail: notif['detail'],
-            );
-          },
-        ),
+        child: notifList.isEmpty
+            ? Center(
+                child: Text(
+                  'No notifications yet',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              )
+            : ListView.builder(
+                itemCount: notifList.length,
+                itemBuilder: (context, index) {
+                  final notif = notifList[index];
+                  return _buildNotificationCard(n: notif);
+                },
+              ),
       ),
     );
   }
 
-  Container _buildNotificationCard({
-    required title,
-    required String detail,
-    bool read = false,
-  }) {
+  Future<void> handleInviteAction(
+    NotificationModel notification,
+    bool accepted,
+  ) async {
+    setState(() => loadingNotificationId = notification.author);
+
+    await Future.delayed(const Duration(seconds: 1));
+
+    debugPrint('Notification id: ${notification.notification_id}');
+
+    notification.action = null;
+
+    setState(() => loadingNotificationId = null);
+  }
+
+  Widget _buildNotificationCard({required NotificationModel n}) {
+    final isLoading = loadingNotificationId == n.author;
     final appColors = context.appColors;
+    final isActionable =
+        n.action?['type'] == NotificationAction.PLAYER_INVITATION.value;
+
     return Container(
-      padding: EdgeInsets.all(Sizes.spaceSm),
-      margin: EdgeInsets.only(bottom: Sizes.spaceSm),
+      padding: const EdgeInsets.all(Sizes.spaceSm),
+      margin: const EdgeInsets.only(bottom: Sizes.spaceSm),
       decoration: BoxDecoration(
         color: appColors.gray100,
         borderRadius: BorderRadius.circular(Sizes.radiusMd),
@@ -98,59 +124,87 @@ class _NotificationScreenState extends State<NotificationScreen> {
           color: appColors.gray600,
         ),
       ),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (!isRead || !read)
-            Positioned(
-              right: 0,
-              top: 0,
-              child: Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               FlexibleNetworkImage(
-                imageUrl: null,
+                imageUrl: n.image,
                 isCircular: true,
                 size: 40,
                 enableEdit: false,
               ),
-              SizedBox(width: Sizes.spaceSm),
+              const SizedBox(width: Sizes.spaceSm),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
+                      n.author,
                       style: TextStyle(
                         fontSize: Sizes.fontSizeMd,
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,
-                      overflow: TextOverflow.fade,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      detail,
+                      n.detail,
                       style: TextStyle(
                         fontSize: Sizes.fontSizeSm,
                         fontWeight: FontWeight.w400,
                       ),
-                      overflow: TextOverflow.fade,
+                      overflow: TextOverflow.ellipsis,
                       maxLines: 4,
                       textAlign: TextAlign.justify,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      formatNotificationTime(n.timestamp.toLocal()),
+                      style: TextStyle(
+                        fontSize: Sizes.fontSizeSm,
+                        color: appColors.gray600,
+                      ),
                     ),
                   ],
                 ),
               ),
             ],
           ),
+          if (isActionable) ...[
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: appColors.gray600,
+                    width: Sizes.borderWidthSm,
+                  ),
+                ),
+              ),
+              padding: const EdgeInsets.only(top: Sizes.spaceSm),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  AppButton(
+                    onPressed: () => handleInviteAction(n, true),
+                    label: 'Accept',
+                    size: ButtonSize.sm,
+                    isDisabled: isLoading,
+                  ),
+                  const SizedBox(width: 8),
+                  AppButton(
+                    onPressed: () => handleInviteAction(n, false),
+                    label: 'Reject',
+                    size: ButtonSize.sm,
+                    variant: ButtonVariant.outline,
+                    isDisabled: isLoading,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );

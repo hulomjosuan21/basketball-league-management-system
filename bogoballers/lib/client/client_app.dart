@@ -1,9 +1,10 @@
 import 'package:bogoballers/client/player/player_main_screen.dart';
 import 'package:bogoballers/client/screens/client_login_screen.dart';
-import 'package:bogoballers/client/screens/notification_screen.dart';
 import 'package:bogoballers/client/team_creator/team_creator_main_screen.dart';
 import 'package:bogoballers/core/helpers/fcm_token_handler.dart';
+import 'package:bogoballers/core/service_locator.dart';
 import 'package:bogoballers/core/socket_controller.dart';
+import 'package:bogoballers/core/state/app_state.dart';
 import 'package:bogoballers/core/widgets/error.dart';
 import 'package:bogoballers/core/enums/user_enum.dart';
 import 'package:bogoballers/core/routes.dart';
@@ -36,23 +37,13 @@ class _ClientMaterialScreenState extends State<ClientMaterialScreen> {
   void initState() {
     super.initState();
     _checkLoginFuture = checkIfUserIsLoggedInAsync();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (widget.user_id != null) {
-        try {
-          await FCMTokenHandler.syncToken(widget.user_id!);
-        } catch (e, stackTrace) {
-          debugPrintStack(stackTrace: stackTrace);
-        }
-      } else {
-        debugPrint("⚠️ Skipped FCM token sync: no user ID");
-      }
-    });
   }
 
   Future<bool> checkIfUserIsLoggedInAsync() async {
     if (widget.user_id == null || widget.accountType == null) return false;
 
     try {
+      await FCMTokenHandler.syncToken(widget.user_id!);
       final service = EntityServices();
       await service.fetch(context, widget.user_id!);
       return true;
@@ -75,6 +66,7 @@ class _ClientMaterialScreenState extends State<ClientMaterialScreen> {
 
     if (userId != null && accountType != null) {
       try {
+        getIt<AppState>().fetchNotificationsOnce(userId);
         SocketService().init(userId: userId);
       } catch (e) {
         debugPrint("🧨 Socket init failed: $e");

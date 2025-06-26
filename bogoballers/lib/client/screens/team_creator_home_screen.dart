@@ -22,7 +22,7 @@ class _TeamCreatorHomeScreenState extends State<TeamCreatorHomeScreen> {
         child: AppButton(
           label: "Logut",
           onPressed: () =>
-              handleLogout(context: context, route: '/client/login'),
+              handleLogout(context: context, route: '/client/login/screen'),
         ),
       ),
     );
