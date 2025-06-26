@@ -17,7 +17,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 load_dotenv()
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-
+print(f"Base Directory: {BASE_DIR}")
 limiter = Limiter(
     key_func=get_remote_address,
     default_limits=["1000 per hour", "5000 per day"],
@@ -27,7 +27,12 @@ scheduler = BackgroundScheduler()
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
-socketio = SocketIO(cors_allowed_origins="*")
+socketio = SocketIO(
+    async_mode='eventlet',
+    cors_allowed_origins="*",
+    logger=True,
+    engineio_logger=True
+)
 ph = PasswordHasher()
 
 firebase_credentials_path = os.path.join(BASE_DIR, 'firebase_credentials.json')

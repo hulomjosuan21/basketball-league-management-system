@@ -27,6 +27,12 @@ from src.models.team_model import *
 from src.models.audit_log_model import *
 from src.models.payment_model import *
 from src.models.notification_model import *
+import logging
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+)
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
