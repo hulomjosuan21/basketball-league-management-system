@@ -1,9 +1,10 @@
 import 'package:bogoballers/client/player/player_main_screen.dart';
 import 'package:bogoballers/client/screens/client_login_screen.dart';
-import 'package:bogoballers/client/screens/notification_screen.dart';
 import 'package:bogoballers/client/team_creator/team_creator_main_screen.dart';
 import 'package:bogoballers/core/helpers/fcm_token_handler.dart';
+import 'package:bogoballers/core/service_locator.dart';
 import 'package:bogoballers/core/socket_controller.dart';
+import 'package:bogoballers/core/state/app_state.dart';
 import 'package:bogoballers/core/widgets/error.dart';
 import 'package:bogoballers/core/enums/user_enum.dart';
 import 'package:bogoballers/core/routes.dart';
@@ -65,6 +66,7 @@ class _ClientMaterialScreenState extends State<ClientMaterialScreen> {
 
     if (userId != null && accountType != null) {
       try {
+        getIt<AppState>().fetchNotificationsOnce(userId);
         SocketService().init(userId: userId);
       } catch (e) {
         debugPrint("🧨 Socket init failed: $e");

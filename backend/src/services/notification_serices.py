@@ -1,46 +1,42 @@
-from flask import request
 from firebase_admin import messaging
-
+from src.models.notification_model import NotificationModel
+from src.models.user_model import UserModel
 from src.utils.api_response import ApiResponse
 
 class NotificationService:
     @staticmethod
-    def send_fcm_notification_test():
-        data = request.get_json()
-        token = data.get('token')
-        title = data.get('title', 'No Title')
-        body = data.get('body', 'No Body')
-
-        if not token:
-            raise ValueError('Missing FCM token')
-
+    def send_fcm(user_id: str, title: str, body: str) -> ApiResponse:
         try:
+            user = UserModel.query.get(user_id)
+            if not user or not user.fcm_token:
+                return ApiResponse.error("User or FCM token not found")
+
             message = messaging.Message(
                 notification=messaging.Notification(title=title, body=body),
-                token=token
+                token=user.fcm_token,
             )
-            response = messaging.send(message)
-            return ApiResponse.success(payload=response)
+            messaging.send(message)
+            print(f"[FCM] Sent push to {user_id}")
+            return ApiResponse.success()
+        except Exception as e:
+            print(f"[FCM] Error sending to {user_id}: {e}")
+            return ApiResponse.error(str(e))
+
+    @staticmethod
+    def fetchNotifications(user_id: str):
+        try:
+            notifications = (
+                NotificationModel.query
+                .filter_by(user_id=user_id)
+                .order_by(NotificationModel.timestamp.desc())
+                .all()
+            )
+
+            if not notifications:
+                return ApiResponse.success(payload=[])
+            
+            notifications_json = [notification.to_json() for notification in notifications]
+            return ApiResponse.success(payload=notifications_json)
         except Exception as e:
             return ApiResponse.error(str(e))
         
-    @staticmethod
-    def send_fcm_notification(token, title, body = "No Body"):
-        if not token:
-            raise ValueError('Missing FCM token')
-        
-        if not title:
-            raise ValueError('Missing title')
-
-        try:
-            message = messaging.Message(
-                notification=messaging.Notification(
-                    title="Team Invitation",
-                    body=body
-                ),
-                token=token
-            )
-            messaging.send(message)
-
-        except Exception as e:
-            raise

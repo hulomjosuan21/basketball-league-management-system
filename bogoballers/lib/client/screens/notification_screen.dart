@@ -1,13 +1,14 @@
-import 'dart:convert';
-
 import 'package:bogoballers/core/constants/sizes.dart';
-import 'package:bogoballers/core/enums/user_enum.dart';
+import 'package:bogoballers/core/helpers/formatNotificationTime.dart';
 import 'package:bogoballers/core/models/notification_model.dart';
 import 'package:bogoballers/core/socket_controller.dart';
+import 'package:bogoballers/core/state/app_state.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
+import 'package:bogoballers/core/widgets/app_button.dart';
 import 'package:bogoballers/core/widgets/flexible_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:provider/provider.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({this.enableBack = false, super.key});
@@ -18,31 +19,19 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  final List<NotificationModel> notifList = [];
-  bool isRead = false;
+  String? loadingNotificationId;
 
   @override
   void initState() {
     super.initState();
-    isRead = true;
-    debugPrint("🔌 Subscribing to notification socket event");
     SocketService().on(SocketEvent.notification, _handleNotification);
   }
 
   void _handleNotification(dynamic payload) {
     if (!mounted) return;
-    debugPrint("📦 Payload received: ${jsonEncode(payload)}");
 
-    final accountType = AccountTypeEnum.fromValue(payload['account_type']);
-    final notif =
-        (accountType == AccountTypeEnum.TEAM_CREATOR &&
-            payload.containsKey('team_id'))
-        ? TeamNotificationModel.fromJson(payload)
-        : NotificationModel.fromJson(payload);
-
-    setState(() {
-      notifList.insert(0, notif);
-    });
+    final notif = NotificationModel.fromDynamicJson(payload);
+    context.read<AppState>().addNotification(notif);
   }
 
   @override
@@ -54,12 +43,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
   @override
   Widget build(BuildContext context) {
     final appColors = context.appColors;
+    final notifList = context.watch<AppState>().notifications;
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: appColors.gray200,
         centerTitle: true,
-        iconTheme: IconThemeData(color: appColors.accent1100),
+        iconTheme: IconThemeData(color: appColors.gray1100),
         leading: widget.enableBack
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
@@ -102,11 +92,27 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
-  Widget _buildNotificationCard({
-    required NotificationModel n,
-    bool read = false,
-  }) {
+  Future<void> handleInviteAction(
+    NotificationModel notification,
+    bool accepted,
+  ) async {
+    setState(() => loadingNotificationId = notification.author);
+
+    await Future.delayed(const Duration(seconds: 1));
+
+    debugPrint('Notification id: ${notification.notification_id}');
+
+    notification.action = null;
+
+    setState(() => loadingNotificationId = null);
+  }
+
+  Widget _buildNotificationCard({required NotificationModel n}) {
+    final isLoading = loadingNotificationId == n.author;
     final appColors = context.appColors;
+    final isActionable =
+        n.action?['type'] == NotificationAction.PLAYER_INVITATION.value;
+
     return Container(
       padding: const EdgeInsets.all(Sizes.spaceSm),
       margin: const EdgeInsets.only(bottom: Sizes.spaceSm),
@@ -118,19 +124,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
           color: appColors.gray600,
         ),
       ),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (!isRead || !read)
-            const Positioned(
-              right: 0,
-              top: 0,
-              child: CircleAvatar(radius: 6, backgroundColor: Colors.red),
-            ),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               FlexibleNetworkImage(
-                imageUrl: n.image ?? null,
+                imageUrl: n.image,
                 isCircular: true,
                 size: 40,
                 enableEdit: false,
@@ -159,11 +159,52 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       maxLines: 4,
                       textAlign: TextAlign.justify,
                     ),
+                    const SizedBox(height: 4),
+                    Text(
+                      formatNotificationTime(n.timestamp.toLocal()),
+                      style: TextStyle(
+                        fontSize: Sizes.fontSizeSm,
+                        color: appColors.gray600,
+                      ),
+                    ),
                   ],
                 ),
               ),
             ],
           ),
+          if (isActionable) ...[
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: appColors.gray600,
+                    width: Sizes.borderWidthSm,
+                  ),
+                ),
+              ),
+              padding: const EdgeInsets.only(top: Sizes.spaceSm),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  AppButton(
+                    onPressed: () => handleInviteAction(n, true),
+                    label: 'Accept',
+                    size: ButtonSize.sm,
+                    isDisabled: isLoading,
+                  ),
+                  const SizedBox(width: 8),
+                  AppButton(
+                    onPressed: () => handleInviteAction(n, false),
+                    label: 'Reject',
+                    size: ButtonSize.sm,
+                    variant: ButtonVariant.outline,
+                    isDisabled: isLoading,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );

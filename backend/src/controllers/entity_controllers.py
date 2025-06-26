@@ -188,7 +188,7 @@ class EntityControllers:
                     raise ValueError(f"Unknown account type {account_type}")
 
             additional_claims = {
-                "account_type": account_type
+                "account_type": str(account_type)
             }
 
             access_token = None

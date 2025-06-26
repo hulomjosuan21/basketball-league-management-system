@@ -1,7 +1,5 @@
 from flask import Flask
 from flask_cors import CORS
-from src.controllers.socket_controllers import SocketController
-from src.services.notification_serices import NotificationService
 from src.workers.test import job_wrapper
 from src.config import Config
 from src.controllers.organization_type import organization_type_list
@@ -13,6 +11,7 @@ from functools import partial
 from apscheduler.triggers.interval import IntervalTrigger
 from src.routes.test_route import test_bp
 from src.routes.user.user_route import user_bp
+from src.routes.notification_routes import notification_bp
 from src.routes.file_routes import FileRoutes
 from src.routes.player.player_route import player_bp
 from src.routes.team_creator.team_creator_route import team_creator_bp 
@@ -27,6 +26,7 @@ from src.models.league_model import *
 from src.models.team_model import *
 from src.models.audit_log_model import *
 from src.models.payment_model import *
+from src.models.notification_model import *
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -72,20 +72,14 @@ class FlaskServer:
         self.server.get("/organization-types")(organization_type_list)
         self.server.get("/barangay-list")(barangay_list)
 
-        socket_controller = SocketController()
-
-        def socket_send_handler(user_id):
-            return socket_controller.send(user_id)
-        self.server.post('/send/<string:user_id>')(socket_send_handler)
-
         self.server.get('/log/<string:audit_id>')(AuditLogModel.fetch_log)
         self.server.get('/logs/<string:audit_to_id>')(AuditLogModel.fetch_logs_for)
-        self.server.post('/test/send-fcm')(NotificationService.send_fcm_notification_test)
         
         self.server.register_blueprint(player_bp)
         self.server.register_blueprint(team_creator_bp)
         self.server.register_blueprint(payment_bp)
         self.server.register_blueprint(entity_bp)
+        self.server.register_blueprint(notification_bp)
 
         self.server.register_blueprint(league_bp)
         self.server.register_blueprint(team_bp)

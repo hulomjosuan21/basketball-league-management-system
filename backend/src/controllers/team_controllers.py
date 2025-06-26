@@ -1,3 +1,5 @@
+from src.utils.enums import NotificationAction
+from src.models.notification_model import NotificationModel
 from src.utils.db_utils import AccountTypeEnum
 from src.services.notification_serices import NotificationService
 from src.models.user_model import UserModel
@@ -9,7 +11,9 @@ from src.models.team_model import TeamModel, PlayerTeamModel
 from src.utils.file_utils import save_file
 from sqlalchemy import or_
 import difflib
-from src.controllers.socket_controllers import socket_controller
+from src.services.socket_service import SocketEvent, socket_service
+from datetime import datetime, timezone
+
 class TeamControllers:
     def get_team_by_team_id(self, team_id):
         try:
@@ -110,6 +114,41 @@ class TeamControllers:
             db.session.rollback()
             return ApiResponse.error(str(e))
         
+    def send_player_invitation_notification(self, user_id: str, team, enable_fcm: bool = False):
+        try:
+            payload = team.to_json_for_notification(
+                f"You have been invited to join the team \"{team.team_name}\"."
+            )
+            payload["account_type"] = AccountTypeEnum.TEAM_CREATOR.value
+            payload["action"] = {
+                "type": NotificationAction.PLAYER_INVITATION.value,
+                "team_id": team.team_id,
+            }
+            payload["timestamp"] = datetime.now(timezone.utc).isoformat()
+
+            notification = NotificationModel.from_team_invite(
+                team=team,
+                detail=payload["detail"],
+                user_id=user_id
+            )
+            notification_id = notification.save()
+
+            payload["notification_id"] = notification_id
+
+            socket_resp = socket_service.emit_to_user(user_id, SocketEvent.NOTIFICATION, payload)
+
+            if enable_fcm:
+                NotificationService.send_fcm(
+                    user_id, f"From: {team.team_name}", payload["detail"]
+                )
+
+            return socket_resp
+
+        except Exception as e:
+            print(f"[Notification] Error: {e}")
+            return ApiResponse.error(str(e))
+
+        
     def invite_player(self):
         try:
             data = request.get_json()
@@ -167,7 +206,7 @@ class TeamControllers:
 
             db.session.add(player_team)
             db.session.commit()
-            socket_controller.send_player_invitation_notification(player.user_id, team, True)
+            self.send_player_invitation_notification(player.user_id, team, True)
 
             return ApiResponse.success(message=f"{player.full_name} invited to team.")
 
