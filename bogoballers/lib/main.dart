@@ -3,7 +3,7 @@ import 'package:bogoballers/client/client_app.dart';
 import 'package:bogoballers/core/state/app_state.dart';
 import 'package:bogoballers/core/state/entity_state.dart';
 import 'package:bogoballers/core/enums/user_enum.dart';
-import 'package:bogoballers/core/helpers/supabase_helpers.dart';
+// import 'package:bogoballers/core/helpers/supabase_helpers.dart';
 import 'package:bogoballers/core/hive/app_box.dart';
 import 'package:bogoballers/core/models/access_token.dart';
 import 'package:bogoballers/core/models/league_administrator.dart';
@@ -18,7 +18,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+// import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -41,16 +41,16 @@ Future<void> main() async {
 
   try {
     await dotenv.load(fileName: ".env");
+    await AppBox.init();
+    // await Future.wait([
 
-    await Future.wait([
-      AppBox.init(),
-      Supabase.initialize(
-        url: dotenv.env['SUPABASE_URL']!,
-        anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
-      ),
-    ]);
+    //   Supabase.initialize(
+    //     url: dotenv.env['SUPABASE_URL']!,
+    //     anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+    //   ),
+    // ]);
 
-    checkSupabaseStatus();
+    // checkSupabaseStatus();
 
     AccessToken? accessToken = AppBox.accessTokenBox.get('access_token');
     String? user_id;

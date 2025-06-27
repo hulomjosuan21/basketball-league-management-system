@@ -38,6 +38,7 @@ class PlayerTeamModel(db.Model):
     updated_at = UpdatedAt(db)
 
     def to_json_for_team(self) -> dict:
+        is_team_captain = any(team.team_id == self.team_id for team in self.teams_where_captain)
         return {
             "player_team_id": self.player_team_id,
             "user_id": self.player.user_id,
@@ -52,6 +53,7 @@ class PlayerTeamModel(db.Model):
             "position": self.player.position,
             "profile_image_url": self.player.profile_image_url,
             "is_ban": self.is_ban,
+            "is_team_captain": is_team_captain
         }
 
     def to_json(self) -> dict:

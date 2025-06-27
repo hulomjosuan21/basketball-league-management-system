@@ -30,15 +30,28 @@ class NotificationScreen extends StatefulWidget {
 
 class _NotificationScreenState extends State<NotificationScreen> {
   late Future<void> _futureFetchNotifications;
+
   String? loadingNotificationId;
 
   @override
   void initState() {
     super.initState();
-    SocketService().on(SocketEvent.notification, _handleNotification);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _futureFetchNotifications = fetchNotifications();
-      setState(() {});
+    _futureFetchNotifications = fetchNotifications();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        final socketService = SocketService();
+
+        if (socketService.isInitialized) {
+          await socketService.waitUntilConnected();
+          socketService.on(SocketEvent.notification, _handleNotification);
+        } else {
+          print(
+            "⚠️ SocketService not initialized yet. Skipping listener setup.",
+          );
+        }
+      } catch (e) {
+        print("⚠️ Failed to listen to socket: $e");
+      }
     });
   }
 

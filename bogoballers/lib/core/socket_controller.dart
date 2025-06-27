@@ -42,11 +42,26 @@ class SocketService {
   static final SocketService _instance = SocketService._internal();
   factory SocketService() => _instance;
 
-  late IO.Socket _socket;
+  IO.Socket? _socket;
   bool _isInitialized = false;
   bool _hasErrorListeners = false;
 
   SocketService._internal();
+
+  bool get isInitialized => _isInitialized;
+  bool get isConnected => _socket?.connected == true;
+
+  Future<void> waitUntilConnected({
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
+    final start = DateTime.now();
+    while (!isConnected) {
+      if (DateTime.now().difference(start) > timeout) {
+        throw Exception("Socket connection timed out.");
+      }
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+  }
 
   void init({required String userId}) {
     if (_isInitialized) return;
@@ -61,12 +76,12 @@ class SocketService {
 
     // Listen for connect
     on(SocketEvent.connect, (_) {
-      print("✅ Connected: ${_socket.id}");
+      print("✅ Connected: ${_socket?.id}");
       emit(SocketEvent.register, {'user_id': userId});
     });
 
     // Connect manually
-    _socket.connect();
+    _socket?.connect();
 
     // Attach error/disconnect listeners once
     if (!_hasErrorListeners) {
@@ -89,19 +104,20 @@ class SocketService {
   }
 
   void emit(SocketEvent event, dynamic payload) {
-    _socket.emit(event.value, payload);
+    _socket?.emit(event.value, payload);
   }
 
   void on(SocketEvent event, Function(dynamic) handler) {
-    _socket.on(event.value, handler);
+    _socket?.on(event.value, handler);
   }
 
   void off(SocketEvent event) {
-    _socket.off(event.value);
+    _socket?.off(event.value);
   }
 
   void dispose() {
-    _socket.dispose();
+    _socket?.dispose();
+    _socket = null;
     _isInitialized = false;
     _hasErrorListeners = false;
   }

@@ -141,7 +141,7 @@ class TeamControllers:
 
             NotificationModel.from_message(
                 user_id=player_team.team.user.user_id,
-                detail="Player accepted the invitation to join the team.",
+                detail=f"Player accepted the invitation to join the team {team_name}.",
                 author=player_team.player.full_name,
                 account_type= AccountTypeEnum.TEAM_CREATOR.value,
             ).save()
@@ -297,10 +297,10 @@ class TeamControllers:
             team_data["team_name"] = team.team_name
             team_data["team_logo_url"] = team.team_logo_url
 
-            app = current_app._get_current_object()
+            from src.server_instance import server_instance
 
             eventlet.spawn(lambda: self.send_player_invitation_notification(
-                app, player_team_id, user_id, team_data, True
+                server_instance.server, player_team_id, user_id, team_data, True
             ))
 
             return ApiResponse.success(message=f"{player.full_name} invited to team.")
