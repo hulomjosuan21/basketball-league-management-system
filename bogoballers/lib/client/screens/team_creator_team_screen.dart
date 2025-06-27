@@ -187,7 +187,9 @@ class _TeamCreatorTeamScreenState extends State<TeamCreatorTeamScreen> {
   void _handleGotoPlayers() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => TeamCreatorTeamPlayerScreen()),
+      MaterialPageRoute(
+        builder: (context) => TeamCreatorTeamPlayerScreen(team: team),
+      ),
     );
   }
 }

@@ -8,18 +8,26 @@ class NotificationModelSerices {
   ) async {
     final api = DioClient().client;
 
-    try {
-      final response = await api.get("/notification/fetch-from/$user_id");
-      final apiResponse = ApiResponse<List<NotificationModel>>.fromJson(
-        response.data,
-        (data) => (data as List)
-            .map((item) => NotificationModel.fromDynamicJson(item))
-            .toList(),
-      );
+    final response = await api.get("/notification/fetch-from/$user_id");
+    final apiResponse = ApiResponse<List<NotificationModel>>.fromJson(
+      response.data,
+      (data) => (data as List)
+          .map((item) => NotificationModel.fromDynamicJson(item))
+          .toList(),
+    );
 
-      return apiResponse;
-    } catch (_) {
-      rethrow;
-    }
+    return apiResponse;
+  }
+
+  Future<ApiResponse> nullifyAction(String notification_id) async {
+    final api = DioClient().client;
+
+    final response = await api.get(
+      "/notification/nullify-action/$notification_id",
+    );
+
+    final apiResponse = ApiResponse.fromJsonNoPayload(response.data);
+
+    return apiResponse;
   }
 }

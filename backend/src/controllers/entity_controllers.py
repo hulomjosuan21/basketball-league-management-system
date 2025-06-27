@@ -203,6 +203,7 @@ class EntityControllers:
                 'access_token': access_token,
                 'entity': entity.to_json(),
                 'account_type': account_type,
+                'user_id': user.user_id
             }
 
             return ApiResponse.success(redirect=redirect,message="Login successful.",payload=payload)

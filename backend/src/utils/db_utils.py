@@ -3,6 +3,15 @@ import uuid
 from sqlalchemy.dialects.postgresql import UUID
 from enum import Enum
 
+from src.extensions import db
+from sqlalchemy.orm import scoped_session, sessionmaker
+
+def get_new_session():
+    engine = db.get_engine()
+    session_factory = sessionmaker(bind=engine)
+    return scoped_session(session_factory)
+
+
 def CreatedAt(db):
     return db.Column(
         db.DateTime(timezone=True),

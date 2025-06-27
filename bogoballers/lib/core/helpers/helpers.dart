@@ -6,6 +6,11 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 
+String formatJerseyNumber(double? input) {
+  if (input == null) return "No data";
+  return input % 1 == 0 ? input.toInt().toString() : input.toString();
+}
+
 Future<List<String>> leagueCategories() async {
   try {
     final api = DioClient().client;

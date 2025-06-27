@@ -51,18 +51,25 @@ class NotificationModel(db.Model):
 
         return json_data
 
+    @staticmethod
+    def from_message(author: str, detail: str, user_id: str, image: str = None, account_type=None, action: dict = None):
+        return NotificationModel(
+            author=author,
+            detail=detail,
+            image=image,
+            account_type=account_type,
+            action=action,
+            user_id=user_id
+        )
 
     @staticmethod
-    def from_team_invite(team, detail: str, user_id: str):
+    def from_team_invite(team, action, detail: str, user_id: str):
         return NotificationModel(
             author=team.team_name,
             detail=detail,
             image=team.team_logo_url,
             account_type=AccountTypeEnum.TEAM_CREATOR.value,
-            action={
-                'type': NotificationAction.PLAYER_INVITATION.value,
-                'team_id': team.team_id
-            },
+            action=action,
             team_id=team.team_id,
             team_name=team.team_name,
             team_logo_url=team.team_logo_url,
