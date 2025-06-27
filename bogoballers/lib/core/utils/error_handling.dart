@@ -17,7 +17,6 @@ class EntityNotFound implements Exception {
       case AccountTypeEnum.LGU_ADMINISTRATOR:
         return 'Administrator not found.';
       case AccountTypeEnum.PLAYER:
-        return 'User not found.';
       case AccountTypeEnum.TEAM_CREATOR:
         return 'User not found.';
       default:

@@ -10,7 +10,7 @@ from argon2 import PasswordHasher
 import json
 import os
 from flask_socketio import SocketIO
-from flask import current_app
+from flask import current_app, Flask
 from dotenv import load_dotenv
 from supabase import create_client, Client
 from apscheduler.schedulers.background import BackgroundScheduler

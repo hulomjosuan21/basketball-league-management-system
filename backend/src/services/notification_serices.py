@@ -2,6 +2,7 @@ from firebase_admin import messaging
 from src.models.notification_model import NotificationModel
 from src.models.user_model import UserModel
 from src.utils.api_response import ApiResponse
+from src.extensions import db
 
 class NotificationService:
     @staticmethod
@@ -37,6 +38,18 @@ class NotificationService:
             
             notifications_json = [notification.to_json() for notification in notifications]
             return ApiResponse.success(payload=notifications_json)
+        except Exception as e:
+            return ApiResponse.error(str(e))
+        
+    @staticmethod
+    def nullifyAction(notification_id: str):
+        try:
+            notification = NotificationModel.query.get(notification_id)
+
+            notification.action = None
+
+            db.session.commit()
+            return ApiResponse.success('Action nullified successfully.')
         except Exception as e:
             return ApiResponse.error(str(e))
         

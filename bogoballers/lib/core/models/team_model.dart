@@ -1,21 +1,39 @@
 // ignore_for_file: non_constant_identifier_names
+import 'dart:io';
+
 import 'package:bogoballers/core/models/league_model.dart';
-import 'package:bogoballers/core/models/player_model.dart';
 import 'package:dio/dio.dart';
+
+enum TeamInviteStatus {
+  pending('Pending'),
+  accepted('Accepted'),
+  rejected('Rejected'),
+  invited('Invited');
+
+  final String value;
+
+  const TeamInviteStatus(this.value);
+
+  static TeamInviteStatus? fromValue(String? value) {
+    return TeamInviteStatus.values.firstWhere(
+      (e) => e.value.toLowerCase() == value?.toLowerCase(),
+      orElse: () => TeamInviteStatus.pending,
+    );
+  }
+}
 
 class PlayerTeamModel {
   late String player_team_id;
   String player_id;
   String team_id;
   late bool is_ban;
-  late DateTime created_at;
-  late DateTime updated_at;
 
   late DateTime birth_date;
   late String full_name;
   late String gender;
+  late String contact_number;
   late String jersey_name;
-  late String jersey_number;
+  late double jersey_number;
   late String player_address;
   late String position;
   late String profile_image_url;
@@ -23,22 +41,30 @@ class PlayerTeamModel {
 
   factory PlayerTeamModel.fromJson(Map<String, dynamic> json) {
     return PlayerTeamModel(
-      player_team_id: json['player_team_id'],
-      player_id: json['player_id'],
-      team_id: json['team_id'],
-      is_ban: json['is_ban'],
-      created_at: DateTime.parse(json['created_at']),
-      updated_at: DateTime.parse(json['updated_at']),
-      birth_date: DateTime.parse(json['birth_date']),
-      full_name: json['full_name'],
-      gender: json['gender'],
-      jersey_name: json['jersey_name'],
+      player_team_id: json['player_team_id'] ?? '',
+      player_id: json['player_id'] ?? '',
+      team_id: json['team_id'] ?? '',
+      is_ban: json['is_ban'] ?? false,
+      birth_date: _parseHttpDate(json['birth_date']),
+      full_name: json['full_name'] ?? '',
+      gender: json['gender'] ?? '',
+      contact_number: json['contact_number'],
+      jersey_name: json['jersey_name'] ?? '',
       jersey_number: json['jersey_number'],
-      player_address: json['player_address'],
-      position: json['position'],
-      profile_image_url: json['profile_image_url'],
-      user_id: json['user_id'],
+      player_address: json['player_address'] ?? '',
+      position: json['position'] ?? '',
+      profile_image_url: json['profile_image_url'] ?? '',
+      user_id: json['user_id'] ?? '',
     );
+  }
+
+  static DateTime _parseHttpDate(String? raw) {
+    try {
+      if (raw == null) return DateTime(2000);
+      return HttpDate.parse(raw);
+    } catch (e) {
+      return DateTime(2000);
+    }
   }
 
   PlayerTeamModel({
@@ -46,11 +72,10 @@ class PlayerTeamModel {
     required this.player_id,
     required this.team_id,
     required this.is_ban,
-    required this.created_at,
-    required this.updated_at,
     required this.birth_date,
     required this.full_name,
     required this.gender,
+    required this.contact_number,
     required this.jersey_name,
     required this.jersey_number,
     required this.player_address,
@@ -65,8 +90,6 @@ class PlayerTeamModel {
       'player_id': player_id,
       'team_id': team_id,
       'is_ban': is_ban,
-      'created_at': created_at,
-      'updated_at': updated_at,
       'birth_date': birth_date,
       'full_name': full_name,
       'gender': gender,
@@ -99,7 +122,7 @@ class TeamModel {
   String? team_captain_id;
   PlayerTeamModel? team_captain;
   LeagueModel? active_league;
-  List<PlayerModel> players;
+  List<PlayerTeamModel> players;
 
   late MultipartFile team_logo_image;
   late DateTime created_at;
@@ -124,6 +147,9 @@ class TeamModel {
       is_recruiting: json['is_recruiting'] ?? 0,
       created_at: DateTime.parse(json['created_at']),
       updated_at: DateTime.parse(json['updated_at']),
+      players: (json['players'] as List)
+          .map((player) => PlayerTeamModel.fromJson(player))
+          .toList(),
     );
   }
 
@@ -188,7 +214,7 @@ class TeamModel {
     String? team_captain_id,
     PlayerTeamModel? team_captain,
     LeagueModel? active_league,
-    List<PlayerModel>? players,
+    List<PlayerTeamModel>? players,
     MultipartFile? team_logo_image,
     DateTime? created_at,
     DateTime? updated_at,

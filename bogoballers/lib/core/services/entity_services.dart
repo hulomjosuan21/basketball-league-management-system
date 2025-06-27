@@ -8,6 +8,7 @@ import 'package:bogoballers/core/models/user.dart';
 import 'package:bogoballers/core/network/api_response.dart';
 import 'package:bogoballers/core/network/dio_client.dart';
 import 'package:bogoballers/core/routes.dart';
+import 'package:bogoballers/core/state/app_state.dart';
 import 'package:bogoballers/core/state/entity_state.dart';
 import 'package:bogoballers/core/service_locator.dart';
 import 'package:flutter/material.dart';
@@ -40,6 +41,10 @@ class EntityServices<T> {
         payload['account_type'],
       );
 
+      String? userId = payload['user_id'];
+      if (userId == null) {
+        throw Exception("User ID is missing in the response payload.");
+      }
       if (accountType == AccountTypeEnum.LOCAL_ADMINISTRATOR ||
           accountType == AccountTypeEnum.LGU_ADMINISTRATOR) {
         if (kIsWeb || Platform.isIOS || Platform.isAndroid) {
@@ -119,6 +124,8 @@ class EntityServices<T> {
           "Access token not saved (user may not be staying logged in)",
         );
       }
+
+      getIt<AppState>().setUserId = userId;
 
       return apiResponse;
     } catch (e) {

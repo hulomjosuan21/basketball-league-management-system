@@ -66,7 +66,7 @@ class _ClientMaterialScreenState extends State<ClientMaterialScreen> {
 
     if (userId != null && accountType != null) {
       try {
-        getIt<AppState>().fetchNotificationsOnce(userId);
+        getIt<AppState>().setUserId = userId;
         SocketService().init(userId: userId);
       } catch (e) {
         debugPrint("🧨 Socket init failed: $e");

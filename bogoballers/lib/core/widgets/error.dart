@@ -18,7 +18,13 @@ Widget retryError(
         textAlign: TextAlign.center,
       ),
       SizedBox(height: 20),
-      AppButton(onPressed: callback, icon: Icon(Icons.refresh), label: 'Retry'),
+      AppButton(
+        onPressed: callback,
+        icon: Icon(Icons.refresh),
+        label: 'Retry',
+        size: ButtonSize.sm,
+        variant: ButtonVariant.ghost,
+      ),
     ],
   );
 }

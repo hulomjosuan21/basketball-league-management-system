@@ -3,6 +3,11 @@ import 'package:bogoballers/core/services/notification_model_serices.dart';
 import 'package:flutter/material.dart';
 
 class AppState extends ChangeNotifier {
+  String? user_id;
+  void set setUserId(String? id) {
+    user_id = id;
+  }
+
   final List<NotificationModel> _notificationList = [];
 
   List<NotificationModel> get notifications => _notificationList;
@@ -37,6 +42,13 @@ class AppState extends ChangeNotifier {
   /// Optional: clear all notifications
   void clearNotifications() {
     _notificationList.clear();
+    notifyListeners();
+  }
+
+  void clear() {
+    _notificationList.clear();
+    _hasFetchedNotifications = false;
+    user_id = null;
     notifyListeners();
   }
 }

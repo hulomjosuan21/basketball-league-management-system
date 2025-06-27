@@ -44,6 +44,7 @@ class PlayerTeamModel(db.Model):
             "player_id": self.player_id,
             "full_name": self.player.full_name,
             "gender": self.player.gender,
+            "contact_number": self.player.user.contact_number,
             "birth_date": self.player.birth_date,
             "player_address": self.player.player_address,
             "jersey_name": self.player.jersey_name,

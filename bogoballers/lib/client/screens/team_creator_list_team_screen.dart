@@ -8,7 +8,6 @@ import 'package:bogoballers/core/models/team_model.dart';
 import 'package:bogoballers/core/models/user.dart';
 import 'package:bogoballers/core/state/entity_state.dart';
 import 'package:bogoballers/core/state/team_provider.dart';
-import 'package:bogoballers/core/theme/colors.dart';
 import 'package:bogoballers/core/theme/theme_extensions.dart';
 import 'package:bogoballers/core/utils/error_handling.dart';
 import 'package:bogoballers/core/widgets/app_button.dart';
