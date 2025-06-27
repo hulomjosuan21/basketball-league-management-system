@@ -38,6 +38,7 @@ class PlayerTeamModel {
   late String position;
   late String profile_image_url;
   late String user_id;
+  late bool is_team_captain;
 
   factory PlayerTeamModel.fromJson(Map<String, dynamic> json) {
     return PlayerTeamModel(
@@ -55,6 +56,7 @@ class PlayerTeamModel {
       position: json['position'] ?? '',
       profile_image_url: json['profile_image_url'] ?? '',
       user_id: json['user_id'] ?? '',
+      is_team_captain: json['is_team_captain'],
     );
   }
 
@@ -82,6 +84,7 @@ class PlayerTeamModel {
     required this.position,
     required this.profile_image_url,
     required this.user_id,
+    required this.is_team_captain,
   });
 
   Map<String, dynamic> toMap() {
