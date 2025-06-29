@@ -65,26 +65,6 @@ class LeagueModel {
     this.banner_image,
   });
 
-  // Map<String, dynamic> toJsonForCreation() {
-  //   final data = {
-  //     'league_administrator_id': league_administrator_id,
-  //     'league_title': league_title,
-  //     'league_description': league_description,
-  //     'league_budget': league_budget,
-  //     'registration_deadline': registration_deadline.toIso8601String(),
-  //     'opening_date': opening_date.toIso8601String(),
-  //     'start_date': start_date.toIso8601String(),
-  //     'league_rules': league_rules,
-  //     'status': status,
-  //     'categories': categories.map((cat) => cat.toJsonForCreation()).toList(),
-  //   };
-
-  //   if (sponsors != null) {
-  //     data['sponsors'] = sponsors!;
-  //   }
-
-  //   return data;
-  // }
   FormData toFormDataForCreation() {
     return FormData.fromMap({
       'league_administrator_id': league_administrator_id,
