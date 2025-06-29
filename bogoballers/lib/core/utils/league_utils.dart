@@ -5,16 +5,22 @@ class CategoryInputData {
   final String category;
   final TextEditingController formatController;
   final TextEditingController maxTeamController;
+  final TextEditingController entranceFeeController;
 
   CategoryInputData({
     required this.category,
     String? initialFormat,
     String? initialMaxTeam,
+    String? initialEntranceFee,
   }) : formatController = TextEditingController(text: initialFormat ?? ''),
-       maxTeamController = TextEditingController(text: initialMaxTeam ?? '');
+       maxTeamController = TextEditingController(text: initialMaxTeam ?? ''),
+       entranceFeeController = TextEditingController(
+         text: initialEntranceFee ?? '',
+       );
 
   String get format => formatController.text;
   String get maxTeam => maxTeamController.text;
+  String get entranceFee => entranceFeeController.text;
 }
 
 Future<Map<String, dynamic>> getLeagueCategoryDropdownData(

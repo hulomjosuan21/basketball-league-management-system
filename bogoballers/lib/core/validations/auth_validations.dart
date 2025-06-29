@@ -146,17 +146,14 @@ void validateLoginFields({
 
 void validateNewLeagueFields({
   required TextEditingController titleController,
-  required TextEditingController registrationDeadlineController,
-  required TextEditingController openingDateController,
-  required TextEditingController startDateController,
+  required DateTime? registrationDeadline,
+  required DateTime? openingDate,
+  required DateTime? startDate,
   required TextEditingController descriptionController,
   required TextEditingController rulesController,
   required List<CategoryInputData> addedCategories,
 }) {
   final title = titleController.text.trim();
-  final regDeadline = registrationDeadlineController.text.trim();
-  final openingDate = openingDateController.text.trim();
-  final startDate = startDateController.text.trim();
   final description = descriptionController.text.trim();
   final rules = rulesController.text.trim();
 
@@ -164,15 +161,15 @@ void validateNewLeagueFields({
     throw ValidationException("Title cannot be empty");
   }
 
-  if (regDeadline.isEmpty) {
+  if (registrationDeadline == null) {
     throw ValidationException("Registration deadline cannot be empty");
   }
 
-  if (openingDate.isEmpty) {
+  if (openingDate == null) {
     throw ValidationException("Opening date cannot be empty");
   }
 
-  if (startDate.isEmpty) {
+  if (startDate == null) {
     throw ValidationException("Start date cannot be empty");
   }
 

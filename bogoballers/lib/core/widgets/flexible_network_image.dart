@@ -149,3 +149,31 @@ class _FlexibleNetworkImageState extends State<FlexibleNetworkImage> {
     );
   }
 }
+
+class ViewOnlyNetworkImage extends StatelessWidget {
+  final String? imageUrl;
+  final String fallbackAsset;
+  final BoxFit fit;
+
+  const ViewOnlyNetworkImage({
+    Key? key,
+    required this.imageUrl,
+    this.fallbackAsset = ImageStrings.appLogoFill,
+    this.fit = BoxFit.cover,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    if (imageUrl == null || imageUrl!.isEmpty) {
+      return Image.asset(fallbackAsset, fit: fit);
+    }
+
+    return Image.network(
+      imageUrl!,
+      fit: fit,
+      errorBuilder: (context, error, stackTrace) {
+        return Image.asset(fallbackAsset, fit: fit);
+      },
+    );
+  }
+}

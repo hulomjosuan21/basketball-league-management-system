@@ -132,7 +132,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
           ),
         ),
       ),
-      backgroundColor: appColors.gray200,
       body: RefreshIndicator(
         color: appColors.accent900,
         onRefresh: () => fetchNotifications(refresh: true),

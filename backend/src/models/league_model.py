@@ -16,7 +16,6 @@ class LeagueModel(db.Model):
     league_title = db.Column(db.String(100), nullable=False)
     league_description = db.Column(db.String(100), nullable=False)
     league_budget = db.Column(db.Float, nullable=False, default=0.0)
-    entrance_fee_amount = db.Column(db.Float, nullable=True, default=0.0)
 
     registration_deadline = db.Column(db.DateTime, nullable=False)
     opening_date = db.Column(db.DateTime, nullable=False)
@@ -79,7 +78,6 @@ class LeagueModel(db.Model):
             "league_title": self.league_title,
             "league_budget": float(self.league_budget),
             "league_budget": self.league_budget,
-            "entrance_fee_amount": float(self.entrance_fee_amount) if self.entrance_fee_amount else 0.0,
             "registration_deadline": self.registration_deadline.isoformat() if self.registration_deadline else None,
             "opening_date": self.opening_date.isoformat() if self.opening_date else None,
             "start_date": self.start_date.isoformat() if self.start_date else None,
@@ -228,6 +226,7 @@ class LeagueCategoryModel(db.Model):
     stage = db.Column(db.String(100), nullable=False, default="Group Stage")
     max_team = db.Column(db.Integer, nullable=False, default=4)
     accept_teams = db.Column(db.Boolean, nullable=False, default=True)
+    entrance_fee_amount = db.Column(db.Float, nullable=True, default=0.0)
 
     created_at = CreatedAt(db)
     updated_at = UpdatedAt(db)
@@ -245,6 +244,8 @@ class LeagueCategoryModel(db.Model):
             "category_name": self.category_name,
             "category_teams": [assoc.team.to_json() for assoc in self.category_teams] if self.category_teams else [],
             "max_team": self.max_team,
+            "accept_teams": self.accept_teams,
+            "entrance_fee_amount": float(self.entrance_fee_amount) if self.entrance_fee_amount else 0.0,
             "stage": self.stage,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat()

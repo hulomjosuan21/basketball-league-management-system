@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 enum ButtonVariant { primary, secondary, destructive, outline, ghost }
 
-enum ButtonSize { sm, md, lg }
+enum ButtonSize { xs, sm, md, lg }
 
 class AppButton extends MaterialButton {
   final String label;
@@ -70,6 +70,10 @@ class AppButton extends MaterialButton {
     double fontSize;
 
     switch (size) {
+      case ButtonSize.xs:
+        padding = const EdgeInsets.symmetric(horizontal: 6, vertical: 4);
+        fontSize = Sizes.fontSizeXs;
+        break;
       case ButtonSize.sm:
         padding = const EdgeInsets.symmetric(horizontal: 12, vertical: 8);
         fontSize = Sizes.fontSizeSm;
