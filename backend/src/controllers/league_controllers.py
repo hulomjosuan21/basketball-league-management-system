@@ -8,7 +8,7 @@ from src.extensions import db
 from datetime import datetime
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func
-import difflib
+from rapidfuzz.fuzz import ratio
 from src.utils.db_utils import AccountTypeEnum
 from src.utils.file_utils import save_file
 
@@ -17,14 +17,25 @@ class LeagueControllers:
         try:
             data = request.get_json()
 
-            organization_name = data.get('organization_name', '').lower()
-            barangay_name = data.get('barangay_name', '').lower()
-            municipality_name = data.get('municipality_name', '').lower()
-            organization_type = data.get('organization_type', '').lower()
+            org_name = data.get('organization_name', '').lower()
+            brgy = data.get('barangay_name', '').lower()
+            muni = data.get('municipality_name', '').lower()
+            org_type = data.get('organization_type', '').lower()
 
-            leagues = db.session.query(LeagueModel).join(LeagueAdministratorModel).options(
-                joinedload(LeagueModel.league_administrator)
-            ).all()
+            query = db.session.query(LeagueModel).join(LeagueAdministratorModel)
+
+            if brgy:
+                query = query.filter(LeagueAdministratorModel.organization_address.ilike(f"%{brgy}%"))
+            if muni:
+                query = query.filter(LeagueAdministratorModel.organization_address.ilike(f"%{muni}%"))
+
+            if query.count() == 0:
+                return ApiResponse.success(message="No found league",payload=[])
+
+            if org_type:
+                query = query.filter(func.lower(LeagueAdministratorModel.organization_type) == org_type)
+
+            leagues = query.options(joinedload(LeagueModel.league_administrator)).all()
 
             filtered = []
             for league in leagues:
@@ -32,87 +43,88 @@ class LeagueControllers:
                 if not admin:
                     continue
 
-                name_match = True
-                if organization_name:
-                    name_match = difflib.SequenceMatcher(
-                        None, admin.organization_name.lower(), organization_name
-                    ).ratio() >= 0.7
+                if org_name:
+                    if ratio(admin.organization_name.lower(), org_name) < 70:
+                        continue
 
-                barangay_match = True
-                if barangay_name:
-                    barangay_match = admin.barangay_name.lower() == barangay_name
+                filtered.append(league)
 
-                municipality_match = True
-                if municipality_name:
-                    municipality_match = admin.municipality_name.lower() == municipality_name
-
-                type_match = True
-                if organization_type:
-                    type_match = admin.organization_type.lower() == organization_type
-
-                if name_match and barangay_match and municipality_match and type_match:
-                    filtered.append(league)
-
-            payload = [league.to_json() for league in filtered]
+            payload = [l.to_json() for l in filtered]
             return ApiResponse.success(payload=payload)
 
         except Exception as e:
-            db.session.rollback()
             return ApiResponse.error(str(e))
-
+        
     def create_league(self):
         try:
             data = request.get_json()
+
+            # Extract required fields
             league_administrator_id = data.get('league_administrator_id')
             league_title = data.get('league_title')
             league_description = data.get('league_description')
             league_budget = data.get('league_budget')
-            entrance_fee_amount = float(data.get('entrance_fee_amount', 0.0))
             registration_deadline = data.get('registration_deadline')
             opening_date = data.get('opening_date')
             start_date = data.get('start_date')
             league_rules = data.get('league_rules')
             status = data.get('status')
             categories = data.get('categories')
-            sponsors = data.get('sponsors')
+            sponsors = data.get('sponsors', None)
 
-            if not all([league_administrator_id, league_title, league_description, league_budget, registration_deadline, opening_date, start_date, league_rules, status, categories]):
-                raise ValueError("All fields must be provided and not empty.")
+            required_fields = [
+                league_administrator_id,
+                league_title,
+                league_description,
+                registration_deadline,
+                opening_date,
+                start_date,
+                league_rules,
+                status,
+                categories
+            ]
+            if any(field is None for field in required_fields):
+                return ApiResponse.error("All required fields must be provided and not null.")
+
+            if not isinstance(categories, list) or not categories:
+                return ApiResponse.error("At least one category is required.")
 
             league = LeagueModel(
                 league_administrator_id=league_administrator_id,
                 league_title=league_title,
                 league_description=league_description,
-                league_budget=league_budget,
-                entrance_fee_amount=entrance_fee_amount,
+                league_budget=float(league_budget),
                 registration_deadline=datetime.fromisoformat(registration_deadline),
                 opening_date=datetime.fromisoformat(opening_date),
                 start_date=datetime.fromisoformat(start_date),
                 league_rules=league_rules,
                 status=status,
-                sponsors=sponsors if sponsors else None,
+                sponsors=sponsors
             )
 
             db.session.add(league)
             db.session.flush()
 
-            league_id = league.league_id
-
             for cat in categories:
                 category = LeagueCategoryModel(
-                    league_id=league_id,
+                    league_id=league.league_id,
                     category_name=cat.get('category_name'),
                     category_format=cat.get('category_format'),
-                    max_team=cat.get('max_team', 4)
+                    stage=cat.get('stage'),
+                    max_team=int(cat.get('max_team', 4)),
+                    entrance_fee_amount=float(cat.get('entrance_fee_amount', 0.0))
                 )
                 db.session.add(category)
 
             db.session.commit()
-            return ApiResponse.success(message=f"New League Created {league_title}",payload=league_id)
+            return ApiResponse.success(
+                message=f"New League '{league_title}' created successfully.",
+                payload={"league_id": league.league_id}
+            )
 
         except Exception as e:
             db.session.rollback()
-            return ApiResponse.error(e)
+            return ApiResponse.error(f"Failed to create league: {str(e)}")
         
     async def upload_league_images(self):
         try:

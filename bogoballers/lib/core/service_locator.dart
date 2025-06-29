@@ -3,6 +3,7 @@ import 'package:bogoballers/core/state/entity_state.dart';
 import 'package:bogoballers/core/models/league_administrator.dart';
 import 'package:bogoballers/core/models/player_model.dart';
 import 'package:bogoballers/core/models/user.dart';
+import 'package:bogoballers/core/state/league_state.dart';
 import 'package:bogoballers/core/state/team_provider.dart';
 import 'package:get_it/get_it.dart';
 
@@ -17,4 +18,5 @@ void setupLocator() {
 
   getIt.registerSingleton<AppState>(AppState());
   getIt.registerSingleton<TeamProvider>(TeamProvider());
+  getIt.registerSingleton<LeagueProvider>(LeagueProvider());
 }

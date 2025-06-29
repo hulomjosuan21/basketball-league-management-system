@@ -10,6 +10,7 @@ import 'package:bogoballers/core/models/league_administrator.dart';
 import 'package:bogoballers/core/models/player_model.dart';
 import 'package:bogoballers/core/models/user.dart';
 import 'package:bogoballers/core/services/notification_services.dart';
+import 'package:bogoballers/core/state/league_state.dart';
 import 'package:bogoballers/core/state/team_provider.dart';
 import 'package:bogoballers/core/service_locator.dart';
 import 'package:flutter/material.dart';
@@ -70,6 +71,9 @@ Future<void> main() async {
     final List<ChangeNotifierProvider> providers = [
       ChangeNotifierProvider<AppState>.value(value: getIt<AppState>()),
       ChangeNotifierProvider<TeamProvider>.value(value: getIt<TeamProvider>()),
+      ChangeNotifierProvider<LeagueProvider>.value(
+        value: getIt<LeagueProvider>(),
+      ),
     ];
 
     if (kIsWeb || Platform.isIOS || Platform.isAndroid) {

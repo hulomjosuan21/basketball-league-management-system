@@ -1,4 +1,5 @@
 class Sizes {
+  static const fontSizeXs = 10.0;
   static const fontSizeSm = 12.0;
   static const fontSizeMd = 14.0;
   static const fontSizeLg = 16.0;

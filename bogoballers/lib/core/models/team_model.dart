@@ -123,7 +123,6 @@ class TeamModel {
   late int total_losses;
   late bool is_recruiting;
   String? team_captain_id;
-  PlayerTeamModel? team_captain;
   LeagueModel? active_league;
   List<PlayerTeamModel> players;
 
@@ -144,7 +143,6 @@ class TeamModel {
       championships_won: json['championships_won'],
       coach_name: json['coach_name'],
       assistant_coach_name: json['assistant_coach_name'] ?? null,
-      team_captain: json['team_captain'] ?? null,
       total_wins: json['total_wins'],
       total_losses: json['total_losses'] ?? 0,
       is_recruiting: json['is_recruiting'] ?? 0,
@@ -169,7 +167,6 @@ class TeamModel {
       'championships_won': championships_won,
       'coach_name': coach_name,
       'assistant_coach_name': assistant_coach_name,
-      'team_captain': team_captain?.toMap() ?? null,
       'players': players.toList(),
       'total_wins': total_wins,
       'is_recruiting': is_recruiting,
@@ -194,7 +191,6 @@ class TeamModel {
     required this.created_at,
     required this.updated_at,
     required this.is_recruiting,
-    this.team_captain,
     this.players = const [],
     required this.total_wins,
     required this.total_losses,
@@ -237,7 +233,6 @@ class TeamModel {
       total_losses: total_losses ?? this.total_losses,
       is_recruiting: is_recruiting ?? this.is_recruiting,
       team_captain_id: team_captain_id ?? this.team_captain_id,
-      team_captain: team_captain ?? this.team_captain,
       active_league: active_league ?? this.active_league,
       players: players ?? this.players,
       created_at: created_at ?? this.created_at,
